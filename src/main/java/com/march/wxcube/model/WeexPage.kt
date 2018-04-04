@@ -11,7 +11,8 @@ import android.text.TextUtils
  *
  * @author chendong
  */
-class PageBundle() : Parcelable {
+class WeexPage() : Parcelable {
+
     var pageName: String? = null
 
     var remoteJs: String? = null // 远程 js
@@ -28,8 +29,6 @@ class PageBundle() : Parcelable {
 
     var webUrl: String? = null  // 降级 web，也是唯一标记
 
-    var realUrl: String? = null // 开启页面的 url,带参数
-
     val isValid: Boolean
         get() = (!TextUtils.isEmpty(pageName)
                 && !TextUtils.isEmpty(jsVersion)
@@ -41,12 +40,25 @@ class PageBundle() : Parcelable {
                 || !TextUtils.isEmpty(assetsJs)
                 || !TextUtils.isEmpty(localJs))
 
+    fun make(openUrl: String): WeexPage {
+        val page = WeexPage()
+        page.pageName = this.pageName
+        page.remoteJs = this.remoteJs
+        page.localJs = this.localJs
+        page.assetsJs = this.assetsJs
+        page.appVersion = this.appVersion
+        page.jsVersion = this.jsVersion
+        page.jsMd5 = this.jsMd5
+        page.webUrl = openUrl
+        return page
+    }
+
     override fun hashCode(): Int {
         return 43
     }
 
     override fun equals(other: Any?): Boolean {
-        if (other == null || other !is PageBundle) {
+        if (other == null || other !is WeexPage) {
             return false
         }
         return pageName == other.pageName && jsVersion == other.jsVersion
@@ -75,10 +87,9 @@ class PageBundle() : Parcelable {
         dest.writeString(this.jsVersion)
         dest.writeString(this.jsMd5)
         dest.writeString(this.webUrl)
-        dest.writeString(this.realUrl)
     }
 
-    constructor(`in`: Parcel):this() {
+    constructor(`in`: Parcel) : this() {
         this.pageName = `in`.readString()
         this.remoteJs = `in`.readString()
         this.localJs = `in`.readString()
@@ -87,7 +98,6 @@ class PageBundle() : Parcelable {
         this.jsVersion = `in`.readString()
         this.jsMd5 = `in`.readString()
         this.webUrl = `in`.readString()
-        this.realUrl = `in`.readString()
     }
 
     override fun describeContents() = 0
@@ -98,9 +108,9 @@ class PageBundle() : Parcelable {
         const val KEY_PAGE = "KEY_PAGE"
 
         @JvmField
-        val CREATOR: Parcelable.Creator<PageBundle> = object : Parcelable.Creator<PageBundle> {
-            override fun createFromParcel(source: Parcel): PageBundle = PageBundle(source)
-            override fun newArray(size: Int): Array<PageBundle?> = arrayOfNulls(size)
+        val CREATOR: Parcelable.Creator<WeexPage> = object : Parcelable.Creator<WeexPage> {
+            override fun createFromParcel(source: Parcel): WeexPage = WeexPage(source)
+            override fun newArray(size: Int): Array<WeexPage?> = arrayOfNulls(size)
         }
     }
 }

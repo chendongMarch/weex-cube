@@ -11,7 +11,7 @@ import android.view.WindowManager
 
 import com.march.wxcube.R
 import com.march.wxcube.model.DialogConfig
-import com.march.wxcube.model.PageBundle
+import com.march.wxcube.model.WeexPage
 
 /**
  * CreateAt : 2018/3/28
@@ -106,9 +106,9 @@ class WeexDialogFragment : DialogFragment() {
     }
 
     companion object {
-        fun newInstance(bundle: PageBundle, config: DialogConfig?): WeexDialogFragment {
+        fun newInstance(bundle: WeexPage, config: DialogConfig?): WeexDialogFragment {
             val args = Bundle()
-            args.putParcelable(PageBundle.KEY_PAGE, bundle)
+            args.putParcelable(WeexPage.KEY_PAGE, bundle)
             args.putParcelable(DialogConfig.KEY_DIALOG_CONFIG, config)
             val fragment = WeexDialogFragment()
             fragment.arguments = args

@@ -8,7 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.march.wxcube.lifecycle.WeexLifeCycle
-import com.march.wxcube.model.PageBundle
+import com.march.wxcube.manager.BaseManager
+import com.march.wxcube.model.WeexPage
 import com.taobao.weex.WXSDKInstance
 
 import java.util.HashMap
@@ -25,18 +26,18 @@ class WeexDelegate : WeexLifeCycle {
     private lateinit var weexInst: WXSDKInstance
     private lateinit var actContext: Activity
 
-    private var pageBundle: PageBundle? = null
+    private var weexPage: WeexPage? = null
     private var weexView: ViewGroup? = null
 
-    var extra = mutableMapOf<String, Any>()
+    private var managers = mutableMapOf<String, BaseManager>()
 
     constructor(fragment: Fragment, renderService: WeexRender.RenderService) {
-        this.pageBundle = fragment.arguments.getParcelable(PageBundle.KEY_PAGE)
+        this.weexPage = fragment.arguments.getParcelable(WeexPage.KEY_PAGE)
         init(fragment.activity, renderService)
     }
 
     constructor(activity: Activity, renderService: WeexRender.RenderService) {
-        this.pageBundle = activity.intent.getParcelableExtra(PageBundle.KEY_PAGE)
+        this.weexPage = activity.intent.getParcelableExtra(WeexPage.KEY_PAGE)
         init(activity, renderService)
     }
 
@@ -47,17 +48,20 @@ class WeexDelegate : WeexLifeCycle {
             override fun onViewCreated(view: View) {
                 weexView = view as ViewGroup
                 renderService.onViewCreated(view)
+                for (manager in managers) {
+                    manager.value.onViewCreated(view)
+                }
             }
         })
     }
 
     fun render() {
-        if (pageBundle == null) {
+        if (weexPage == null) {
             return
         }
-        val bundle = pageBundle!!
+        val bundle = weexPage!!
         val opts = HashMap<String, Any>()
-        val realUrl = bundle.realUrl
+        val realUrl = bundle.webUrl
         if (!realUrl.isNullOrEmpty()) {
             val uri = Uri.parse(realUrl)
             val parameterNames = uri.queryParameterNames
@@ -66,6 +70,19 @@ class WeexDelegate : WeexLifeCycle {
             }
         }
         weexRender.render(bundle, opts)
+    }
+
+    fun putExtra(obj: BaseManager) {
+        managers[obj.javaClass.simpleName] = obj
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T> getExtra(clz: Class<T>): T? {
+        val obj = managers[clz.simpleName]
+        if (obj == null || obj.javaClass != clz) {
+            return null
+        }
+        return obj as T
     }
 
     override fun onCreate() {

@@ -3,12 +3,13 @@ package com.march.wxcube
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
+import com.march.wxcube.model.DialogConfig
 
-import com.march.wxcube.model.PageBundle
+import com.march.wxcube.model.WeexPage
 import com.march.wxcube.ui.WeexActivity
-
-import java.util.HashMap
+import com.march.wxcube.ui.WeexDialogFragment
 
 /**
  * CreateAt : 2018/3/27
@@ -19,7 +20,7 @@ import java.util.HashMap
 class WeexRouter {
 
     // url-page的map，url 需要是不带有协议头的、没有参数的 url
-    private var mPageBundleMap = mutableMapOf<UrlKey, PageBundle>()
+    private var mPageBundleMap = mutableMapOf<UrlKey, WeexPage>()
 
     private class UrlKey {
         internal var host = ""
@@ -55,32 +56,41 @@ class WeexRouter {
     fun openUrl(context: Context, url: String) {
         val page = findPage(url) ?: return
         val intent = Intent(context, WeexActivity::class.java)
-        intent.putExtra(PageBundle.KEY_PAGE, page)
+        intent.putExtra(WeexPage.KEY_PAGE, page)
         try {
             context.startActivity(intent)
         } catch (e: Exception) {
-            Weex.instance.weexService.onErrorReport(e, "open Url, can not start activity, url => $url" )
+            Weex.instance.weexService.onErrorReport(e, "open Url, can not start activity, url => $url")
         }
 
+    }
+
+    /**
+     * 打开一个弹窗
+     */
+    fun openDialog(activity: AppCompatActivity, url: String, config: DialogConfig?) {
+        val nonNullConfig = config?:DialogConfig()
+        val page = Weex.getInst().weexRouter.findPage(url) ?: return
+        val fragment = WeexDialogFragment.newInstance(page, nonNullConfig)
+        fragment.show(activity.supportFragmentManager, "dialog")
     }
 
     /**
      * 根据 web url 查找指定页面
      */
-    fun findPage(url: String): PageBundle? {
-        val pageBundle = mPageBundleMap[UrlKey.fromUrl(url)]
-        if (pageBundle == null) {
-            Weex.instance.weexService.onErrorReport(null, "open Url, can not find page, url => " + url)
+    fun findPage(url: String): WeexPage? {
+        val weexPage = mPageBundleMap[UrlKey.fromUrl(url)]
+        if (weexPage == null) {
+            Weex.instance.weexService.onErrorReport(null, "open Url, can not find page, url => $url")
             return null
         }
-        pageBundle.realUrl = url
-        return pageBundle
+        return weexPage.make(url)
     }
 
     /**
      * 更新数据源
      */
-    fun update(pageBundles: List<PageBundle>) {
+    fun update(pageBundles: List<WeexPage>) {
         mPageBundleMap.isNotEmpty().let { mPageBundleMap.clear() }
         pageBundles
                 .filterNot { TextUtils.isEmpty(it.webUrl) }

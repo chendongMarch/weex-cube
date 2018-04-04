@@ -1,4 +1,4 @@
-package com.march.wxcube.adapter
+package com.march.wxcube.wxadapter
 
 import android.widget.ImageView
 

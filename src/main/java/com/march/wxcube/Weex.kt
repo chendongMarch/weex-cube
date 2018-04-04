@@ -1,12 +1,15 @@
 package com.march.wxcube
 
 import android.app.Application
+import com.march.common.Common
 
-import com.march.wxcube.adapter.ImgAdapter
+import com.march.wxcube.wxadapter.ImgAdapter
 import com.march.wxcube.cache.JsBundleCache
-import com.march.wxcube.model.PageBundle
+import com.march.wxcube.common.JsonParseAdapterImpl
 import com.march.wxcube.module.BasicModule
 import com.march.wxcube.module.DebugModule
+import com.march.wxcube.module.StatusBarModule
+import com.march.wxcube.widget.Container
 import com.taobao.weex.InitConfig
 import com.taobao.weex.WXEnvironment
 import com.taobao.weex.WXSDKEngine
@@ -26,9 +29,9 @@ class Weex private constructor() {
     var jsLoadStrategy = JsLoadStrategy.PREPARE_ALL
 
     object JsLoadStrategy {
-        val ALWAYS_FRESH = 0 // 总是使用最新的
-        val PREPARE_ALL = 1 // 提前准备
-        val LAZY_LOAD = 2 // 使用时才加载，并缓存
+        const val ALWAYS_FRESH = 0 // 总是使用最新的
+        const val PREPARE_ALL = 1 // 提前准备
+        const val LAZY_LOAD = 2 // 使用时才加载，并缓存
     }
 
     fun init(application: Application, debug: Boolean, service: WeexService) {
@@ -60,13 +63,25 @@ class Weex private constructor() {
         WXSDKEngine.initialize(application, builder.build())
 
         registerModule()
+        registerComponent()
 
+        Common.init(application, JsonParseAdapterImpl())
+
+    }
+
+    private fun registerComponent() {
+        try {
+            WXSDKEngine.registerComponent("container", Container::class.java)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun registerModule() {
         try {
             WXSDKEngine.registerModule("basic", BasicModule::class.java, true)
             WXSDKEngine.registerModule("debug", DebugModule::class.java, true)
+            WXSDKEngine.registerModule("statusbar", StatusBarModule::class.java, true)
         } catch (e: WXException) {
             e.printStackTrace()
         }

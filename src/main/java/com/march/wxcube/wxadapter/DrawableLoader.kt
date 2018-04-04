@@ -1,4 +1,4 @@
-package com.march.wxcube.adapter
+package com.march.wxcube.wxadapter
 
 import com.taobao.weex.adapter.DrawableStrategy
 import com.taobao.weex.adapter.IDrawableLoader

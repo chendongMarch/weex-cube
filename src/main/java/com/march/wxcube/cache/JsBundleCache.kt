@@ -3,10 +3,10 @@ package com.march.wxcube.cache
 import android.content.Context
 import android.text.TextUtils
 import android.util.LruCache
+import com.march.common.utils.StreamUtils
 
 import com.march.wxcube.Weex
-import com.march.wxcube.model.PageBundle
-import com.march.wxcube.utils.StreamUtils
+import com.march.wxcube.model.WeexPage
 import com.taobao.weex.utils.WXFileUtils
 
 import java.io.IOException
@@ -21,11 +21,11 @@ import java.util.concurrent.Executors
  *
  * @author chendong
  */
-class JsBundleCache : LruCache<PageBundle, String>(10 * 1024 * 1024) {
+class JsBundleCache : LruCache<WeexPage, String>(10 * 1024 * 1024) {
 
     private val mService: ExecutorService = Executors.newFixedThreadPool(1)
 
-    fun getTemplateAsync(context: Context, page: PageBundle?, consumer: (String?) -> Unit) {
+    fun getTemplateAsync(context: Context, page: WeexPage?, consumer: (String?) -> Unit) {
         if (page == null) {
             return
         }
@@ -60,11 +60,11 @@ class JsBundleCache : LruCache<PageBundle, String>(10 * 1024 * 1024) {
         }
     }
 
-    override fun sizeOf(key: PageBundle, value: String): Int {
+    override fun sizeOf(key: WeexPage, value: String): Int {
         return value.length
     }
 
-    private fun downloadJs(page: PageBundle): String? {
+    private fun downloadJs(page: WeexPage): String? {
         return try {
             val connection = URL(page.remoteJs).openConnection() as HttpURLConnection
             val inputStream = StreamUtils.openHttpStream(connection)

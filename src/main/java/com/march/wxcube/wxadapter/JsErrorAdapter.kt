@@ -1,4 +1,4 @@
-package com.march.wxcube.adapter
+package com.march.wxcube.wxadapter
 
 import com.march.wxcube.Weex
 import com.taobao.weex.adapter.IWXJSExceptionAdapter

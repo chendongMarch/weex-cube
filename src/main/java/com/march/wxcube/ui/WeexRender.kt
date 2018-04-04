@@ -5,7 +5,7 @@ import android.text.TextUtils
 import android.view.View
 
 import com.march.wxcube.Weex
-import com.march.wxcube.model.PageBundle
+import com.march.wxcube.model.WeexPage
 import com.taobao.weex.IWXRenderListener
 import com.taobao.weex.RenderContainer
 import com.taobao.weex.WXSDKInstance
@@ -29,7 +29,7 @@ class WeexRender(activity: Activity, private val mWxInst: WXSDKInstance, private
         fun onViewCreated(view: View)
     }
 
-    fun render(page: PageBundle, opts: Map<String, Any>) {
+    fun render(page: WeexPage, opts: Map<String, Any>) {
         Weex.getInst().jsBundleCache.getTemplateAsync(mWxInst.context, page) {
             if (!TextUtils.isEmpty(it)) {
                 mWxInst.render(page.pageName, it, opts, null, WXRenderStrategy.APPEND_ASYNC)

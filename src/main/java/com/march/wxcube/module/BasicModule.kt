@@ -2,15 +2,16 @@ package com.march.wxcube.module
 
 import android.support.v4.app.Fragment
 import android.text.TextUtils
+import android.view.View
 
 import com.alibaba.fastjson.JSONArray
+import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.R
 import com.march.wxcube.Weex
 import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.FragmentConfig
-import com.march.wxcube.ui.WeexDialogFragment
 import com.march.wxcube.ui.WeexFragment
-import com.march.wxcube.utils.FragmentUtils
+import com.march.wxcube.manager.FragmentManager
 import com.taobao.weex.annotation.JSMethod
 
 
@@ -22,29 +23,39 @@ import com.taobao.weex.annotation.JSMethod
  */
 class BasicModule : BaseModule() {
 
+    /**
+     * 打开页面
+     */
     @JSMethod
     fun openUrl(webUrl: String) {
         val ctx = context ?: return
         Weex.getInst().weexRouter.openUrl(ctx, webUrl)
     }
 
+    /**
+     * 打开弹窗
+     */
     @JSMethod
-    fun openDialog(webUrl: String, params: Map<String, Any>) {
+    fun openDialog(webUrl: String, params: JSONObject) {
         val act = activity ?: return
-        val config = map2Obj(params, DialogConfig::class.java)
-        val page = Weex.getInst().weexRouter.findPage(webUrl) ?: return
-        val fragment = WeexDialogFragment.newInstance(page, config)
-        fragment.show(act.supportFragmentManager, "dialog")
+        val config = jsonObj2Obj(params, DialogConfig::class.java)
+        Weex.getInst().weexRouter.openDialog(act, webUrl, config)
     }
 
+    /**
+     * 加载 tab
+     */
     @JSMethod
     fun loadTabPages(array: JSONArray) {
         val weexAct = weexActivity ?: return
         val configs = jsonArray2List(array, FragmentConfig::class.java)
-
-        val utils = FragmentUtils(weexAct.supportFragmentManager, object : FragmentUtils.FragmentHandler {
-            override val fragmentContainerId: Int
-                get() = R.id.weex_activity_root
+        val manager = FragmentManager(weexAct.supportFragmentManager, configs, object : FragmentManager.FragmentHandler {
+            override fun containerIdFinder(): () -> Int {
+                return {
+                    val view = findView { it.tag == "container" }
+                    view?.id ?: -1
+                }
+            }
 
             override fun makeFragment(tag: String): Fragment? {
                 val config = configs.firstOrNull { it.tag.equals(tag) }
@@ -56,13 +67,16 @@ class BasicModule : BaseModule() {
                 return null
             }
         })
-        weexAct.weexDelegate.extra["fragment-manager"] = utils
+        weexAct.weexDelegate.putExtra(manager)
     }
 
+    /**
+     * 显示 tab
+     */
     @JSMethod
     fun showTab(tag: String) {
         val weexAct = weexActivity ?: return
-        val obj = weexAct.weexDelegate.extra["fragment-manager"] as? FragmentUtils ?: return
+        val obj = weexAct.weexDelegate.getExtra(FragmentManager::class.java) ?: return
         obj.showFragment(tag)
     }
 }

@@ -2,6 +2,8 @@ package com.march.wxcube.module
 
 import android.content.Context
 import android.support.v7.app.AppCompatActivity
+import android.view.View
+import android.view.ViewGroup
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
@@ -45,7 +47,26 @@ open class BaseModule : WXModule() {
         } else null
 
 
-    protected fun <T> map2Obj(objectMap: Map<String, Any>, clz: Class<T>): T {
+    protected fun findView(f: (View) -> Boolean): View? {
+        val containerView: ViewGroup = mWXSDKInstance.containerView as ViewGroup
+        return findView(containerView, f)
+    }
+
+    protected tailrec fun findView(viewGroup: ViewGroup, f: (View) -> Boolean): View? {
+        var view: View
+        for (i in (0 until viewGroup.childCount)) {
+            view = viewGroup.getChildAt(i)
+            val result = f.invoke(view)
+            if (result) {
+                return view
+            } else if (view is ViewGroup) {
+                return findView(view, f)
+            }
+        }
+        return null
+    }
+
+    protected fun <T> jsonObj2Obj(objectMap: JSONObject, clz: Class<T>): T {
         val json = JSON.toJSONString(objectMap)
         return JSONObject.parseObject(json, clz)
     }

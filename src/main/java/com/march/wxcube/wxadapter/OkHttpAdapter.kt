@@ -1,4 +1,4 @@
-package com.march.wxcube.adapter
+package com.march.wxcube.wxadapter
 
 import com.taobao.weex.adapter.IWXHttpAdapter
 import com.taobao.weex.common.WXRequest
