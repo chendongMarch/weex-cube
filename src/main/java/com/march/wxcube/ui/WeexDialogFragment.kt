@@ -19,40 +19,28 @@ import com.march.wxcube.model.WeexPage
  *
  * @author chendong
  */
-class WeexDialogFragment : DialogFragment() {
+open class WeexDialogFragment : DialogFragment() {
 
     private lateinit var mConfig: DialogConfig
 
-    private var mContainerView: ViewGroup? = null
-
-    private val mWeexDelegate: WeexDelegate by lazy {
-        WeexDelegate(this, object : WeexRender.RenderService {
-            override fun onViewCreated(view: View) {
-                if (mContainerView != null) {
-                    mContainerView!!.removeAllViews()
-                    mContainerView!!.addView(view)
-                }
-            }
-        })
-    }
-
+    private val mWeexDelegate: WeexDelegate by lazy { WeexDelegate(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(DialogFragment.STYLE_NO_FRAME, R.style.dialog_theme)
         mWeexDelegate.onCreate()
         mConfig = arguments.getParcelable(DialogConfig.KEY_DIALOG_CONFIG) ?: DialogConfig()
-
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        mContainerView = inflater!!.inflate(R.layout.weex_fragment, container, false) as ViewGroup
+        val view = inflater?.inflate(R.layout.weex_fragment, container, false) as ViewGroup
+        mWeexDelegate.containerView = view
         mWeexDelegate.render()
-        return mContainerView
+        return view
     }
 
     /* 全部参数设置属性 */
-    protected fun setDialogAttributes(dialog: Dialog, config: DialogConfig) {
+    private fun setDialogAttributes(dialog: Dialog, config: DialogConfig) {
         isCancelable = true
         dialog.setCanceledOnTouchOutside(true)
         val window = dialog.window ?: return

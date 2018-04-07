@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.march.common.utils.LogUtils
 
 import com.march.wxcube.R
 import com.march.wxcube.model.WeexPage
@@ -25,31 +26,24 @@ class WeexFragment : Fragment() {
             args.putParcelable(WeexPage.KEY_PAGE, bundle)
             val fragment = WeexFragment()
             fragment.arguments = args
+            LogUtils.e("Weex Fragment newInst")
             return fragment
         }
     }
 
-    private var mContainerView: ViewGroup? = null
-
-    private val weexDelegate: WeexDelegate by lazy {
-        WeexDelegate(this, object : WeexRender.RenderService {
-            override fun onViewCreated(view: View) {
-                mContainerView?.addView(view)
-            }
-        })
-    }
+    private val weexDelegate: WeexDelegate by lazy { WeexDelegate(this) }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         weexDelegate.onCreate()
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        mContainerView = inflater?.inflate(R.layout.weex_fragment, container, false) as ViewGroup
+        val view = inflater?.inflate(R.layout.weex_fragment, container, false) as ViewGroup
+        weexDelegate.containerView = view
         weexDelegate.render()
-        return mContainerView
+        return view
     }
 
     override fun onResume() {

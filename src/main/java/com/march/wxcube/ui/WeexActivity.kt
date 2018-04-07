@@ -3,7 +3,6 @@ package com.march.wxcube.ui
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.view.View
 import android.view.ViewGroup
 
 import com.march.wxcube.R
@@ -17,20 +16,13 @@ import com.march.wxcube.R
  */
 class WeexActivity : AppCompatActivity() {
 
-    private var mContainerView: ViewGroup? = null
-
     val weexDelegate: WeexDelegate by lazy {
-        WeexDelegate(this, object : WeexRender.RenderService {
-            override fun onViewCreated(view: View) {
-                mContainerView?.addView(view)
-            }
-        })
+        WeexDelegate(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.weex_activity)
-        mContainerView = findViewById(R.id.weex_activity_root)
         weexDelegate.render()
     }
 

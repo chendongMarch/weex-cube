@@ -6,10 +6,14 @@ import android.net.Uri
 import android.support.v4.app.Fragment
 import android.view.View
 import android.view.ViewGroup
+import com.march.common.utils.LogUtils
+import com.march.wxcube.R
+import com.march.wxcube.Weex
 
 import com.march.wxcube.lifecycle.WeexLifeCycle
 import com.march.wxcube.manager.BaseManager
 import com.march.wxcube.model.WeexPage
+import com.taobao.weex.IWXRenderListener
 import com.taobao.weex.WXSDKInstance
 
 import java.util.HashMap
@@ -26,34 +30,32 @@ class WeexDelegate : WeexLifeCycle {
     private lateinit var weexInst: WXSDKInstance
     private lateinit var actContext: Activity
 
-    private var weexPage: WeexPage? = null
-    private var weexView: ViewGroup? = null
+    private var weexPage: WeexPage? = null // 页面数据
+    private var weexView: ViewGroup? = null // weex root view
+    var containerView: ViewGroup? = null // 容器 View
 
     private var managers = mutableMapOf<String, BaseManager>()
 
-    constructor(fragment: Fragment, renderService: WeexRender.RenderService) {
+    // 为 Fragment 提供构造方法
+    constructor(fragment: Fragment) {
         this.weexPage = fragment.arguments.getParcelable(WeexPage.KEY_PAGE)
-        init(fragment.activity, renderService)
+        init(fragment.activity)
     }
 
-    constructor(activity: Activity, renderService: WeexRender.RenderService) {
+    // 为 Activity 提供构造方法
+    constructor(activity: Activity) {
+        this.containerView = activity.findViewById(R.id.weex_activity_root)
         this.weexPage = activity.intent.getParcelableExtra(WeexPage.KEY_PAGE)
-        init(activity, renderService)
+        init(activity)
     }
 
-    private fun init(activity: Activity, renderService: WeexRender.RenderService) {
+    // 初始化方法
+    private fun init(activity: Activity) {
         this.actContext = activity
         this.weexInst = WXSDKInstance(actContext)
-        this.weexRender = WeexRender(actContext, weexInst, object : WeexRender.RenderService {
-            override fun onViewCreated(view: View) {
-                weexView = view as ViewGroup
-                renderService.onViewCreated(view)
-                for (manager in managers) {
-                    manager.value.onViewCreated(view)
-                }
-            }
-        })
+        this.weexRender = WeexRender(actContext, weexInst, RenderListener())
     }
+
 
     fun render() {
         if (weexPage == null) {
@@ -65,8 +67,8 @@ class WeexDelegate : WeexLifeCycle {
         if (!realUrl.isNullOrEmpty()) {
             val uri = Uri.parse(realUrl)
             val parameterNames = uri.queryParameterNames
-            for (parameterName in parameterNames) {
-                opts[parameterName] = uri.getQueryParameter(parameterName)
+            for (name in parameterNames) {
+                opts[name] = uri.getQueryParameter(name)
             }
         }
         weexRender.render(bundle, opts)
@@ -111,5 +113,31 @@ class WeexDelegate : WeexLifeCycle {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         weexInst.onActivityResult(requestCode, resultCode, data)
+    }
+
+    inner class RenderListener : IWXRenderListener {
+
+        override fun onViewCreated(instance: WXSDKInstance, view: View) {
+            LogUtils.e("onViewCreated -> $containerView  ${weexPage?.webUrl}" )
+            weexView = view as ViewGroup
+            containerView?.removeAllViews()
+            containerView?.addView(view)
+            LogUtils.e("loop managers -> ${managers.size} ${weexPage?.webUrl}")
+            for (manager in managers) {
+                manager.value.onViewCreated()
+            }
+        }
+
+        override fun onRenderSuccess(instance: WXSDKInstance, width: Int, height: Int) {
+            containerView?.postInvalidate()
+        }
+
+        override fun onRefreshSuccess(instance: WXSDKInstance, width: Int, height: Int) {
+
+        }
+
+        override fun onException(instance: WXSDKInstance, errCode: String, msg: String) {
+            Weex.instance.weexService.onErrorReport(null, "code = $errCode, msg = $msg")
+        }
     }
 }

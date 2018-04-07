@@ -6,6 +6,7 @@ import android.view.View
 
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
+import com.march.common.utils.LogUtils
 import com.march.wxcube.R
 import com.march.wxcube.Weex
 import com.march.wxcube.model.DialogConfig
@@ -47,6 +48,7 @@ class BasicModule : BaseModule() {
      */
     @JSMethod
     fun loadTabPages(array: JSONArray) {
+        LogUtils.e("loadTabPages")
         val weexAct = weexActivity ?: return
         val configs = jsonArray2List(array, FragmentConfig::class.java)
         val manager = FragmentManager(weexAct.supportFragmentManager, configs, object : FragmentManager.FragmentHandler {
@@ -60,8 +62,7 @@ class BasicModule : BaseModule() {
             override fun makeFragment(tag: String): Fragment? {
                 val config = configs.firstOrNull { it.tag.equals(tag) }
                 if (config != null && !TextUtils.isEmpty(config.url)) {
-                    val page = Weex.getInst().weexRouter.findPage(config.url!!)
-                    page ?: return null
+                    val page = Weex.getInst().weexRouter.findPage(config.url!!) ?: return null
                     return WeexFragment.newInstance(page)
                 }
                 return null

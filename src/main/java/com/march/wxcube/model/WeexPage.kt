@@ -66,7 +66,7 @@ class WeexPage() : Parcelable {
 
 
     override fun toString(): String {
-        return "PageBundle{" +
+        return "WeexPage{" +
                 "pageName='" + pageName + '\'' +
                 ", remoteJs='" + remoteJs + '\'' +
                 ", localJs='" + localJs + '\'' +

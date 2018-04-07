@@ -9,5 +9,5 @@ import android.view.View
  * @author chendong
  */
 interface BaseManager {
-    fun onViewCreated(view: View)
+    fun onViewCreated()
 }

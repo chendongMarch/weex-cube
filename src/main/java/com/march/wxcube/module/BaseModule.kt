@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
+import com.march.common.utils.LogUtils
 import com.march.wxcube.ui.WeexActivity
 import com.taobao.weex.common.WXModule
 
@@ -56,6 +57,7 @@ open class BaseModule : WXModule() {
         var view: View
         for (i in (0 until viewGroup.childCount)) {
             view = viewGroup.getChildAt(i)
+            LogUtils.e(view.toString() + "  " + view.tag)
             val result = f.invoke(view)
             if (result) {
                 return view

@@ -17,16 +17,12 @@ import com.taobao.weex.common.WXRenderStrategy
  *
  * @author chendong
  */
-class WeexRender(activity: Activity, private val mWxInst: WXSDKInstance, private val mRenderService: RenderService) {
+class WeexRender(activity: Activity, private val mWxInst: WXSDKInstance, listener: IWXRenderListener) {
 
     init {
         val renderContainer = RenderContainer(activity)
         mWxInst.setRenderContainer(renderContainer)
-        mWxInst.registerRenderListener(RenderListener())
-    }
-
-    interface RenderService {
-        fun onViewCreated(view: View)
+        mWxInst.registerRenderListener(listener)
     }
 
     fun render(page: WeexPage, opts: Map<String, Any>) {
@@ -42,22 +38,4 @@ class WeexRender(activity: Activity, private val mWxInst: WXSDKInstance, private
     }
 
 
-    private inner class RenderListener : IWXRenderListener {
-
-        override fun onViewCreated(instance: WXSDKInstance, view: View) {
-            mRenderService.onViewCreated(view)
-        }
-
-        override fun onRenderSuccess(instance: WXSDKInstance, width: Int, height: Int) {
-
-        }
-
-        override fun onRefreshSuccess(instance: WXSDKInstance, width: Int, height: Int) {
-
-        }
-
-        override fun onException(instance: WXSDKInstance, errCode: String, msg: String) {
-            Weex.instance.weexService.onErrorReport(null, "code = $errCode, msg = $msg")
-        }
-    }
 }

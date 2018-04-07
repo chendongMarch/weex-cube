@@ -20,7 +20,7 @@ import com.march.wxcube.ui.WeexDialogFragment
 class WeexRouter {
 
     // url-page的map，url 需要是不带有协议头的、没有参数的 url
-    private var mPageBundleMap = mutableMapOf<UrlKey, WeexPage>()
+    private var mWeexPageMap = mutableMapOf<UrlKey, WeexPage>()
 
     private class UrlKey {
         internal var host = ""
@@ -79,7 +79,7 @@ class WeexRouter {
      * 根据 web url 查找指定页面
      */
     fun findPage(url: String): WeexPage? {
-        val weexPage = mPageBundleMap[UrlKey.fromUrl(url)]
+        val weexPage = mWeexPageMap[UrlKey.fromUrl(url)]
         if (weexPage == null) {
             Weex.instance.weexService.onErrorReport(null, "open Url, can not find page, url => $url")
             return null
@@ -90,10 +90,10 @@ class WeexRouter {
     /**
      * 更新数据源
      */
-    fun update(pageBundles: List<WeexPage>) {
-        mPageBundleMap.isNotEmpty().let { mPageBundleMap.clear() }
-        pageBundles
+    fun update(WeexPages: List<WeexPage>) {
+        mWeexPageMap.isNotEmpty().let { mWeexPageMap.clear() }
+        WeexPages
                 .filterNot { TextUtils.isEmpty(it.webUrl) }
-                .forEach { mPageBundleMap[UrlKey.fromUrl(it.webUrl!!)] = it }
+                .forEach { mWeexPageMap[UrlKey.fromUrl(it.webUrl!!)] = it }
     }
 }
