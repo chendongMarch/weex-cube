@@ -7,6 +7,9 @@ import android.support.v4.app.Fragment
 import android.view.View
 import android.view.ViewGroup
 import com.march.common.utils.LogUtils
+import com.march.webkit.IWebView
+import com.march.webkit.sys.SysWebView
+import com.march.webkit.x5.X5WebView
 import com.march.wxcube.R
 import com.march.wxcube.Weex
 
@@ -115,21 +118,21 @@ class WeexDelegate : WeexLifeCycle {
         weexInst.onActivityResult(requestCode, resultCode, data)
     }
 
+    private var iWebView: IWebView? = null
+
     inner class RenderListener : IWXRenderListener {
 
         override fun onViewCreated(instance: WXSDKInstance, view: View) {
-            LogUtils.e("onViewCreated -> $containerView  ${weexPage?.webUrl}" )
             weexView = view as ViewGroup
             containerView?.removeAllViews()
             containerView?.addView(view)
-            LogUtils.e("loop managers -> ${managers.size} ${weexPage?.webUrl}")
-            for (manager in managers) {
-                manager.value.onViewCreated()
-            }
         }
 
         override fun onRenderSuccess(instance: WXSDKInstance, width: Int, height: Int) {
-            containerView?.postInvalidate()
+            for (manager in managers) {
+                manager.value.onViewCreated()
+            }
+            LogUtils.e("onRenderSuccess")
         }
 
         override fun onRefreshSuccess(instance: WXSDKInstance, width: Int, height: Int) {
@@ -138,6 +141,14 @@ class WeexDelegate : WeexLifeCycle {
 
         override fun onException(instance: WXSDKInstance, errCode: String, msg: String) {
             Weex.instance.weexService.onErrorReport(null, "code = $errCode, msg = $msg")
+            if (weexPage?.webUrl != null) {
+                if (iWebView == null) {
+                    iWebView = X5WebView(actContext)
+                }
+                containerView?.removeAllViews()
+                containerView?.addView(iWebView as View)
+                iWebView?.loadPage(weexPage?.webUrl)
+            }
         }
     }
 }

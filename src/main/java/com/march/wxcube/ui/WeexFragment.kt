@@ -26,7 +26,6 @@ class WeexFragment : Fragment() {
             args.putParcelable(WeexPage.KEY_PAGE, bundle)
             val fragment = WeexFragment()
             fragment.arguments = args
-            LogUtils.e("Weex Fragment newInst")
             return fragment
         }
     }

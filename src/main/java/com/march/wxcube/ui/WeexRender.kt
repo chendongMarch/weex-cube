@@ -17,7 +17,7 @@ import com.taobao.weex.common.WXRenderStrategy
  *
  * @author chendong
  */
-class WeexRender(activity: Activity, private val mWxInst: WXSDKInstance, listener: IWXRenderListener) {
+class WeexRender(activity: Activity, private val mWxInst: WXSDKInstance, private val listener: IWXRenderListener) {
 
     init {
         val renderContainer = RenderContainer(activity)
@@ -26,6 +26,10 @@ class WeexRender(activity: Activity, private val mWxInst: WXSDKInstance, listene
     }
 
     fun render(page: WeexPage, opts: Map<String, Any>) {
+        if (!page.isValid) {
+            listener.onException(mWxInst, "100", "页面数据有问题")
+            return
+        }
         Weex.getInst().jsBundleCache.getTemplateAsync(mWxInst.context, page) {
             if (!TextUtils.isEmpty(it)) {
                 mWxInst.render(page.pageName, it, opts, null, WXRenderStrategy.APPEND_ASYNC)
@@ -33,6 +37,7 @@ class WeexRender(activity: Activity, private val mWxInst: WXSDKInstance, listene
                 mWxInst.renderByUrl(page.pageName, page.remoteJs, opts, null, WXRenderStrategy.APPEND_ASYNC)
             } else {
                 Weex.instance.weexService.onErrorReport(null, "render error " + page.toString())
+                listener.onException(mWxInst, "101", "页面数据有问题")
             }
         }
     }

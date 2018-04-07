@@ -69,7 +69,7 @@ class WeexRouter {
      * 打开一个弹窗
      */
     fun openDialog(activity: AppCompatActivity, url: String, config: DialogConfig?) {
-        val nonNullConfig = config?:DialogConfig()
+        val nonNullConfig = config ?: DialogConfig()
         val page = Weex.getInst().weexRouter.findPage(url) ?: return
         val fragment = WeexDialogFragment.newInstance(page, nonNullConfig)
         fragment.show(activity.supportFragmentManager, "dialog")
@@ -82,7 +82,9 @@ class WeexRouter {
         val weexPage = mWeexPageMap[UrlKey.fromUrl(url)]
         if (weexPage == null) {
             Weex.instance.weexService.onErrorReport(null, "open Url, can not find page, url => $url")
-            return null
+            val page = WeexPage()
+            page.webUrl = url
+            return page
         }
         return weexPage.make(url)
     }

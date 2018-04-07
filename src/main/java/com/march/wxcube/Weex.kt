@@ -2,6 +2,7 @@ package com.march.wxcube
 
 import android.app.Application
 import com.march.common.Common
+import com.march.webkit.WebKit
 
 import com.march.wxcube.wxadapter.ImgAdapter
 import com.march.wxcube.cache.JsBundleCache
@@ -66,7 +67,7 @@ class Weex private constructor() {
         registerComponent()
 
         Common.init(application, JsonParseAdapterImpl())
-
+        WebKit.init(application)
     }
 
     private fun registerComponent() {
