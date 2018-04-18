@@ -1,11 +1,11 @@
-package com.march.wxcube.cache
+package com.march.wxcube
 
 import android.content.Context
 import android.text.TextUtils
 import android.util.LruCache
+import com.march.common.utils.FileUtils
 import com.march.common.utils.StreamUtils
 
-import com.march.wxcube.Weex
 import com.march.wxcube.model.WeexPage
 import com.taobao.weex.utils.WXFileUtils
 
@@ -21,7 +21,7 @@ import java.util.concurrent.Executors
  *
  * @author chendong
  */
-class JsBundleCache : LruCache<WeexPage, String>(10 * 1024 * 1024) {
+class WeexBundleCache : LruCache<WeexPage, String>(10 * 1024 * 1024) {
 
     private val mService: ExecutorService = Executors.newFixedThreadPool(1)
 
@@ -40,7 +40,7 @@ class JsBundleCache : LruCache<WeexPage, String>(10 * 1024 * 1024) {
         }
         mService.execute {
             var template: String? = null
-            if (!TextUtils.isEmpty(page.localJs)) {
+            if (!TextUtils.isEmpty(page.localJs) && !FileUtils.isNotExist(page.localJs)) {
                 Weex.instance.weexService.onLog(TAG, "从文件中取得 => ${page.pageName}")
                 template = WXFileUtils.loadFileOrAsset(page.localJs, context)
             } else if (!TextUtils.isEmpty(page.assetsJs)) {
@@ -76,7 +76,7 @@ class JsBundleCache : LruCache<WeexPage, String>(10 * 1024 * 1024) {
     }
 
     companion object {
-        val TAG = JsBundleCache::class.java.simpleName!!
+        val TAG = WeexBundleCache::class.java.simpleName!!
     }
 
 }

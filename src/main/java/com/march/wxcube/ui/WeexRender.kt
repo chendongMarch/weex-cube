@@ -2,7 +2,6 @@ package com.march.wxcube.ui
 
 import android.app.Activity
 import android.text.TextUtils
-import android.view.View
 
 import com.march.wxcube.Weex
 import com.march.wxcube.model.WeexPage
@@ -30,7 +29,7 @@ class WeexRender(activity: Activity, private val mWxInst: WXSDKInstance, private
             listener.onException(mWxInst, "100", "页面数据有问题")
             return
         }
-        Weex.getInst().jsBundleCache.getTemplateAsync(mWxInst.context, page) {
+        Weex.getInst().weexBundleCache.getTemplateAsync(mWxInst.context, page) {
             if (!TextUtils.isEmpty(it)) {
                 mWxInst.render(page.pageName, it, opts, null, WXRenderStrategy.APPEND_ASYNC)
             } else if (!TextUtils.isEmpty(page.remoteJs)) {
