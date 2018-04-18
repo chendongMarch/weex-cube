@@ -2,6 +2,7 @@ package com.march.wxcube.module
 
 import com.march.common.utils.immersion.ImmersionStatusBarUtils
 import com.taobao.weex.annotation.JSMethod
+import com.taobao.weex.common.WXModule
 
 /**
  * CreateAt : 2018/4/2
@@ -9,12 +10,12 @@ import com.taobao.weex.annotation.JSMethod
  *
  * @author chendong
  */
-class StatusBarModule : BaseModule() {
+class StatusBarModule : WXModule() {
 
     /**
      * 状态栏透明，必须在 create 中调用，否则不生效
      */
-    @JSMethod
+    @JSMethod(uiThread = true)
     fun transluteStatusBar() {
         val act = activity ?: return
         ImmersionStatusBarUtils.translucent(act)
@@ -23,7 +24,7 @@ class StatusBarModule : BaseModule() {
     /**
      * 状态栏颜色黑字
      */
-    @JSMethod
+    @JSMethod(uiThread = true)
     fun setStatusBarLight() {
         val act = activity ?: return
         ImmersionStatusBarUtils.setStatusBarLightMode(act)
@@ -32,7 +33,7 @@ class StatusBarModule : BaseModule() {
     /**
      * 状态栏颜色白字
      */
-    @JSMethod
+    @JSMethod(uiThread = true)
     fun setStatusBarDark() {
         val act = activity ?: return
         ImmersionStatusBarUtils.setStatusBarDarkMode(act)

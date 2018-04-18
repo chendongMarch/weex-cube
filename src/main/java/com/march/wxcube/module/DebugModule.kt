@@ -4,6 +4,7 @@ import android.util.Log
 import android.widget.Toast
 
 import com.taobao.weex.annotation.JSMethod
+import com.taobao.weex.common.WXModule
 
 /**
  * CreateAt : 2018/3/29
@@ -11,24 +12,24 @@ import com.taobao.weex.annotation.JSMethod
  *
  * @author chendong
  */
-class DebugModule : BaseModule() {
+class DebugModule : WXModule() {
 
-    @JSMethod
+    @JSMethod(uiThread = true)
     fun log(tag: String, msg: String) {
         Log.e(tag, msg)
     }
 
-    @JSMethod
+    @JSMethod(uiThread = true)
     fun logMsg(msg: String) {
         Log.e(TAG, msg)
     }
 
-    @JSMethod
+    @JSMethod(uiThread = true)
     fun toast(msg: String) {
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
     }
 
-    @JSMethod
+    @JSMethod(uiThread = true)
     fun toastLong(msg: String) {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
     }
