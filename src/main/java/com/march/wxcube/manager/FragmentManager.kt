@@ -2,7 +2,6 @@ package com.march.wxcube.manager
 
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
-import android.view.View
 import com.march.common.utils.LogUtils
 import com.march.wxcube.model.FragmentConfig
 
@@ -14,10 +13,11 @@ import com.march.wxcube.model.FragmentConfig
  */
 class FragmentManager(private val mFragmentManager: FragmentManager,
                       private val mConfigs: List<FragmentConfig>,
-                      private val mHandler: FragmentHandler) : BaseManager {
+                      private val mHandler: FragmentHandler) : BaseManager() {
+
 
     override fun onViewCreated() {
-        LogUtils.e("FragmentManager onViewCreated 1")
+        LogUtils.e("FragmentManager onViewCreated")
         checkPreloadFragment()
         val config = mConfigs.firstOrNull { it.indexPage }
         showFragment(config?.tag)
@@ -52,7 +52,8 @@ class FragmentManager(private val mFragmentManager: FragmentManager,
                         beginTransaction.add(containerId, fragment, tag).hide(fragment)
                     }
                 }
-        beginTransaction.commitAllowingStateLoss()
+        // 同步 commit 避免 getFragments 拿不到
+        beginTransaction.commitNow()
     }
 
     private var containerId: Int = 0
@@ -94,7 +95,7 @@ class FragmentManager(private val mFragmentManager: FragmentManager,
             }
         }
         if (fragment != null) {
-            transaction.show(fragment).commitAllowingStateLoss()
+            transaction.show(fragment).commit()
         }
     }
 

@@ -1,5 +1,7 @@
 package com.march.wxcube.manager
 
+import com.taobao.weex.WXSDKInstance
+
 
 /**
  * CreateAt : 2018/4/4
@@ -7,6 +9,8 @@ package com.march.wxcube.manager
  *
  * @author chendong
  */
-interface BaseManager {
-    fun onViewCreated()
+open class BaseManager {
+    open fun onViewCreated() {}
+
+    open fun onDestroy(instance: WXSDKInstance) {}
 }
