@@ -14,12 +14,16 @@ import com.march.webkit.sys.SysWebView
 import com.march.webkit.x5.X5WebView
 import com.march.wxcube.R
 import com.march.wxcube.Weex
+import com.march.wxcube.hub.DataHub
+import com.march.wxcube.hub.EventHub
 
 import com.march.wxcube.lifecycle.WeexLifeCycle
 import com.march.wxcube.manager.BaseManager
 import com.march.wxcube.model.WeexPage
+import com.march.wxcube.module.EventModule
 import com.taobao.weex.IWXRenderListener
 import com.taobao.weex.WXSDKInstance
+import java.lang.ref.WeakReference
 
 import java.util.HashMap
 
@@ -31,24 +35,30 @@ import java.util.HashMap
  */
 class WeexDelegate : WeexLifeCycle {
 
+    companion object {
+        val instanceDelegateMap: MutableMap<String, WeakReference<WeexDelegate>> = mutableMapOf()
+    }
+
     private lateinit var weexRender: WeexRender
     private lateinit var weexInst: WXSDKInstance
     private lateinit var actContext: Activity
 
+    var containerView: ViewGroup? = null // 容器 View
     private var weexPage: WeexPage? = null // 页面数据
     private var weexView: ViewGroup? = null // weex root view
-    var containerView: ViewGroup? = null // 容器 View
-
+    private val host: Any // 宿主
     private var managers = mutableMapOf<String, BaseManager>()
 
     // 为 Fragment 提供构造方法
     constructor(fragment: Fragment) {
+        this.host = fragment
         this.weexPage = fragment.arguments.getParcelable(WeexPage.KEY_PAGE)
         init(fragment.activity)
     }
 
     // 为 Activity 提供构造方法
     constructor(activity: Activity) {
+        this.host = activity
         this.containerView = activity.findViewById(R.id.weex_activity_root)
         this.weexPage = activity.intent.getParcelableExtra(WeexPage.KEY_PAGE)
         init(activity)
@@ -59,24 +69,28 @@ class WeexDelegate : WeexLifeCycle {
         this.actContext = activity
         this.weexInst = WXSDKInstance(actContext)
         this.weexRender = WeexRender(actContext, weexInst, RenderListener())
+        instanceDelegateMap[weexInst.instanceId] = WeakReference(this)
     }
 
 
     fun render() {
-        if (weexPage == null) {
-            return
-        }
-        val bundle = weexPage!!
+        val page = weexPage ?: return
+        val realUrl = page.webUrl ?: return
         val opts = HashMap<String, Any>()
-        val realUrl = bundle.webUrl
-        if (!realUrl.isNullOrEmpty()) {
+        // parse url
+        if (!realUrl.isEmpty()) {
             val uri = Uri.parse(realUrl)
             val parameterNames = uri.queryParameterNames
             for (name in parameterNames) {
                 opts[name] = uri.getQueryParameter(name)
             }
         }
-        weexRender.render(bundle, opts)
+        // parse data
+        val data = DataHub.getData(realUrl)
+        if (data != null) {
+            opts["extraData"] = data
+        }
+        weexRender.render(page, opts)
     }
 
     fun putExtra(obj: BaseManager) {
@@ -84,12 +98,21 @@ class WeexDelegate : WeexLifeCycle {
     }
 
     @Suppress("UNCHECKED_CAST")
+    // getExtra(FragmentManager::class.java)
     fun <T> getExtra(clz: Class<T>): T? {
         val obj = managers[clz.simpleName]
         if (obj == null || obj.javaClass != clz) {
             return null
         }
         return obj as T
+    }
+
+    override fun close() {
+        when (host) {
+            is WeexActivity -> host.finish()
+            is WeexFragment -> host.activity.finish()
+            is WeexDialogFragment -> host.dismiss()
+        }
     }
 
     override fun onCreate() {
@@ -114,6 +137,7 @@ class WeexDelegate : WeexLifeCycle {
 
     override fun onDestroy() {
         weexInst.onActivityDestroy()
+        EventHub.clear(weexInst)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
