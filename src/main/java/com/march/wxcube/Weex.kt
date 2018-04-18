@@ -5,7 +5,6 @@ import com.march.common.Common
 import com.march.webkit.WebKit
 
 import com.march.wxcube.wxadapter.ImgAdapter
-import com.march.wxcube.cache.JsBundleCache
 import com.march.wxcube.common.JsonParseAdapterImpl
 import com.march.wxcube.module.*
 import com.march.wxcube.widget.Container
@@ -23,7 +22,7 @@ import com.taobao.weex.common.WXException
 class Weex private constructor() {
 
     var weexService: WeexService = WeexService.EMPTY
-    val jsBundleCache: JsBundleCache = JsBundleCache() // 负责模版缓存
+    val weexBundleCache: WeexBundleCache = WeexBundleCache() // 负责模版缓存
     val weexRouter: WeexRouter = WeexRouter() // 负责跳转逻辑
     var jsLoadStrategy = JsLoadStrategy.PREPARE_ALL
 
