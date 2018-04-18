@@ -62,7 +62,7 @@ open class WeexDialogFragment : DialogFragment() {
 
     override fun onResume() {
         super.onResume()
-        mWeexDelegate!!.onResume()
+        mWeexDelegate.onResume()
     }
 
 

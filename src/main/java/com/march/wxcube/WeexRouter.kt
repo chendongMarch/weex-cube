@@ -19,7 +19,7 @@ import com.march.wxcube.ui.WeexDialogFragment
  */
 class WeexRouter {
 
-    // url-page的map，url 需要是不带有协议头的、没有参数的 url
+    // url-page 的 map，url 需要是不带有协议头的、没有参数的 url
     private var mWeexPageMap = mutableMapOf<UrlKey, WeexPage>()
 
     private class UrlKey {

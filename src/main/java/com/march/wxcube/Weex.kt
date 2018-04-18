@@ -7,9 +7,7 @@ import com.march.webkit.WebKit
 import com.march.wxcube.wxadapter.ImgAdapter
 import com.march.wxcube.cache.JsBundleCache
 import com.march.wxcube.common.JsonParseAdapterImpl
-import com.march.wxcube.module.BasicModule
-import com.march.wxcube.module.DebugModule
-import com.march.wxcube.module.StatusBarModule
+import com.march.wxcube.module.*
 import com.march.wxcube.widget.Container
 import com.taobao.weex.InitConfig
 import com.taobao.weex.WXEnvironment
@@ -80,9 +78,11 @@ class Weex private constructor() {
 
     private fun registerModule() {
         try {
-            WXSDKEngine.registerModule("basic", BasicModule::class.java, true)
-            WXSDKEngine.registerModule("debug", DebugModule::class.java, true)
-            WXSDKEngine.registerModule("statusbar", StatusBarModule::class.java, true)
+            WXSDKEngine.registerModule("cube-basic", BasicModule::class.java, true)
+            WXSDKEngine.registerModule("cube-debug", DebugModule::class.java, true)
+            WXSDKEngine.registerModule("cube-statusbar", StatusBarModule::class.java, true)
+            WXSDKEngine.registerModule("cube-modal", ModalModule::class.java, true)
+            WXSDKEngine.registerModule("cube-event", EventModule::class.java, true)
         } catch (e: WXException) {
             e.printStackTrace()
         }

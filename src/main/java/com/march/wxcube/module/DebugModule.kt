@@ -7,7 +7,7 @@ import com.taobao.weex.annotation.JSMethod
 
 /**
  * CreateAt : 2018/3/29
- * Describe :
+ * Describe : 调试
  *
  * @author chendong
  */
@@ -34,7 +34,6 @@ class DebugModule : BaseModule() {
     }
 
     companion object {
-
         val TAG = DebugModule::class.java.simpleName!!
     }
 }

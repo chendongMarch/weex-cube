@@ -1,1 +1,13 @@
-<manifest package="com.march.wxcube"/>
+<manifest package="com.march.wxcube"
+          xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <application>
+        <activity android:name="com.march.wxcube.ui.WeexActivity"/>
+        <activity android:name="com.march.wxcube.ui.WebActivity"/>
+    </application>
+</manifest>
+

@@ -14,7 +14,9 @@ import com.taobao.weex.dom.WXImageQuality
  * @author chendong
  */
 class ImgAdapter : IWXImgLoaderAdapter {
-    override fun setImage(url: String, view: ImageView, quality: WXImageQuality, strategy: WXImageStrategy) {
-        Glide.with(view.context).load(url).into(view)
+    override fun setImage(url: String?, view: ImageView?, quality: WXImageQuality?, strategy: WXImageStrategy?) {
+        if (view != null && url != null) {
+            Glide.with(view.context).load(url).into(view)
+        }
     }
 }

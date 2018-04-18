@@ -1,5 +1,6 @@
 package com.march.wxcube.module
 
+import android.content.Intent
 import android.support.v4.app.Fragment
 import android.text.TextUtils
 import android.view.View
@@ -13,12 +14,13 @@ import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.FragmentConfig
 import com.march.wxcube.ui.WeexFragment
 import com.march.wxcube.manager.FragmentManager
+import com.march.wxcube.ui.WebActivity
 import com.taobao.weex.annotation.JSMethod
 
 
 /**
  * CreateAt : 2018/3/28
- * Describe :
+ * Describe : 基础 module
  *
  * @author chendong
  */
@@ -43,6 +45,14 @@ class BasicModule : BaseModule() {
         Weex.getInst().weexRouter.openDialog(act, webUrl, config)
     }
 
+    @JSMethod
+    fun openWeb(webUrl: String) {
+        val act = activity ?: return
+        val intent = Intent(act, WebActivity::class.java)
+        intent.putExtra(WebActivity.KEY_URL, webUrl)
+        act.startActivity(intent)
+    }
+
     /**
      * 加载 tab
      */
@@ -54,7 +64,9 @@ class BasicModule : BaseModule() {
         val manager = FragmentManager(weexAct.supportFragmentManager, configs, object : FragmentManager.FragmentHandler {
             override fun containerIdFinder(): () -> Int {
                 return {
-                    val view = findView { it.tag == "container" }
+                    val view = findView {
+                        it.tag == "container"
+                    }
                     view?.id ?: -1
                 }
             }

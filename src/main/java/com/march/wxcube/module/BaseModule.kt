@@ -53,19 +53,24 @@ open class BaseModule : WXModule() {
         return findView(containerView, f)
     }
 
-    protected tailrec fun findView(viewGroup: ViewGroup, f: (View) -> Boolean): View? {
-        var view: View
+    val testList = mutableListOf<View>()
+
+    protected fun findView(viewGroup: ViewGroup, f: (View) -> Boolean): View? {
+        var view: View? = null
+//        LogUtils.e("开始遍历一个 ViewGroup 共有 ${viewGroup.childCount} 个孩子")
         for (i in (0 until viewGroup.childCount)) {
             view = viewGroup.getChildAt(i)
-            LogUtils.e(view.toString() + "  " + view.tag)
+            testList.add(view)
+//            LogUtils.e("第${i}个孩子$view  ${view.tag}")
             val result = f.invoke(view)
             if (result) {
+                LogUtils.e("监测到，返回数据")
                 return view
             } else if (view is ViewGroup) {
-                return findView(view, f)
+                view = findView(view, f)
             }
         }
-        return null
+        return view
     }
 
     protected fun <T> jsonObj2Obj(objectMap: JSONObject, clz: Class<T>): T {

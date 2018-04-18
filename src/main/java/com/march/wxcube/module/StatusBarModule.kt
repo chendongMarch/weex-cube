@@ -5,7 +5,7 @@ import com.taobao.weex.annotation.JSMethod
 
 /**
  * CreateAt : 2018/4/2
- * Describe :
+ * Describe : 状态栏
  *
  * @author chendong
  */

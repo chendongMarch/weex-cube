@@ -7,6 +7,8 @@ import android.support.v4.app.Fragment
 import android.view.View
 import android.view.ViewGroup
 import com.march.common.utils.LogUtils
+import com.march.common.utils.StatusBarUtils
+import com.march.common.utils.immersion.ImmersionStatusBarUtils
 import com.march.webkit.IWebView
 import com.march.webkit.sys.SysWebView
 import com.march.webkit.x5.X5WebView

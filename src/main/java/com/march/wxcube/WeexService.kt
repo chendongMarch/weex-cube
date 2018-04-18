@@ -10,15 +10,20 @@ import com.taobao.weex.InitConfig
  */
 interface WeexService {
 
-
     fun onErrorReport(throwable: Throwable?, errorMsg: String)
 
     fun onLog(tag: String, msg: String)
 
     fun onInitWeex(builder: InitConfig.Builder)
 
+    fun onPageCreated()
+
     companion object {
         val EMPTY = object : WeexService {
+            override fun onPageCreated() {
+
+            }
+
             override fun onErrorReport(throwable: Throwable?, errorMsg: String) {
 
             }
