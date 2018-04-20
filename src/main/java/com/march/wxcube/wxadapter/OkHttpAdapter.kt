@@ -1,5 +1,6 @@
 package com.march.wxcube.wxadapter
 
+import com.march.wxcube.manager.ManagerRegistry
 import com.taobao.weex.adapter.IWXHttpAdapter
 import com.taobao.weex.common.WXRequest
 
@@ -10,7 +11,8 @@ import com.taobao.weex.common.WXRequest
  * @author chendong
  */
 class OkHttpAdapter : IWXHttpAdapter {
-    override fun sendRequest(request: WXRequest, listener: IWXHttpAdapter.OnHttpListener) {
 
+    override fun sendRequest(request: WXRequest, listener: IWXHttpAdapter.OnHttpListener) {
+        ManagerRegistry.HTTP.request(request, listener)
     }
 }
