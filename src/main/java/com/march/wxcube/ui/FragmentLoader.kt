@@ -1,4 +1,4 @@
-package com.march.wxcube.manager
+package com.march.wxcube.ui
 
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
@@ -11,12 +11,12 @@ import com.march.wxcube.model.FragmentConfig
  *
  * @author chendong
  */
-class FragmentManager(private val mFragmentManager: FragmentManager,
-                      private val mConfigs: List<FragmentConfig>,
-                      private val mHandler: FragmentHandler) : BaseManager() {
+class FragmentLoader(private val mFragmentManager: FragmentManager,
+                     private val mConfigs: List<FragmentConfig>,
+                     private val mHandler: FragmentHandler) {
 
 
-    override fun onViewCreated() {
+    fun onViewCreated() {
         LogUtils.e("FragmentManager onViewCreated")
         checkPreloadFragment()
         val config = mConfigs.firstOrNull { it.indexPage }
