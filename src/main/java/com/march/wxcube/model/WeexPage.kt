@@ -13,6 +13,8 @@ import android.text.TextUtils
  */
 class WeexPage() : Parcelable {
 
+    var _comment: String? = null
+
     var pageName: String? = null
 
     var remoteJs: String? = null // 远程 js
