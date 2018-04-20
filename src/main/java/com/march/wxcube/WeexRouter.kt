@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
+import com.march.wxcube.common.report
 import com.march.wxcube.model.DialogConfig
 
 import com.march.wxcube.model.WeexPage
@@ -60,7 +61,7 @@ class WeexRouter {
         try {
             context.startActivity(intent)
         } catch (e: Exception) {
-            Weex.instance.weexService.onErrorReport(e, "open Url, can not start activity, url => $url")
+            Weex.getInst().mWeexInjector.onErrorReport(e, "open Url, can not start activity, url => $url")
         }
 
     }
@@ -70,7 +71,7 @@ class WeexRouter {
      */
     fun openDialog(activity: AppCompatActivity, url: String, config: DialogConfig?) {
         val nonNullConfig = config ?: DialogConfig()
-        val page = Weex.getInst().weexRouter.findPage(url) ?: return
+        val page = Weex.getInst().mWeexRouter.findPage(url) ?: return
         val fragment = WeexDialogFragment.newInstance(page, nonNullConfig)
         fragment.show(activity.supportFragmentManager, "dialog")
     }
@@ -81,7 +82,7 @@ class WeexRouter {
     fun findPage(url: String): WeexPage? {
         val weexPage = mWeexPageMap[UrlKey.fromUrl(url)]
         if (weexPage == null) {
-            Weex.instance.weexService.onErrorReport(null, "open Url, can not find page, url => $url")
+            report("open Url, can not find page, url => $url")
             val page = WeexPage()
             page.webUrl = url
             return page
@@ -89,13 +90,11 @@ class WeexRouter {
         return weexPage.make(url)
     }
 
-    /**
-     * 更新数据源
-     */
-    fun update(WeexPages: List<WeexPage>) {
+    fun update(weexPages: List<WeexPage>) {
         mWeexPageMap.isNotEmpty().let { mWeexPageMap.clear() }
-        WeexPages
-                .filterNot { TextUtils.isEmpty(it.webUrl) }
-                .forEach { mWeexPageMap[UrlKey.fromUrl(it.webUrl!!)] = it }
+        weexPages.forEach {
+            mWeexPageMap[WeexRouter.UrlKey.fromUrl(it.webUrl!!)] = it
+        }
     }
+
 }
