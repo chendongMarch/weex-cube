@@ -5,19 +5,12 @@ import android.os.Build
 import android.text.TextUtils
 import android.util.LruCache
 import com.march.common.utils.FileUtils
-import com.march.common.utils.LogUtils
-import com.march.common.utils.StreamUtils
-import com.march.wxcube.http.HttpManager
+import com.march.wxcube.manager.ManagerRegistry
 
 import com.march.wxcube.model.WeexPage
-import com.taobao.weex.adapter.IWXHttpAdapter
 import com.taobao.weex.common.WXRequest
-import com.taobao.weex.common.WXResponse
 import com.taobao.weex.utils.WXFileUtils
 
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
 import java.nio.charset.Charset
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -91,7 +84,7 @@ class WeexJsLoader(loadStrategy: Int, maxSize: Int) {
         wxRequest.url = page.remoteJs
         wxRequest.method = "get"
         wxRequest.paramMap = mapOf("from" to "download-js")
-        val resp = HttpManager.getInst().requestSync(wxRequest)
+        val resp = ManagerRegistry.HTTP.requestSync(wxRequest)
         val originalData = resp.originalData
         return if (resp.originalData == null) null
         else String(originalData, Charset.forName("utf-8"))
