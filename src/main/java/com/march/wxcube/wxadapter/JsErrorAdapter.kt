@@ -1,6 +1,7 @@
 package com.march.wxcube.wxadapter
 
 import com.march.wxcube.Weex
+import com.march.wxcube.common.report
 import com.taobao.weex.adapter.IWXJSExceptionAdapter
 import com.taobao.weex.common.WXJSExceptionInfo
 
@@ -12,6 +13,6 @@ import com.taobao.weex.common.WXJSExceptionInfo
  */
 class JsErrorAdapter : IWXJSExceptionAdapter {
     override fun onJSException(exception: WXJSExceptionInfo) {
-        Weex.instance.weexService.onErrorReport(null, exception.toString())
+          report(exception.toString())
     }
 }
