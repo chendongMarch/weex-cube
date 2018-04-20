@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.march.common.utils.LogUtils
 
 import com.march.wxcube.R
 import com.march.wxcube.model.WeexPage
@@ -40,7 +39,7 @@ class WeexFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater?.inflate(R.layout.weex_fragment, container, false) as ViewGroup
-        weexDelegate.containerView = view
+        weexDelegate.mContainerView = view
         weexDelegate.render()
         return view
     }
