@@ -1,13 +1,23 @@
 package com.march.wxcube
 
+import android.app.ActivityManager
 import android.app.Application
+import android.content.Context
+import android.text.TextUtils
 import com.march.common.Common
+import com.march.common.model.WeakContext
 import com.march.webkit.WebKit
 
 import com.march.wxcube.wxadapter.ImgAdapter
 import com.march.wxcube.common.JsonParseAdapterImpl
+import com.march.wxcube.manager.DataManager
+import com.march.wxcube.manager.EventManager
+import com.march.wxcube.manager.HttpManager
+import com.march.wxcube.manager.ManagerRegistry
+import com.march.wxcube.model.WeexPage
 import com.march.wxcube.module.*
 import com.march.wxcube.widget.Container
+import com.march.wxcube.wxadapter.OkHttpAdapter
 import com.taobao.weex.InitConfig
 import com.taobao.weex.WXEnvironment
 import com.taobao.weex.WXSDKEngine
@@ -21,30 +31,37 @@ import com.taobao.weex.common.WXException
  */
 class Weex private constructor() {
 
-    var weexService: WeexService = WeexService.EMPTY
-    val weexBundleCache: WeexBundleCache = WeexBundleCache() // 负责模版缓存
-    val weexRouter: WeexRouter = WeexRouter() // 负责跳转逻辑
-    var jsLoadStrategy = JsLoadStrategy.PREPARE_ALL
+    lateinit var mWeakCtx: WeakContext
+    lateinit var mWeexInjector: WeexInjector
+    lateinit var mWeexJsLoader: WeexJsLoader
+    lateinit var mWeexRouter: WeexRouter
 
-    object JsLoadStrategy {
-        const val ALWAYS_FRESH = 0 // 总是使用最新的
-        const val PREPARE_ALL = 1 // 提前准备
-        const val LAZY_LOAD = 2 // 使用时才加载，并缓存
+
+    private fun checkWeexConfig(application: Application, config: WeexConfig) {
+        if (config.jsCacheMaxSize == -1) {
+            val activityManager: ActivityManager = application.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            config.jsCacheMaxSize = (activityManager.memoryClass * 1024 * 1024 * 0.3f).toInt()
+        }
     }
 
-    fun init(application: Application, debug: Boolean, service: WeexService) {
+    fun init(application: Application, config: WeexConfig, injector: WeexInjector) {
 
-        weexService = service
+        checkWeexConfig(application, config)
 
-        WXEnvironment.setOpenDebugLog(debug)
-        WXEnvironment.setApkDebugable(debug)
+        mWeakCtx = WeakContext(application.applicationContext)
+        mWeexInjector = injector
+        mWeexJsLoader = WeexJsLoader(config.jsLoadStrategy, config.jsCacheMaxSize)
+        mWeexRouter = WeexRouter()
+
+        WXEnvironment.setOpenDebugLog(config.debug)
+        WXEnvironment.setApkDebugable(config.debug)
         WXSDKEngine.addCustomOptions("container", "weex-cube")
 
         val builder = InitConfig.Builder()
                 // 用户行为捕捉
                 // .setUtAdapter(new UtAdapter())
                 // 网络请求 def
-                // .setHttpAdapter(new OkHttpAdapter())
+                .setHttpAdapter(OkHttpAdapter())
                 // 存储管理
                 // .setStorageAdapter(new StorageAdapter())
                 // URI 重写 def
@@ -57,15 +74,22 @@ class Weex private constructor() {
                 // .setWebSocketAdapterFactory(WebSocketAdapter.createFactory())
                 // 图片加载
                 .setImgAdapter(ImgAdapter())
-        service.onInitWeex(builder)
+        injector.onInitWeex(builder)
         WXSDKEngine.initialize(application, builder.build())
 
         registerModule()
         registerComponent()
 
+        ManagerRegistry.getInst().register(DataManager.instance)
+        ManagerRegistry.getInst().register(EventManager.instance)
+        ManagerRegistry.getInst().register(HttpManager.instance)
+
         Common.init(application, JsonParseAdapterImpl())
         WebKit.init(application)
     }
+
+    fun getContext() = mWeakCtx.get()
+
 
     private fun registerComponent() {
         try {
@@ -87,8 +111,20 @@ class Weex private constructor() {
         }
     }
 
+    /**
+     * 更新数据源
+     */
+    fun updateWeexPages(context: Context, weexPages: List<WeexPage>) {
+        val list = weexPages.filterNot { TextUtils.isEmpty(it.webUrl) }
+        mWeexRouter.update(list)
+        mWeexJsLoader.update(context, list)
+
+    }
+
+
     companion object {
-        val instance: Weex by lazy { Weex() }
+
+        private val instance: Weex by lazy { Weex() }
 
         fun getInst() = instance
     }

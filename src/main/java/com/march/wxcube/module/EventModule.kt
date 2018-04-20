@@ -1,6 +1,7 @@
 package com.march.wxcube.module
 
-import com.march.wxcube.hub.EventHub
+import com.march.wxcube.manager.EventManager
+import com.march.wxcube.manager.ManagerRegistry
 import com.taobao.weex.annotation.JSMethod
 import com.taobao.weex.common.WXModule
 
@@ -18,7 +19,7 @@ class EventModule : WXModule() {
     // globalEvent.addEventListener('myEvent', (params) => {});
     @JSMethod(uiThread = true)
     fun registerEvent(key: String?) {
-        EventHub.registerEvent(key,instantId)
+        ManagerRegistry.EVENT.registerEvent(key, instantId)
     }
 
     // 发送事件
@@ -26,7 +27,7 @@ class EventModule : WXModule() {
     // event.post('myEvent',{isOk:true});
     @JSMethod(uiThread = true)
     fun postEvent(key: String, params: Map<String, Any>) {
-        EventHub.postEvent(key,params)
+        ManagerRegistry.EVENT.postEvent(key, params)
     }
 
 }

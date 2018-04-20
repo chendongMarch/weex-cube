@@ -8,11 +8,12 @@ import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.march.common.utils.LogUtils
 import com.march.wxcube.Weex
-import com.march.wxcube.hub.DataHub
+import com.march.wxcube.manager.DataManager
+import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.FragmentConfig
 import com.march.wxcube.ui.WeexFragment
-import com.march.wxcube.manager.FragmentManager
+import com.march.wxcube.ui.FragmentLoader
 import com.march.wxcube.ui.WebActivity
 import com.taobao.weex.annotation.JSMethod
 import com.taobao.weex.common.WXModule
@@ -28,12 +29,12 @@ class BasicModule : WXModule() {
 
     @JSMethod(uiThread = true)
     fun putExtraData(url: String, data: JSONObject) {
-        DataHub.putData(url, data)
+        ManagerRegistry.DATA.putData(url, data)
     }
 
     @JSMethod(uiThread = true)
     fun close() {
-        val delegate = weexDelegate?:return
+        val delegate = weexDelegate ?: return
         delegate.close()
     }
 
@@ -43,7 +44,7 @@ class BasicModule : WXModule() {
     @JSMethod(uiThread = true)
     fun openUrl(webUrl: String) {
         val ctx = context ?: return
-        Weex.getInst().weexRouter.openUrl(ctx, webUrl)
+        Weex.getInst().mWeexRouter.openUrl(ctx, webUrl)
     }
 
     /**
@@ -53,7 +54,7 @@ class BasicModule : WXModule() {
     fun openDialog(webUrl: String, params: JSONObject) {
         val act = activity ?: return
         val config = jsonObj2Obj(params, DialogConfig::class.java)
-        Weex.getInst().weexRouter.openDialog(act, webUrl, config)
+        Weex.getInst().mWeexRouter.openDialog(act, webUrl, config)
     }
 
     @JSMethod(uiThread = true)
@@ -72,7 +73,8 @@ class BasicModule : WXModule() {
         LogUtils.e("loadTabPages")
         val weexAct = weexActivity ?: return
         val configs = jsonArray2List(array, FragmentConfig::class.java)
-        val manager = FragmentManager(weexAct.supportFragmentManager, configs, object : FragmentManager.FragmentHandler {
+        weexAct.weexDelegate.mFragmentLoader = FragmentLoader(weexAct.supportFragmentManager,
+                configs, object : FragmentLoader.FragmentHandler {
             override fun containerIdFinder(): () -> Int {
                 return {
                     val view = findView {
@@ -85,13 +87,12 @@ class BasicModule : WXModule() {
             override fun makeFragment(tag: String): Fragment? {
                 val config = configs.firstOrNull { it.tag.equals(tag) }
                 if (config != null && !TextUtils.isEmpty(config.url)) {
-                    val page = Weex.getInst().weexRouter.findPage(config.url!!) ?: return null
+                    val page = Weex.getInst().mWeexRouter.findPage(config.url!!) ?: return null
                     return WeexFragment.newInstance(page)
                 }
                 return null
             }
         })
-        weexAct.weexDelegate.putExtra(manager)
     }
 
     /**
@@ -100,7 +101,7 @@ class BasicModule : WXModule() {
     @JSMethod(uiThread = true)
     fun showTab(tag: String) {
         val weexAct = weexActivity ?: return
-        val obj = weexAct.weexDelegate.getExtra(FragmentManager::class.java) ?: return
-        obj.showFragment(tag)
+        val loader = weexAct.weexDelegate.mFragmentLoader ?: return
+        loader.showFragment(tag)
     }
 }
