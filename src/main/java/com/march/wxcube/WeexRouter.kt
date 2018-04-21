@@ -6,11 +6,14 @@ import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import com.march.wxcube.common.report
+import com.march.wxcube.common.toSafeUrl
 import com.march.wxcube.model.DialogConfig
 
 import com.march.wxcube.model.WeexPage
 import com.march.wxcube.ui.WeexActivity
 import com.march.wxcube.ui.WeexDialogFragment
+import com.taobao.weex.WXSDKManager
+import com.taobao.weex.adapter.URIAdapter
 
 /**
  * CreateAt : 2018/3/27
@@ -24,9 +27,9 @@ class WeexRouter {
     private var mWeexPageMap = mutableMapOf<UrlKey, WeexPage>()
 
     private class UrlKey {
-        internal var host = ""
-        internal var port = ""
-        internal var path = ""
+        internal var host: String? = ""
+        internal var port: String? = ""
+        internal var path: String? = ""
 
         override fun equals(other: Any?): Boolean {
             if (other == null || other !is UrlKey) {
@@ -80,7 +83,8 @@ class WeexRouter {
      * 根据 web url 查找指定页面
      */
     fun findPage(url: String): WeexPage? {
-        val weexPage = mWeexPageMap[UrlKey.fromUrl(url)]
+        val safeUrl = url.toSafeUrl()
+        val weexPage = mWeexPageMap[UrlKey.fromUrl(safeUrl)]
         if (weexPage == null) {
             report("open Url, can not find page, url => $url")
             val page = WeexPage()

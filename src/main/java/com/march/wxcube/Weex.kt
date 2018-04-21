@@ -18,6 +18,7 @@ import com.march.wxcube.model.WeexPage
 import com.march.wxcube.module.*
 import com.march.wxcube.widget.Container
 import com.march.wxcube.wxadapter.OkHttpAdapter
+import com.march.wxcube.wxadapter.UriAdapter
 import com.taobao.weex.InitConfig
 import com.taobao.weex.WXEnvironment
 import com.taobao.weex.WXSDKEngine
@@ -35,6 +36,7 @@ class Weex private constructor() {
     lateinit var mWeexInjector: WeexInjector
     lateinit var mWeexJsLoader: WeexJsLoader
     lateinit var mWeexRouter: WeexRouter
+    lateinit var mWeexUpdater: WeexUpdater
 
 
     private fun checkWeexConfig(application: Application, config: WeexConfig) {
@@ -48,10 +50,11 @@ class Weex private constructor() {
 
         checkWeexConfig(application, config)
 
-        mWeakCtx = WeakContext(application.applicationContext)
         mWeexInjector = injector
-        mWeexJsLoader = WeexJsLoader(config.jsLoadStrategy, config.jsCacheMaxSize)
+        mWeakCtx = WeakContext(application.applicationContext)
+        mWeexJsLoader = WeexJsLoader(config.jsLoadStrategy, config.jsCacheStrategy, config.jsCacheMaxSize)
         mWeexRouter = WeexRouter()
+        mWeexUpdater = WeexUpdater()
 
         WXEnvironment.setOpenDebugLog(config.debug)
         WXEnvironment.setApkDebugable(config.debug)
@@ -65,7 +68,7 @@ class Weex private constructor() {
                 // 存储管理
                 // .setStorageAdapter(new StorageAdapter())
                 // URI 重写 def
-                // .setURIAdapter(new UriAdapter())
+                 .setURIAdapter( UriAdapter())
                 // js 错误
                 // .setJSExceptionAdapter(new JsErrorAdapter())
                 // drawable 加载
@@ -110,17 +113,6 @@ class Weex private constructor() {
             e.printStackTrace()
         }
     }
-
-    /**
-     * 更新数据源
-     */
-    fun updateWeexPages(context: Context, weexPages: List<WeexPage>) {
-        val list = weexPages.filterNot { TextUtils.isEmpty(it.webUrl) }
-        mWeexRouter.update(list)
-        mWeexJsLoader.update(context, list)
-
-    }
-
 
     companion object {
 

@@ -178,13 +178,13 @@ class WeexDelegate : WeexLifeCycle {
                 return
             }
             Weex.getInst().mWeexJsLoader.getTemplateAsync(mWxInst.context, page) {
-                if (!TextUtils.isEmpty(it)) {
+                if (!it.isNullOrBlank()) {
                     mWxInst.render(page.pageName, it, opts, null, WXRenderStrategy.APPEND_ASYNC)
-                } else if (!TextUtils.isEmpty(page.remoteJs)) {
+                } else if (!page.remoteJs.isNullOrBlank()) {
                     mWxInst.renderByUrl(page.pageName, page.remoteJs, opts, null, WXRenderStrategy.APPEND_ASYNC)
                 } else {
                     report("render error " + page.toString())
-                    listener.onException(mWxInst, "101", "页面数据有问题")
+                    listener.onException(mWxInst, "101", "js 没有准备好")
                 }
             }
         }

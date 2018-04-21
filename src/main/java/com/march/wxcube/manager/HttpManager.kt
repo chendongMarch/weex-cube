@@ -25,6 +25,7 @@ class HttpManager : IManager {
 
     companion object {
         const val KEY_TAG = "http-tag"
+        const val ERROR_CODE = "-1"
         val instance: HttpManager by lazy { HttpManager() }
     }
 
@@ -66,7 +67,7 @@ class HttpManager : IManager {
         return builder.build()
     }
 
-    fun requestSync(wxRequest: WXRequest): WXResponse {
+    fun requestSync(wxRequest: WXRequest, originData: Boolean = true): WXResponse {
         val netResp = checkNetWork(null)
         if (netResp != null) {
             return netResp
@@ -75,8 +76,8 @@ class HttpManager : IManager {
         val request = makeRequest(wxRequest)
         val failure: (e: Exception?) -> WXResponse = {
             val resp = WXResponse()
-            resp.errorCode = "-2"
-            resp.statusCode = "-2"
+            resp.errorCode = ERROR_CODE
+            resp.statusCode = ERROR_CODE
             resp.errorMsg = "请求失败 ${it?.message} "
             resp
         }
@@ -85,9 +86,13 @@ class HttpManager : IManager {
             if (response == null) {
                 wxResp = failure(IOException("wxResp is null"))
             } else if (response.isSuccessful) {
-                wxResp.errorCode = "0"
+                wxResp.errorCode = ERROR_CODE
                 wxResp.statusCode = response.code().toString()
-                wxResp.originalData = response.body()?.bytes()
+                if (originData) {
+                    wxResp.originalData = response.body()?.bytes()
+                } else {
+                    wxResp.data = response.body()?.string()
+                }
             }
         } catch (e: Exception) {
             wxResp = failure(e)
@@ -95,7 +100,7 @@ class HttpManager : IManager {
         return wxResp
     }
 
-    fun request(wxRequest: WXRequest, listener: IWXHttpAdapter.OnHttpListener) {
+    fun request(wxRequest: WXRequest, listener: IWXHttpAdapter.OnHttpListener, originData: Boolean = true) {
         if (checkNetWork(listener) != null) {
             return
         }
@@ -108,16 +113,21 @@ class HttpManager : IManager {
                         if (response == null) {
                             onFailure(call, IOException("wxResp is null"))
                         } else if (response.isSuccessful) {
+                            listener.onHeadersReceived(response.code(), response.headers().toMultimap())
                             wxResp.errorCode = "1"
                             wxResp.statusCode = response.code().toString()
-                            wxResp.originalData = response.body()?.bytes()
+                            if (originData) {
+                                wxResp.originalData = response.body()?.bytes()
+                            } else {
+                                wxResp.data = response.body()?.string()
+                            }
                             listener.onHttpFinish(wxResp)
                         }
                     }
 
                     override fun onFailure(call: Call?, e: IOException?) {
-                        wxResp.errorCode = "-2"
-                        wxResp.statusCode = "-2"
+                        wxResp.errorCode = ERROR_CODE
+                        wxResp.statusCode = ERROR_CODE
                         wxResp.errorMsg = "请求失败 ${e?.message}"
                         listener.onHttpFinish(wxResp)
                     }
@@ -128,8 +138,8 @@ class HttpManager : IManager {
     private fun checkNetWork(listener: IWXHttpAdapter.OnHttpListener?): WXResponse? {
         if (!NetUtils.isNetworkConnected(Weex.getInst().getContext())) {
             val wxResp = WXResponse()
-            wxResp.errorCode = "-1"
-            wxResp.statusCode = "-1"
+            wxResp.errorCode = ERROR_CODE
+            wxResp.statusCode = ERROR_CODE
             wxResp.errorMsg = "网络未连接"
             listener?.onHttpFinish(wxResp)
             return wxResp
@@ -139,12 +149,12 @@ class HttpManager : IManager {
 
     private fun makeRequest(wxRequest: WXRequest): Request {
         val method = if (wxRequest.method == null) "get" else wxRequest.method
-        val body = wxRequest.body
         val url = wxRequest.url
+        val body = wxRequest.body
         val paramMap = wxRequest.paramMap
         var reqBuilder = Request.Builder().url(url)
         // header
-        for (entry in paramMap) {
+        paramMap?.forEach { entry ->
             if (entry.key == KEY_TAG) {
                 reqBuilder.tag(entry.value)
             } else {
@@ -173,23 +183,18 @@ class HttpManager : IManager {
         return reqBuilder.build()
     }
 
-
-    open class HttpListener : IWXHttpAdapter.OnHttpListener {
-        override fun onHttpUploadProgress(uploadProgress: Int) {
-
-        }
-
-        override fun onHttpFinish(response: WXResponse?) {
-        }
-
-        override fun onHttpResponseProgress(loadedLength: Int) {
-        }
-
-        override fun onHeadersReceived(statusCode: Int, headers: MutableMap<String, MutableList<String>>?) {
-        }
-
-        override fun onHttpStart() {
-        }
-
+    fun makeWxRequest(method: String = "get",
+                      body: String = "",
+                      paramMap: Map<String, String>? = null,
+                      url: String?,
+                      from: String = "weex-cube"): WXRequest {
+        val wxRequest = WXRequest()
+        wxRequest.method = method
+        wxRequest.url = url
+        wxRequest.body = body
+        val map = paramMap?.toMutableMap()
+        map?.set("from", from)
+        wxRequest.paramMap = map
+        return wxRequest
     }
 }

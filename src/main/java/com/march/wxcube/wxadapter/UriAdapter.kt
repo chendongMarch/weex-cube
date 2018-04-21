@@ -3,6 +3,7 @@ package com.march.wxcube.wxadapter
 import android.net.Uri
 
 import com.taobao.weex.WXSDKInstance
+import com.taobao.weex.adapter.DefaultUriAdapter
 import com.taobao.weex.adapter.URIAdapter
 
 /**
@@ -11,8 +12,8 @@ import com.taobao.weex.adapter.URIAdapter
  *
  * @author chendong
  */
-class UriAdapter : URIAdapter {
+class UriAdapter : DefaultUriAdapter() {
     override fun rewrite(instance: WXSDKInstance, type: String, uri: Uri): Uri {
-        return uri
+        return super.rewrite(instance, type, uri)
     }
 }

@@ -8,7 +8,6 @@ import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.march.common.utils.LogUtils
 import com.march.wxcube.Weex
-import com.march.wxcube.manager.DataManager
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.FragmentConfig
@@ -16,6 +15,7 @@ import com.march.wxcube.ui.WeexFragment
 import com.march.wxcube.ui.FragmentLoader
 import com.march.wxcube.ui.WebActivity
 import com.taobao.weex.annotation.JSMethod
+import com.taobao.weex.bridge.JSCallback
 import com.taobao.weex.common.WXModule
 
 
@@ -26,6 +26,12 @@ import com.taobao.weex.common.WXModule
  * @author chendong
  */
 class BasicModule : WXModule() {
+
+
+    @JSMethod(uiThread = true)
+    fun readInstanceId(jsCallback: JSCallback) {
+        jsCallback.invoke(mWXSDKInstance.instanceId)
+    }
 
     @JSMethod(uiThread = true)
     fun putExtraData(url: String, data: JSONObject) {
