@@ -16,20 +16,19 @@ class DataManager : IManager {
         val instance: DataManager by lazy { DataManager() }
     }
 
-    private val cacheData: MutableMap<String, JSONObject> = mutableMapOf()
-
+    private val mCacheExtraData: MutableMap<String, JSONObject> = mutableMapOf()
 
     override fun onWxInstRelease(weexPage: WeexPage?, instance: WXSDKInstance?) {
-        cacheData.remove(weexPage?.webUrl)
+        mCacheExtraData.remove(weexPage?.webUrl)
     }
 
     fun putData(url: String, data: JSONObject) {
-        cacheData[url] = data
+        mCacheExtraData[url] = data
     }
 
     fun getData(url: String): JSONObject? {
-        val data = cacheData[url]
-        cacheData.remove(url)
+        val data = mCacheExtraData[url]
+        mCacheExtraData.remove(url)
         return data
     }
 

@@ -9,11 +9,19 @@ import com.taobao.weex.WXSDKInstance
  *
  * @author chendong
  */
-class EnvManager: IManager{
+class EnvManager : IManager {
+
+    companion object {
+        val instance: EventManager by lazy { EventManager() }
+    }
+
+
+    val mEnvHostMap by lazy { mutableMapOf<Int, String>() }
+
 
     override fun onWxInstRelease(weexPage: WeexPage?, instance: WXSDKInstance?) {
 
     }
 
-    var
+
 }

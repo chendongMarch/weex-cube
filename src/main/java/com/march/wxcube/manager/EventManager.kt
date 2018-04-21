@@ -19,11 +19,11 @@ class EventManager : IManager {
     }
 
     // key -> List<instantId>
-    private val eventInstantIdMap = mutableMapOf<String, MutableSet<String>>()
+    private val mEventInstanceIdMap by lazy { mutableMapOf<String, MutableSet<String>>() }
 
     override fun onWxInstRelease(weexPage: WeexPage?, instance: WXSDKInstance?) {
         val nonNullId = instance?.instanceId ?: return
-        for (mutableEntry in eventInstantIdMap) {
+        for (mutableEntry in mEventInstanceIdMap) {
             if (mutableEntry.value.isNotEmpty()) {
                 mutableEntry.value.remove(nonNullId)
             }
@@ -40,9 +40,9 @@ class EventManager : IManager {
             return
         }
         val nonNullKey = key ?: return
-        val registerInstantIds = eventInstantIdMap[nonNullKey] ?: mutableSetOf()
+        val registerInstantIds = mEventInstanceIdMap[nonNullKey] ?: mutableSetOf()
         registerInstantIds.add(instantId)
-        eventInstantIdMap[nonNullKey] = registerInstantIds
+        mEventInstanceIdMap[nonNullKey] = registerInstantIds
     }
 
     // 发送事件
@@ -58,7 +58,7 @@ class EventManager : IManager {
             report("post event WXSDKManager.getInstance().wxRenderManager == null")
             return
         }
-        val registerInstantIds = eventInstantIdMap[key] ?: listOf<String>()
+        val registerInstantIds = mEventInstanceIdMap[key] ?: listOf<String>()
         val allInstants = renderManager.allInstances
         for (instance in allInstants) {
             // 该事件被该 instant 注册过
