@@ -42,7 +42,7 @@ class WeexUpdater {
     fun updateWeexPages(context: Context, url: String) {
         val http = ManagerRegistry.HTTP
         val request = http.makeWxRequest(url = url, from = "request-config")
-        http.request(request, object : HttpListener {
+        val listener: HttpListener = object : HttpListener {
             override fun onHttpFinish(response: WXResponse) {
                 if (response.errorCode == HttpManager.ERROR_CODE) {
                     report("请求配置文件失败")
@@ -56,6 +56,8 @@ class WeexUpdater {
                     }
                 }
             }
-        }, false)
+        }
+//        http.request(request, listener, false)
+        http.requestAssets(context, request.url, listener)
     }
 }

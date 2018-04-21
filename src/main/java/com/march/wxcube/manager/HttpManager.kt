@@ -1,8 +1,11 @@
 package com.march.wxcube.manager
 
+import android.content.Context
 import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.march.common.utils.NetUtils
+import com.march.common.utils.StreamUtils
 import com.march.wxcube.Weex
+import com.march.wxcube.http.HttpListener
 import com.march.wxcube.http.LogInterceptor
 import com.march.wxcube.model.WeexPage
 import com.taobao.weex.WXSDKInstance
@@ -65,6 +68,15 @@ class HttpManager : IManager {
         // builder.authenticator(new TokenAuthenticator());
         Weex.getInst().mWeexInjector.onInitOkHttpClient(builder)
         return builder.build()
+    }
+
+    fun requestAssets(context: Context, url: String, listener: HttpListener) {
+        listener.onHttpStart()
+        val wxResponse = WXResponse()
+        wxResponse.data = StreamUtils.saveStreamToString(context.assets.open(url))
+        wxResponse.statusCode = "200"
+        wxResponse.errorCode = "1"
+        listener.onHttpFinish(wxResponse)
     }
 
     fun requestSync(wxRequest: WXRequest, originData: Boolean = true): WXResponse {
