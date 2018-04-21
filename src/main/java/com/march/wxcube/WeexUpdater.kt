@@ -34,6 +34,7 @@ class WeexUpdater {
                     it.webUrl.isNullOrBlank()
                 }.forEach {
                     it.webUrl = ManagerRegistry.ENV.checkAddHost(it.webUrl)
+                    it.localJs = Weex.getInst().mWeexJsLoader.mapFile(it).absolutePath
                 }
         Weex.getInst().mWeexRouter.update(pages)
         Weex.getInst().mWeexJsLoader.update(context, pages)

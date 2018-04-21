@@ -5,10 +5,12 @@ import android.os.Build
 import android.text.TextUtils
 import android.util.LruCache
 import com.march.common.utils.FileUtils
+import com.march.common.utils.StreamUtils
 import com.march.wxcube.manager.ManagerRegistry
 
 import com.march.wxcube.model.WeexPage
 import com.taobao.weex.utils.WXFileUtils
+import java.io.File
 
 import java.nio.charset.Charset
 import java.util.concurrent.ExecutorService
@@ -20,12 +22,13 @@ import java.util.concurrent.Executors
  *
  * @author chendong
  */
-class WeexJsLoader(loadStrategy: Int, prepareStrategy: Int, maxSize: Int) {
+class WeexJsLoader(loadStrategy: Int, prepareStrategy: Int, maxSize: Int, cacheDir: File) {
 
-    private val mService: ExecutorService = Executors.newFixedThreadPool(1)
+    private val mService: ExecutorService = Executors.newCachedThreadPool()
     private val mJsLoadStrategy: Int = loadStrategy
     private val mJsCacheStrategy: Int = prepareStrategy
     private val mJsCache: JsLruCache
+    private val mCacheDir: File = cacheDir
 
     init {
         mJsCache = JsLruCache(maxSize)
@@ -53,7 +56,6 @@ class WeexJsLoader(loadStrategy: Int, prepareStrategy: Int, maxSize: Int) {
                 consumer.invoke(it)
             }
         }
-        log("开始加载 ${page.pageName} 缓存大小 => " + mJsCache.size())
         var runnable: (() -> String?)? = null
         when (mJsLoadStrategy) {
         // 只加载网络
@@ -61,7 +63,7 @@ class WeexJsLoader(loadStrategy: Int, prepareStrategy: Int, maxSize: Int) {
                 runnable = {
                     var template: String? = null
                     if (!TextUtils.isEmpty(page.remoteJs)) {
-                        log("从 网络 中取得 => ${page.pageName}")
+                        log("JS加载${page.pageName} [${mJsCache.size()}] 网络")
                         template = downloadJs(page)
                     }
                     template
@@ -72,7 +74,7 @@ class WeexJsLoader(loadStrategy: Int, prepareStrategy: Int, maxSize: Int) {
                 runnable = {
                     var template: String? = null
                     if (!TextUtils.isEmpty(page.assetsJs)) {
-                        log("从 assets 中取得 => ${page.pageName}")
+                        log("JS加载${page.pageName} [${mJsCache.size()}] assets")
                         template = WXFileUtils.loadAsset(page.assetsJs, context)
                     }
                     template
@@ -83,7 +85,7 @@ class WeexJsLoader(loadStrategy: Int, prepareStrategy: Int, maxSize: Int) {
                 runnable = {
                     var template: String? = null
                     if (!TextUtils.isEmpty(page.localJs) && !FileUtils.isNotExist(page.localJs)) {
-                        log("从文件中取得 => ${page.pageName}")
+                        log("JS加载${page.pageName} [${mJsCache.size()}] 文件")
                         template = WXFileUtils.loadFileOrAsset(page.localJs, context)
                     }
                     template
@@ -100,16 +102,16 @@ class WeexJsLoader(loadStrategy: Int, prepareStrategy: Int, maxSize: Int) {
                 runnable = {
                     var template: String? = mJsCache.get(page)
                     if (!TextUtils.isEmpty(template)) {
-                        log("从缓存中取得 => ${page.pageName}")
-                        consumer.invoke(template)
+                        log("JS加载${page.pageName} [${mJsCache.size()}] 缓存")
+                        template
                     } else if (!TextUtils.isEmpty(page.localJs) && !FileUtils.isNotExist(page.localJs)) {
-                        log("从文件中取得 => ${page.pageName}")
+                        log("JS加载${page.pageName} [${mJsCache.size()}] 文件")
                         template = WXFileUtils.loadFileOrAsset(page.localJs, context)
                     } else if (!TextUtils.isEmpty(page.assetsJs)) {
-                        log("从 assets 中取得 => ${page.pageName}")
+                        log("JS加载${page.pageName} [${mJsCache.size()}] assets")
                         template = WXFileUtils.loadAsset(page.assetsJs, context)
                     } else if (!TextUtils.isEmpty(page.remoteJs)) {
-                        log("从 网络 中取得 => ${page.pageName}")
+                        log("JS加载${page.pageName} [${mJsCache.size()}] 网络")
                         template = downloadJs(page)
                     }
                     template
@@ -133,7 +135,16 @@ class WeexJsLoader(loadStrategy: Int, prepareStrategy: Int, maxSize: Int) {
         val http = ManagerRegistry.HTTP
         val wxRequest = http.makeWxRequest(url = url, from = "download-js")
         val resp = http.requestSync(wxRequest, false)
+        StreamUtils.saveStreamToFile(mapFile(page), resp.data?.byteInputStream(Charset.forName("utf-8")))
         return resp.data
+    }
+
+    fun mapFile(page: WeexPage): File {
+        val saveDir = File(mCacheDir, CACHE_DIR)
+        if (!saveDir.exists()) {
+            saveDir.mkdirs()
+        }
+        return File(saveDir, "${page.pageName}-${page.jsVersion}.js")
     }
 
     object JsLoadStrategy {
@@ -152,7 +163,7 @@ class WeexJsLoader(loadStrategy: Int, prepareStrategy: Int, maxSize: Int) {
 
     companion object {
         private val TAG = WeexJsLoader::class.java.simpleName!!
-
+        private const val CACHE_DIR = "weex-js-disk-cache"
         fun log(msg: String) {
             Weex.getInst().mWeexInjector.onLog(TAG, msg)
         }
@@ -164,6 +175,5 @@ class WeexJsLoader(loadStrategy: Int, prepareStrategy: Int, maxSize: Int) {
             return value.length
         }
     }
-
 
 }

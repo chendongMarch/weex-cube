@@ -3,6 +3,7 @@ package com.march.wxcube
 import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
+import android.os.Environment
 import android.text.TextUtils
 import com.march.common.Common
 import com.march.common.model.WeakContext
@@ -23,17 +24,17 @@ import com.taobao.weex.common.WXException
 
 /**
  * CreateAt : 2018/3/26
- * Describe :
+ * Describe : Weex 管理类
  *
  * @author chendong
  */
 class Weex private constructor() {
 
-    lateinit var mWeakCtx: WeakContext
-    lateinit var mWeexInjector: WeexInjector
-    lateinit var mWeexJsLoader: WeexJsLoader
-    lateinit var mWeexRouter: WeexRouter
-    lateinit var mWeexUpdater: WeexUpdater
+    lateinit var mWeakCtx: WeakContext // 上下文虚引用
+    lateinit var mWeexInjector: WeexInjector // 外部注入支持
+    lateinit var mWeexJsLoader: WeexJsLoader // 加载 js
+    lateinit var mWeexRouter: WeexRouter // 路由页面管理
+    lateinit var mWeexUpdater: WeexUpdater // weex 页面更新
 
 
     private fun checkWeexConfig(application: Application, config: WeexConfig) {
@@ -49,7 +50,12 @@ class Weex private constructor() {
 
         mWeexInjector = injector
         mWeakCtx = WeakContext(application.applicationContext)
-        mWeexJsLoader = WeexJsLoader(config.jsLoadStrategy, config.jsCacheStrategy, config.jsCacheMaxSize)
+        mWeexJsLoader = WeexJsLoader(config.jsLoadStrategy,
+                config.jsCacheStrategy,
+                config.jsCacheMaxSize,
+//                application.cacheDir
+                Environment.getExternalStorageDirectory()
+        )
         mWeexRouter = WeexRouter()
         mWeexUpdater = WeexUpdater()
 
