@@ -32,10 +32,3 @@ fun <T> JSONArray?.toList(clz: Class<T>): List<T> {
 fun Any.report(msg: String) {
     Weex.getInst().mWeexInjector.onErrorReport(null, msg)
 }
-
-fun String.toSafeUrl(): String {
-    if (startsWith("/")) {
-        return "http://cdevlab.top$this"
-    }
-    return this
-}

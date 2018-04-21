@@ -20,6 +20,7 @@ class ManagerRegistry : IManager {
         val EVENT by lazy { getInst().get(EventManager::class.java) as EventManager }
         val DATA by lazy { getInst().get(DataManager::class.java) as DataManager }
         val HTTP by lazy { getInst().get(HttpManager::class.java) as HttpManager }
+        val ENV by lazy { getInst().get(EnvManager::class.java) as EnvManager }
     }
 
     private val mManagerMap by lazy { mutableMapOf<String, IManager>() }

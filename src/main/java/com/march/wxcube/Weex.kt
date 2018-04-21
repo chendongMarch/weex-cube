@@ -10,10 +10,7 @@ import com.march.webkit.WebKit
 
 import com.march.wxcube.wxadapter.ImgAdapter
 import com.march.wxcube.common.JsonParseAdapterImpl
-import com.march.wxcube.manager.DataManager
-import com.march.wxcube.manager.EventManager
-import com.march.wxcube.manager.HttpManager
-import com.march.wxcube.manager.ManagerRegistry
+import com.march.wxcube.manager.*
 import com.march.wxcube.model.WeexPage
 import com.march.wxcube.module.*
 import com.march.wxcube.widget.Container
@@ -68,7 +65,7 @@ class Weex private constructor() {
                 // 存储管理
                 // .setStorageAdapter(new StorageAdapter())
                 // URI 重写 def
-                 .setURIAdapter( UriAdapter())
+                .setURIAdapter(UriAdapter())
                 // js 错误
                 // .setJSExceptionAdapter(new JsErrorAdapter())
                 // drawable 加载
@@ -86,6 +83,7 @@ class Weex private constructor() {
         ManagerRegistry.getInst().register(DataManager.instance)
         ManagerRegistry.getInst().register(EventManager.instance)
         ManagerRegistry.getInst().register(HttpManager.instance)
+        ManagerRegistry.getInst().register(EnvManager.instance)
 
         Common.init(application, JsonParseAdapterImpl())
         WebKit.init(application)

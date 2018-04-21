@@ -4,7 +4,6 @@ import android.content.Context
 import android.text.TextUtils
 import com.alibaba.fastjson.JSON
 import com.march.wxcube.common.report
-import com.march.wxcube.common.toSafeUrl
 import com.march.wxcube.http.HttpListener
 import com.march.wxcube.manager.HttpManager
 import com.march.wxcube.manager.ManagerRegistry
@@ -20,7 +19,7 @@ import java.lang.Exception
  */
 class WeexUpdater {
 
-    class WeexPagesResp() {
+    class WeexPagesResp {
         var total: Int? = 0
         var datas: List<WeexPage>? = null
     }
@@ -30,9 +29,14 @@ class WeexUpdater {
      */
     fun updateWeexPages(context: Context, weexPages: List<WeexPage>?) {
         val pages = weexPages ?: return
-        val list = pages.filterNot { TextUtils.isEmpty(it.webUrl) }
-        Weex.getInst().mWeexRouter.update(list)
-        Weex.getInst().mWeexJsLoader.update(context, list)
+        pages
+                .filterNot {
+                    it.webUrl.isNullOrBlank()
+                }.forEach {
+                    it.webUrl = ManagerRegistry.ENV.checkAddHost(it.webUrl)
+                }
+        Weex.getInst().mWeexRouter.update(pages)
+        Weex.getInst().mWeexJsLoader.update(context, pages)
     }
 
     fun updateWeexPages(context: Context, url: String) {
@@ -46,9 +50,6 @@ class WeexUpdater {
                     val json = response.data ?: return
                     try {
                         val weexPagesResp = JSON.parseObject(json, WeexPagesResp::class.java)
-                        weexPagesResp?.datas?.forEach {
-                            it.webUrl = it.webUrl?.toSafeUrl()
-                        }
                         updateWeexPages(context, weexPagesResp?.datas)
                     } catch (e: Exception) {
                         e.printStackTrace()

@@ -7,6 +7,7 @@ import com.march.common.utils.immersion.ImmersionStatusBarUtils
 import com.march.webkit.IWebView
 import com.march.webkit.sys.SysWebView
 import com.march.webkit.x5.X5WebView
+import com.march.wxcube.manager.ManagerRegistry
 
 /**
  * CreateAt : 2018/4/17
@@ -22,7 +23,7 @@ class WebActivity : AppCompatActivity() {
 
     private val iWebView: IWebView by lazy {
         SysWebView(WebActivity@ this)
-//        X5WebView(WebActivity@ this)
+//      X5WebView(WebActivity@ this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,7 +31,8 @@ class WebActivity : AppCompatActivity() {
         ImmersionStatusBarUtils.setStatusBarLightMode(WebActivity@ this)
         setContentView(iWebView as View)
         val url = intent.getStringExtra(KEY_URL)
-        iWebView.loadPage(url)
+        val safeUrl = ManagerRegistry.ENV.safeUrl(url)
+        iWebView.loadPage(safeUrl)
     }
 
     override fun onBackPressed() {

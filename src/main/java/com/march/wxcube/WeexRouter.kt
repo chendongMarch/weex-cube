@@ -4,16 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
-import android.text.TextUtils
 import com.march.wxcube.common.report
-import com.march.wxcube.common.toSafeUrl
+import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
 
 import com.march.wxcube.model.WeexPage
 import com.march.wxcube.ui.WeexActivity
 import com.march.wxcube.ui.WeexDialogFragment
-import com.taobao.weex.WXSDKManager
-import com.taobao.weex.adapter.URIAdapter
 
 /**
  * CreateAt : 2018/3/27
@@ -83,7 +80,8 @@ class WeexRouter {
      * 根据 web url 查找指定页面
      */
     fun findPage(url: String): WeexPage? {
-        val safeUrl = url.toSafeUrl()
+        var safeUrl = ManagerRegistry.ENV.delHttp(url)
+        safeUrl = ManagerRegistry.ENV.checkAddHost(safeUrl)
         val weexPage = mWeexPageMap[UrlKey.fromUrl(safeUrl)]
         if (weexPage == null) {
             report("open Url, can not find page, url => $url")

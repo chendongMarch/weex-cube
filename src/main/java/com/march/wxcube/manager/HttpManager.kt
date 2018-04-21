@@ -149,7 +149,7 @@ class HttpManager : IManager {
 
     private fun makeRequest(wxRequest: WXRequest): Request {
         val method = if (wxRequest.method == null) "get" else wxRequest.method
-        val url = wxRequest.url
+        val url = ManagerRegistry.ENV.safeUrl(wxRequest.url)
         val body = wxRequest.body
         val paramMap = wxRequest.paramMap
         var reqBuilder = Request.Builder().url(url)
