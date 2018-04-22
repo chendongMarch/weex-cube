@@ -23,6 +23,7 @@ import java.util.concurrent.Executors
  */
 class WeexJsLoader(config: WeexConfig) {
 
+    private var fromWhere: String = ""
     // 线程池
     private val mService: ExecutorService = Executors.newFixedThreadPool(1)
     // 加载策略
@@ -62,64 +63,30 @@ class WeexJsLoader(config: WeexConfig) {
             return
         }
         val publishFunc: (String?) -> Unit = {
-            if (it.isNullOrBlank()) {
-                consumer(null)
-            } else {
-                if (mJsCacheStrategy != JsCacheStrategy.NO_CACHE) {
-                    mJsMemoryCache.put(page, it)
-                }
-                consumer(it)
+            consumer(it)
+            if (mJsCacheStrategy != JsCacheStrategy.NO_CACHE) {
+                mJsMemoryCache.put(page, it)
             }
         }
-        var fromWhere = ""
-        val netLoader by lazy {
-            {
-                fromWhere = "网络"
-                downloadJs(page)
-            }
-        }
-        val assetsLoader by lazy {
-            {
-                fromWhere = "assets"
-                WXFileUtils.loadAsset(page.assetsJs, context)
-            }
-        }
-        val fileLoader by lazy {
-            {
-                fromWhere = "文件"
-                page.localJs?.let { mJsFileCache.read(it) }
-            }
-        }
-        val cacheLoader by lazy { { mJsMemoryCache.get(page) } }
-        val defaultLoader by lazy {
+        val runnable = if (mJsLoadStrategy != JsLoadStrategy.DEFAULT) {
+            newLoader(mJsLoadStrategy, context, page)
+        } else {
             {
                 var template: String? = ""
                 if (template.isNullOrBlank()) {
-                    template = cacheLoader()
-                    fromWhere = "缓存"
+                    template = newLoader(JsLoadStrategy.CACHE_FIRST, context, page)()
                 }
                 if (template.isNullOrBlank() && !page.localJs.isNullOrBlank()) {
-                    template = fileLoader()
-                    fromWhere = "文件"
+                    template = newLoader(JsLoadStrategy.FILE_FIRST, context, page)()
                 }
                 if (template.isNullOrBlank() && !page.assetsJs.isNullOrBlank()) {
-                    template = assetsLoader()
-                    fromWhere = "assets"
+                    template = newLoader(JsLoadStrategy.ASSETS_FIRST, context, page)()
                 }
                 if (template.isNullOrBlank() && !page.remoteJs.isNullOrBlank()) {
-                    fromWhere = "网络"
-                    template = netLoader()
+                    template = newLoader(JsLoadStrategy.NET_FIRST, context, page)()
                 }
                 template
             }
-        }
-        val runnable = when (mJsLoadStrategy) {
-            JsLoadStrategy.NET_FIRST -> netLoader // 只加载网络
-            JsLoadStrategy.ASSETS_FIRST -> assetsLoader // 只加载 assets
-            JsLoadStrategy.FILE_FIRST -> fileLoader // 只加载文件
-            JsLoadStrategy.CACHE_FIRST -> cacheLoader // 只加载缓存
-            JsLoadStrategy.DEFAULT -> defaultLoader  // 默认 缓存 -> 文件 -> assets -> 网络
-            else -> defaultLoader
         }
         mService.execute {
             val template = runnable.invoke()
@@ -143,19 +110,37 @@ class WeexJsLoader(config: WeexConfig) {
         return resp.data
     }
 
-
-    object JsLoadStrategy {
-        const val NET_FIRST = 0 // 只加载网络
-        const val FILE_FIRST = 1 // 只加载文件
-        const val ASSETS_FIRST = 2 // 只加载 assets
-        const val CACHE_FIRST = 3 // 只加载缓存
-        const val DEFAULT = 4 // 默认 缓存、文件、assets、网络 一次检查
-    }
-
-    object JsCacheStrategy {
-        const val PREPARE_ALL = 0 // 提前准备所有的js到缓存中
-        const val LAZY_LOAD = 2 // 使用时才加载
-        const val NO_CACHE = 3 // 不缓存
+    // 加载函数
+    private fun newLoader(type: Int, context: Context, page: WeexPage): () -> String? {
+        return when (type) {
+            JsLoadStrategy.NET_FIRST -> {
+                {
+                    fromWhere = "网络"
+                    downloadJs(page)
+                }
+            }
+            JsLoadStrategy.ASSETS_FIRST -> {
+                {
+                    fromWhere = "assets"
+                    WXFileUtils.loadAsset(page.assetsJs, context)
+                }
+            }
+            JsLoadStrategy.FILE_FIRST -> {
+                {
+                    fromWhere = "文件"
+                    page.localJs?.let { mJsFileCache.read(it) }
+                }
+            }
+            JsLoadStrategy.CACHE_FIRST -> {
+                {
+                    fromWhere = "缓存"
+                    mJsMemoryCache.get(page)
+                }
+            }
+            else -> {
+                { "" }
+            }
+        }
     }
 
     companion object {
@@ -168,7 +153,6 @@ class WeexJsLoader(config: WeexConfig) {
     }
 
     class JsMemoryCache(maxNum: Int) : LruCache<WeexPage, String>(maxNum) {
-
         override fun sizeOf(key: WeexPage, value: String): Int {
             return value.length
         }
@@ -179,8 +163,7 @@ class WeexJsLoader(config: WeexConfig) {
         private val diskCache by lazy { DiskLruCache.open(dir, 1, 1, maxSize) }
 
         override fun read(key: String): String? {
-            val result = diskCache.get(key)?.getString(0)
-            return result
+            return diskCache.get(key)?.getString(0)
         }
 
         override fun write(key: String, value: String?) {
@@ -195,5 +178,20 @@ class WeexJsLoader(config: WeexConfig) {
             }
         }
     }
+}
 
+// 加载策略
+object JsLoadStrategy {
+    const val NET_FIRST = 0 // 只加载网络
+    const val FILE_FIRST = 1 // 只加载文件
+    const val ASSETS_FIRST = 2 // 只加载 assets
+    const val CACHE_FIRST = 3 // 只加载缓存
+    const val DEFAULT = 4 // 默认 缓存、文件、assets、网络 一次检查
+}
+
+// 缓存策略
+object JsCacheStrategy {
+    const val PREPARE_ALL = 0 // 提前准备所有的js到缓存中
+    const val LAZY_LOAD = 2 // 使用时才加载
+    const val NO_CACHE = 3 // 不缓存
 }

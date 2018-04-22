@@ -15,8 +15,8 @@ import java.io.File
 class WeexConfig(val application: Application) {
 
     var debug: Boolean = true
-    var jsLoadStrategy: Int = WeexJsLoader.JsLoadStrategy.DEFAULT
-    var jsCacheStrategy: Int = WeexJsLoader.JsCacheStrategy.PREPARE_ALL
+    var jsLoadStrategy: Int = JsLoadStrategy.DEFAULT
+    var jsCacheStrategy: Int = JsCacheStrategy.PREPARE_ALL
     var jsMemoryCacheMaxSize: Int? = null
     var jsFileCacheMaxSize: Long? = null
     var jsFileCacheDir: File? = null
