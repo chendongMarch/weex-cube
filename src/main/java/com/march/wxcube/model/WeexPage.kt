@@ -20,6 +20,13 @@ class WeexPage() : Parcelable {
     var remoteJs: String? = null // 远程 js
 
     var localJs: String? = null // 本地 js
+        get() {
+            if (field == null) {
+
+                field = "$pageName-$jsVersion-js".replace(".","-")
+            }
+            return field
+        }
 
     var assetsJs: String? = null // assets js
 
@@ -54,6 +61,7 @@ class WeexPage() : Parcelable {
         page.webUrl = openUrl
         return page
     }
+
 
     override fun hashCode(): Int {
         return 43

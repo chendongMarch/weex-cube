@@ -37,25 +37,12 @@ class Weex private constructor() {
     lateinit var mWeexUpdater: WeexUpdater // weex 页面更新
 
 
-    private fun checkWeexConfig(application: Application, config: WeexConfig) {
-        if (config.jsCacheMaxSize == -1) {
-            val activityManager: ActivityManager = application.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-            config.jsCacheMaxSize = (activityManager.memoryClass * 1024 * 1024 * 0.3f).toInt()
-        }
-    }
-
-    fun init(application: Application, config: WeexConfig, injector: WeexInjector) {
-
-        checkWeexConfig(application, config)
+    fun init(config: WeexConfig, injector: WeexInjector) {
+        val context = config.application
 
         mWeexInjector = injector
-        mWeakCtx = WeakContext(application.applicationContext)
-        mWeexJsLoader = WeexJsLoader(config.jsLoadStrategy,
-                config.jsCacheStrategy,
-                config.jsCacheMaxSize,
-//                application.cacheDir
-                Environment.getExternalStorageDirectory()
-        )
+        mWeakCtx = WeakContext(context)
+        mWeexJsLoader = WeexJsLoader(config)
         mWeexRouter = WeexRouter()
         mWeexUpdater = WeexUpdater()
 
@@ -81,7 +68,7 @@ class Weex private constructor() {
                 // 图片加载
                 .setImgAdapter(ImgAdapter())
         injector.onInitWeex(builder)
-        WXSDKEngine.initialize(application, builder.build())
+        WXSDKEngine.initialize(context, builder.build())
 
         registerModule()
         registerComponent()
@@ -91,8 +78,8 @@ class Weex private constructor() {
         ManagerRegistry.getInst().register(HttpManager.instance)
         ManagerRegistry.getInst().register(EnvManager.instance)
 
-        Common.init(application, JsonParseAdapterImpl())
-        WebKit.init(application)
+        Common.init(context, JsonParseAdapterImpl())
+        WebKit.init(context)
     }
 
     fun getContext() = mWeakCtx.get()

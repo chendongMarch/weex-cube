@@ -1,18 +1,17 @@
 package com.march.wxcube
 
+import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
-import android.text.TextUtils
 import android.util.LruCache
-import com.march.common.utils.FileUtils
-import com.march.common.utils.StreamUtils
+import com.march.common.disklru.DiskLruCache
 import com.march.wxcube.manager.ManagerRegistry
 
 import com.march.wxcube.model.WeexPage
 import com.taobao.weex.utils.WXFileUtils
+import java.io.Closeable
 import java.io.File
 
-import java.nio.charset.Charset
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -22,16 +21,32 @@ import java.util.concurrent.Executors
  *
  * @author chendong
  */
-class WeexJsLoader(loadStrategy: Int, prepareStrategy: Int, maxSize: Int, cacheDir: File) {
+class WeexJsLoader(config: WeexConfig) {
 
-    private val mService: ExecutorService = Executors.newCachedThreadPool()
-    private val mJsLoadStrategy: Int = loadStrategy
-    private val mJsCacheStrategy: Int = prepareStrategy
-    private val mJsCache: JsLruCache
-    private val mCacheDir: File = cacheDir
+    // 线程池
+    private val mService: ExecutorService = Executors.newFixedThreadPool(1)
+    // 加载策略
+    private val mJsLoadStrategy = config.jsLoadStrategy
+    // 缓存策略
+    private val mJsCacheStrategy = config.jsCacheStrategy
+    // 内存缓存
+    private val mJsMemoryCache = config.jsMemoryCache ?: let {
+        val size = config.jsMemoryCacheMaxSize ?: let {
+            val activityManager = config.application.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            (activityManager.memoryClass * 1024 * 1024 * 0.3f).toInt()
+        }
+        WeexJsLoader.JsMemoryCache(size)
+    }
+    // 文件缓存
+    private val mJsFileCache = config.jsFileCache ?: let {
+        WeexJsLoader.JsFileCache(File(config.jsFileCacheDir
+                ?: config.application.cacheDir, WeexJsLoader.CACHE_DIR),
+                config.jsFileCacheMaxSize ?: 30 * 1024 * 1024)
+    }
 
-    init {
-        mJsCache = JsLruCache(maxSize)
+    interface IJsFileCache : Closeable {
+        fun read(key: String): String?
+        fun write(key: String, value: String?)
     }
 
     fun update(context: Context, weexPages: List<WeexPage>) {
@@ -48,85 +63,74 @@ class WeexJsLoader(loadStrategy: Int, prepareStrategy: Int, maxSize: Int, cacheD
         }
         val publishFunc: (String?) -> Unit = {
             if (it.isNullOrBlank()) {
-                consumer.invoke(null)
+                consumer(null)
             } else {
                 if (mJsCacheStrategy != JsCacheStrategy.NO_CACHE) {
-                    mJsCache.put(page, it)
+                    mJsMemoryCache.put(page, it)
                 }
-                consumer.invoke(it)
+                consumer(it)
             }
         }
-        var runnable: (() -> String?)? = null
-        when (mJsLoadStrategy) {
-        // 只加载网络
-            JsLoadStrategy.NET_FIRST -> {
-                runnable = {
-                    var template: String? = null
-                    if (!TextUtils.isEmpty(page.remoteJs)) {
-                        log("JS加载${page.pageName} [${mJsCache.size()}] 网络")
-                        template = downloadJs(page)
-                    }
-                    template
-                }
+        var fromWhere = ""
+        val netLoader by lazy {
+            {
+                fromWhere = "网络"
+                downloadJs(page)
             }
-        // 只加载 assets
-            JsLoadStrategy.ASSETS_FIRST -> {
-                runnable = {
-                    var template: String? = null
-                    if (!TextUtils.isEmpty(page.assetsJs)) {
-                        log("JS加载${page.pageName} [${mJsCache.size()}] assets")
-                        template = WXFileUtils.loadAsset(page.assetsJs, context)
-                    }
-                    template
-                }
+        }
+        val assetsLoader by lazy {
+            {
+                fromWhere = "assets"
+                WXFileUtils.loadAsset(page.assetsJs, context)
             }
-        // 只加载文件
-            JsLoadStrategy.FILE_FIRST -> {
-                runnable = {
-                    var template: String? = null
-                    if (!TextUtils.isEmpty(page.localJs) && !FileUtils.isNotExist(page.localJs)) {
-                        log("JS加载${page.pageName} [${mJsCache.size()}] 文件")
-                        template = WXFileUtils.loadFileOrAsset(page.localJs, context)
-                    }
-                    template
-                }
+        }
+        val fileLoader by lazy {
+            {
+                fromWhere = "文件"
+                page.localJs?.let { mJsFileCache.read(it) }
             }
-        // 只加载缓存
-            JsLoadStrategy.CACHE_FIRST -> {
-                runnable = {
-                    mJsCache.get(page)
+        }
+        val cacheLoader by lazy { { mJsMemoryCache.get(page) } }
+        val defaultLoader by lazy {
+            {
+                var template: String? = ""
+                if (template.isNullOrBlank()) {
+                    template = cacheLoader()
+                    fromWhere = "缓存"
                 }
-            }
-        // 默认 缓存 -> 文件 -> assets -> 网络
-            JsLoadStrategy.DEFAULT -> {
-                runnable = {
-                    var template: String? = mJsCache.get(page)
-                    if (!TextUtils.isEmpty(template)) {
-                        log("JS加载${page.pageName} [${mJsCache.size()}] 缓存")
-                        template
-                    } else if (!TextUtils.isEmpty(page.localJs) && !FileUtils.isNotExist(page.localJs)) {
-                        log("JS加载${page.pageName} [${mJsCache.size()}] 文件")
-                        template = WXFileUtils.loadFileOrAsset(page.localJs, context)
-                    } else if (!TextUtils.isEmpty(page.assetsJs)) {
-                        log("JS加载${page.pageName} [${mJsCache.size()}] assets")
-                        template = WXFileUtils.loadAsset(page.assetsJs, context)
-                    } else if (!TextUtils.isEmpty(page.remoteJs)) {
-                        log("JS加载${page.pageName} [${mJsCache.size()}] 网络")
-                        template = downloadJs(page)
-                    }
-                    template
+                if (template.isNullOrBlank() && !page.localJs.isNullOrBlank()) {
+                    template = fileLoader()
+                    fromWhere = "文件"
                 }
+                if (template.isNullOrBlank() && !page.assetsJs.isNullOrBlank()) {
+                    template = assetsLoader()
+                    fromWhere = "assets"
+                }
+                if (template.isNullOrBlank() && !page.remoteJs.isNullOrBlank()) {
+                    fromWhere = "网络"
+                    template = netLoader()
+                }
+                template
             }
+        }
+        val runnable = when (mJsLoadStrategy) {
+            JsLoadStrategy.NET_FIRST -> netLoader // 只加载网络
+            JsLoadStrategy.ASSETS_FIRST -> assetsLoader // 只加载 assets
+            JsLoadStrategy.FILE_FIRST -> fileLoader // 只加载文件
+            JsLoadStrategy.CACHE_FIRST -> cacheLoader // 只加载缓存
+            JsLoadStrategy.DEFAULT -> defaultLoader  // 默认 缓存 -> 文件 -> assets -> 网络
+            else -> defaultLoader
         }
         mService.execute {
-            val template = runnable?.invoke()
+            val template = runnable.invoke()
+            log("JS加载${page.pageName} cache[${mJsMemoryCache.size()}] $fromWhere")
             publishFunc(template)
         }
     }
 
-    fun clear() {
+    fun clearCache() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            mJsCache.trimToSize(-1)
+            mJsMemoryCache.trimToSize(-1)
         }
     }
 
@@ -135,17 +139,10 @@ class WeexJsLoader(loadStrategy: Int, prepareStrategy: Int, maxSize: Int, cacheD
         val http = ManagerRegistry.HTTP
         val wxRequest = http.makeWxRequest(url = url, from = "download-js")
         val resp = http.requestSync(wxRequest, false)
-        StreamUtils.saveStreamToFile(mapFile(page), resp.data?.byteInputStream(Charset.forName("utf-8")))
+        page.localJs?.let { mJsFileCache.write(it, resp.data) }
         return resp.data
     }
 
-    fun mapFile(page: WeexPage): File {
-        val saveDir = File(mCacheDir, CACHE_DIR)
-        if (!saveDir.exists()) {
-            saveDir.mkdirs()
-        }
-        return File(saveDir, "${page.pageName}-${page.jsVersion}.js")
-    }
 
     object JsLoadStrategy {
         const val NET_FIRST = 0 // 只加载网络
@@ -163,16 +160,39 @@ class WeexJsLoader(loadStrategy: Int, prepareStrategy: Int, maxSize: Int, cacheD
 
     companion object {
         private val TAG = WeexJsLoader::class.java.simpleName!!
-        private const val CACHE_DIR = "weex-js-disk-cache"
+        const val CACHE_DIR = "weex-js-disk-cache"
         fun log(msg: String) {
             Weex.getInst().mWeexInjector.onLog(TAG, msg)
         }
 
     }
 
-    class JsLruCache(maxNum: Int) : LruCache<WeexPage, String>(maxNum) {
+    class JsMemoryCache(maxNum: Int) : LruCache<WeexPage, String>(maxNum) {
+
         override fun sizeOf(key: WeexPage, value: String): Int {
             return value.length
+        }
+    }
+
+    class JsFileCache(dir: File, maxSize: Long) : WeexJsLoader.IJsFileCache {
+
+        private val diskCache by lazy { DiskLruCache.open(dir, 1, 1, maxSize) }
+
+        override fun read(key: String): String? {
+            val result = diskCache.get(key)?.getString(0)
+            return result
+        }
+
+        override fun write(key: String, value: String?) {
+            val edit = diskCache.edit(key)
+            edit?.set(0, value)
+            edit?.commit()
+        }
+
+        override fun close() {
+            if (!diskCache.isClosed) {
+                diskCache.close()
+            }
         }
     }
 
