@@ -1,5 +1,7 @@
 package com.march.wxcube
 
+import com.march.wxcube.loading.ILoadingHandler
+import com.march.wxcube.loading.LoadingHandlerImpl
 import com.taobao.weex.InitConfig
 import okhttp3.OkHttpClient
 
@@ -20,6 +22,10 @@ interface WeexInjector {
     fun onPageCreated() {}
 
     fun onInitOkHttpClient(builder: OkHttpClient.Builder) {}
+
+    fun getLoadingHandler(): ILoadingHandler {
+        return LoadingHandlerImpl()
+    }
 
     companion object {
         val EMPTY = object : WeexInjector {

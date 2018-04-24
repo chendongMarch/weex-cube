@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.support.v4.app.Fragment
-import android.text.TextUtils
 import android.view.View
 import android.view.ViewGroup
 import com.march.common.utils.LogUtils
@@ -42,11 +41,11 @@ class WeexDelegate : WeexLifeCycle {
     private lateinit var mActivity: Activity
 
     var mFragmentLoader: FragmentLoader? = null
-    var mContainerView: ViewGroup? = null // 容器 View
+    private lateinit var mContainerView: ViewGroup // 容器 View
     private var mWeexView: ViewGroup? = null // weex root view
     private var mWeexPage: WeexPage? = null // 页面数据
     private val mHost: Any // 宿主
-
+    private val mLoadingHandler by lazy { Weex.getInst().mWeexInjector.getLoadingHandler() }
 
     // 为 Fragment 提供构造方法
     constructor(fragment: Fragment) {
@@ -58,7 +57,7 @@ class WeexDelegate : WeexLifeCycle {
     // 为 Activity 提供构造方法
     constructor(activity: Activity) {
         this.mHost = activity
-        this.mContainerView = activity.findViewById(R.id.weex_activity_root)
+        initContainerView(activity.findViewById(R.id.weex_activity_root))
         this.mWeexPage = activity.intent.getParcelableExtra(WeexPage.KEY_PAGE)
         init(activity)
     }
@@ -90,6 +89,11 @@ class WeexDelegate : WeexLifeCycle {
             opts["extraData"] = data
         }
         mWeexRender.render(page, opts)
+    }
+
+    fun initContainerView(view: ViewGroup) {
+        mContainerView = view
+        mLoadingHandler.addLoadingView(mContainerView)
     }
 
     override fun close() {
@@ -135,15 +139,15 @@ class WeexDelegate : WeexLifeCycle {
         override fun onRenderSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
             mFragmentLoader?.onViewCreated()
             LogUtils.e("onRenderSuccess")
+            mLoadingHandler.finish(mContainerView)
         }
-
 
         override fun onViewCreated(instance: WXSDKInstance?, view: View?) {
             mWeexView = view as ViewGroup
-            mContainerView?.removeAllViews()
-            mContainerView?.addView(view)
+            mContainerView.removeAllViews()
+            mContainerView.addView(view, 0)
+            LogUtils.e("onViewCreated")
         }
-
 
         override fun onException(instance: WXSDKInstance?, errCode: String?, msg: String?) {
             report("code = $errCode, msg = $msg")
@@ -151,8 +155,8 @@ class WeexDelegate : WeexLifeCycle {
                 if (iWebView == null) {
                     iWebView = X5WebView(mActivity)
                 }
-                mContainerView?.removeAllViews()
-                mContainerView?.addView(iWebView as View)
+                mContainerView.removeAllViews()
+                mContainerView.addView(iWebView as View)
                 iWebView?.loadPage(mWeexPage?.webUrl)
             }
         }
