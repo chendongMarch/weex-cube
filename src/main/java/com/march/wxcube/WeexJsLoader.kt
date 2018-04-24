@@ -47,7 +47,7 @@ class WeexJsLoader(config: WeexConfig) {
 
     interface IJsFileCache : Closeable {
         fun read(key: String): String?
-        fun write(key: String, value: String?)
+        fun write(key: String, value: String)
     }
 
     fun update(context: Context, weexPages: List<WeexPage>) {
@@ -106,7 +106,9 @@ class WeexJsLoader(config: WeexConfig) {
         val http = ManagerRegistry.HTTP
         val wxRequest = http.makeWxRequest(url = url, from = "download-js")
         val resp = http.requestSync(wxRequest, false)
-        page.localJs?.let { mJsFileCache.write(it, resp.data) }
+        if (page.localJs != null && resp.data != null) {
+            mJsFileCache.write(page.localJs!!, resp.data)
+        }
         return resp.data
     }
 
@@ -166,7 +168,7 @@ class WeexJsLoader(config: WeexConfig) {
             return diskCache.get(key)?.getString(0)
         }
 
-        override fun write(key: String, value: String?) {
+        override fun write(key: String, value: String) {
             val edit = diskCache.edit(key)
             edit?.set(0, value)
             edit?.commit()

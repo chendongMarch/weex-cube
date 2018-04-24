@@ -1,12 +1,24 @@
-<manifest package="com.march.wxcube"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.march.wxcube">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application>
-        <activity android:name="com.march.wxcube.ui.WeexActivity"/>
+        <activity android:name="com.march.wxcube.ui.WeexActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data
+                    android:host="weex-cube"
+                    android:path="/weex"
+                    android:scheme="march"/>
+            </intent-filter>
+        </activity>
         <activity android:name="com.march.wxcube.ui.WebActivity"/>
     </application>
 </manifest>

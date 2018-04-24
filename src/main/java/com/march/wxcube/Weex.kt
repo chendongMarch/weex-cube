@@ -8,6 +8,7 @@ import android.text.TextUtils
 import com.march.common.Common
 import com.march.common.model.WeakContext
 import com.march.webkit.WebKit
+import com.march.webkit.WebKitInjector
 
 import com.march.wxcube.wxadapter.ImgAdapter
 import com.march.wxcube.common.JsonParseAdapterImpl
@@ -21,6 +22,7 @@ import com.taobao.weex.InitConfig
 import com.taobao.weex.WXEnvironment
 import com.taobao.weex.WXSDKEngine
 import com.taobao.weex.common.WXException
+import java.net.HttpCookie
 
 /**
  * CreateAt : 2018/3/26
@@ -79,7 +81,7 @@ class Weex private constructor() {
         ManagerRegistry.getInst().register(EnvManager.instance)
 
         Common.init(context, JsonParseAdapterImpl())
-        WebKit.init(context)
+        WebKit.init(context, WebKit.CORE_SYS,null)
     }
 
     fun getContext() = mWeakCtx.get()

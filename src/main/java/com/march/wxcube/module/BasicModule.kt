@@ -7,6 +7,7 @@ import android.text.TextUtils
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.march.common.utils.LogUtils
+import com.march.webkit.WebKit
 import com.march.wxcube.Weex
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
@@ -67,7 +68,7 @@ class BasicModule : WXModule() {
     fun openWeb(webUrl: String) {
         val act = activity ?: return
         val intent = Intent(act, WebActivity::class.java)
-        intent.putExtra(WebActivity.KEY_URL, webUrl)
+        intent.putExtra(WebKit.KEY_URL, ManagerRegistry.ENV.safeUrl(webUrl))
         act.startActivity(intent)
     }
 

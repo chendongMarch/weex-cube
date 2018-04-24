@@ -4,13 +4,18 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+// project/build.gradle
+// apply from: 'https://coding.net/u/devlab/p/Resource/git/raw/master/android/project.gradle'
+def libs = rootProject.ext.libs
+def version = rootProject.ext.version
+
 android {
 
-    compileSdkVersion 26
+    compileSdkVersion version.compileSdkVersion
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 26
+        targetSdkVersion version.targetSdkVersion
     }
 
 }
@@ -21,9 +26,9 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 
     // appcompat
-    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation libs.appcompat_v7
     // 新版本需要 RecyclerView 支持
-    implementation 'com.android.support:recyclerview-v7:26.1.0'
+    implementation libs.recyclerView_v7
 
     // weex
     api 'com.taobao.android:weex_sdk:0.18.0'
@@ -40,10 +45,10 @@ dependencies {
     implementation 'com.facebook.stetho:stetho-okhttp3:1.5.0'
     implementation 'com.squareup.okhttp3:okhttp:3.9.0'
     // image
-    implementation 'com.github.bumptech.glide:glide:3.7.0'
+    implementation libs.glide
     // leak
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.1'
-    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+    debugImplementation libs.leakCanaryDebug
+    releaseImplementation libs.leakCanaryRelease
 
     // 模块支持
     api project(':common')

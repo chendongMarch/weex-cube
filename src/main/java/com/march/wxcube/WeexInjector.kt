@@ -11,15 +11,15 @@ import okhttp3.OkHttpClient
  */
 interface WeexInjector {
 
-    fun onErrorReport(throwable: Throwable?, errorMsg: String){}
+    fun onErrorReport(throwable: Throwable?, errorMsg: String) {}
 
-    fun onLog(tag: String, msg: String){}
+    fun onLog(tag: String, msg: String) {}
 
-    fun onInitWeex(builder: InitConfig.Builder){}
+    fun onInitWeex(builder: InitConfig.Builder) {}
 
-    fun onPageCreated(){}
+    fun onPageCreated() {}
 
-    fun onInitOkHttpClient(builder: OkHttpClient.Builder){}
+    fun onInitOkHttpClient(builder: OkHttpClient.Builder) {}
 
     companion object {
         val EMPTY = object : WeexInjector {
