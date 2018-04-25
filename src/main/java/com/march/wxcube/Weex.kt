@@ -46,7 +46,7 @@ class Weex private constructor() {
         mWeakCtx = WeakContext(context)
         mWeexJsLoader = WeexJsLoader(config)
         mWeexRouter = WeexRouter()
-        mWeexUpdater = WeexUpdater(config.configUrl?:"")
+        mWeexUpdater = WeexUpdater(config.configUrl ?: "")
 
         WXEnvironment.setOpenDebugLog(config.debug)
         WXEnvironment.setApkDebugable(config.debug)
@@ -84,7 +84,7 @@ class Weex private constructor() {
         ManagerRegistry.ENV.mNowEnv = 0
 
         Common.init(context, JsonParseAdapterImpl())
-        WebKit.init(context, WebKit.CORE_SYS,null)
+        WebKit.init(context, WebKit.CORE_SYS, null)
     }
 
     fun getContext() = mWeakCtx.get()
@@ -111,7 +111,9 @@ class Weex private constructor() {
     }
 
     companion object {
-
+        const val PAGE_WEB = 1
+        const val PAGE_WEEX = 2
+        const val PAGE_INDEX = 3
         private val instance: Weex by lazy { Weex() }
 
         fun getInst() = instance

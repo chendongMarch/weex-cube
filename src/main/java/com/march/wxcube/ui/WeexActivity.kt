@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.ViewGroup
 
 import com.march.wxcube.R
+import com.march.wxcube.Weex
 
 
 /**
@@ -22,6 +23,7 @@ class WeexActivity : WxBaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Weex.getInst().mWeexInjector.onPageCreated(this, Weex.PAGE_WEEX)
         setContentView(R.layout.weex_activity)
         weexDelegate.render()
     }
