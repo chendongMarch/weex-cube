@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
+import com.march.common.model.WeakContext
 import com.march.wxcube.common.report
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
@@ -18,7 +19,8 @@ import com.march.wxcube.ui.WeexDialogFragment
  *
  * @author chendong
  */
-class WeexRouter {
+class WeexRouter : UpdateHandler {
+
 
     // url-page 的 map，url 需要是不带有协议头的、没有参数的 url
     private var mWeexPageMap = mutableMapOf<UrlKey, WeexPage>()
@@ -56,15 +58,16 @@ class WeexRouter {
      */
     fun openUrl(context: Context, url: String) {
         val page = findPage(url) ?: return
-        val intent = Intent(context, WeexActivity::class.java)
+        val intent = Intent()
         intent.putExtra(WeexPage.KEY_PAGE, page)
+        intent.data = Uri.parse("app://weex.cube/weex")
         try {
             context.startActivity(intent)
         } catch (e: Exception) {
             Weex.getInst().mWeexInjector.onErrorReport(e, "open Url, can not start activity, url => $url")
         }
-
     }
+
 
     /**
      * 打开一个弹窗
@@ -92,10 +95,22 @@ class WeexRouter {
         return weexPage.make(url)
     }
 
-    fun update(weexPages: List<WeexPage>) {
+    override fun updateWeexPages(postIndex: Boolean, context: Context, pages: List<WeexPage>?) {
         mWeexPageMap.isNotEmpty().let { mWeexPageMap.clear() }
-        weexPages.forEach {
+        pages?.forEach {
             mWeexPageMap[WeexRouter.UrlKey.fromUrl(it.webUrl!!)] = it
+        }
+        if (postIndex) {
+            var page: WeexPage? = null
+            for (mutableEntry in mWeexPageMap) {
+                if (mutableEntry.value.indexPage) {
+                    page = mutableEntry.value
+                    break
+                }
+            }
+            if (page != null && !page.webUrl.isNullOrBlank()) {
+                Weex.getInst().mWeexRouter.openUrl(context, page.webUrl!!)
+            }
         }
     }
 

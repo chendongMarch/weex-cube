@@ -14,6 +14,7 @@ import com.taobao.weex.common.WXRequest
 import com.taobao.weex.common.WXResponse
 import okhttp3.*
 import okhttp3.internal.Util
+import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
@@ -74,6 +75,15 @@ class HttpManager : IManager {
         listener.onHttpStart()
         val wxResponse = WXResponse()
         wxResponse.data = StreamUtils.saveStreamToString(context.assets.open(url))
+        wxResponse.statusCode = "200"
+        wxResponse.errorCode = "1"
+        listener.onHttpFinish(wxResponse)
+    }
+
+    fun requestFile(url: String, listener: HttpListener) {
+        listener.onHttpStart()
+        val wxResponse = WXResponse()
+        wxResponse.data = StreamUtils.saveStreamToString(File(url).inputStream())
         wxResponse.statusCode = "200"
         wxResponse.errorCode = "1"
         listener.onHttpFinish(wxResponse)

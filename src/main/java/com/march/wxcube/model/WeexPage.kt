@@ -23,7 +23,7 @@ class WeexPage() : Parcelable {
         get() {
             if (field == null) {
 
-                field = "$pageName-$jsVersion-js".replace(".","-")
+                field = "$pageName-$jsVersion-js".replace(".", "-")
             }
             return field
         }
@@ -37,6 +37,8 @@ class WeexPage() : Parcelable {
     var jsMd5: String? = null // js 的 md5 值，用来标记文件有没有修改
 
     var webUrl: String? = null  // 降级 web，也是唯一标记
+
+    var indexPage: Boolean = false
 
     val isValid: Boolean
         get() = (!TextUtils.isEmpty(pageName)

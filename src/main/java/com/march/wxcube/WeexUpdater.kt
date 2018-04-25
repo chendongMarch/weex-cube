@@ -17,31 +17,33 @@ import java.lang.Exception
  *
  * @author chendong
  */
-class WeexUpdater {
+interface UpdateHandler {
+    fun updateWeexPages(postIndex: Boolean, context: Context, pages: List<WeexPage>?)
+}
+
+class WeexUpdater(private val url: String) : UpdateHandler {
+
+
+    companion object {
+        private const val CONFIG_CACHE_KEY = "CONFIG_CACHE_KEY"
+    }
 
     class WeexPagesResp {
         var total: Int? = 0
         var datas: List<WeexPage>? = null
     }
 
-    /**
-     * 更新数据源
-     */
-    fun updateWeexPages(context: Context, weexPages: List<WeexPage>?) {
+    override fun updateWeexPages(postIndex: Boolean, context: Context, weexPages: List<WeexPage>?) {
         val pages = weexPages ?: return
-        pages
-                .filterNot {
-                    it.webUrl.isNullOrBlank()
-                }.forEach {
-                    it.webUrl = ManagerRegistry.ENV.checkAddHost(it.webUrl)
-                }
-        Weex.getInst().mWeexRouter.update(pages)
-        Weex.getInst().mWeexJsLoader.update(context, pages)
+        pages.filterNot { it.webUrl.isNullOrBlank() }
+                .forEach { it.webUrl = ManagerRegistry.ENV.checkAddHost(it.webUrl) }
+        Weex.getInst().mWeexRouter.updateWeexPages(postIndex, context, pages)
+        Weex.getInst().mWeexJsLoader.updateWeexPages(postIndex, context, pages)
     }
 
-    fun updateWeexPages(context: Context, url: String) {
+
+    fun requestPages(postIndex: Boolean, context: Context) {
         val http = ManagerRegistry.HTTP
-        val request = http.makeWxRequest(url = url, from = "request-config")
         val listener: HttpListener = object : HttpListener {
             override fun onHttpFinish(response: WXResponse) {
                 if (response.errorCode == HttpManager.ERROR_CODE) {
@@ -50,14 +52,22 @@ class WeexUpdater {
                     val json = response.data ?: return
                     try {
                         val weexPagesResp = JSON.parseObject(json, WeexPagesResp::class.java)
-                        updateWeexPages(context, weexPagesResp?.datas)
+                        updateWeexPages(postIndex, context, weexPagesResp?.datas)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
                 }
             }
         }
-//        http.request(request, listener, false)
-        http.requestAssets(context, request.url, listener)
+        when {
+            url.isBlank() -> {
+            }
+            url.startsWith("file") -> http.requestFile(url.replace("file://", ""), listener)
+            url.startsWith("assets") -> http.requestAssets(context, url.replace("assets://", ""), listener)
+            else -> {
+                val request = http.makeWxRequest(url = url, from = "request-config")
+                http.request(request, listener, false)
+            }
+        }
     }
 }

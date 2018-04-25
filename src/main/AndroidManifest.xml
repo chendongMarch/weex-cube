@@ -14,10 +14,18 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
 
                 <data
-                    android:host="weex-cube"
+                    android:scheme="app"
+                    android:host="weex.cube"
                     android:path="/weex"
-                    android:scheme="march"/>
+                    />
             </intent-filter>
+        </activity>
+
+        <activity android:name=".ui.IndexActivity">
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN"/>-->
+                <!--<category android:name="android.intent.category.LAUNCHER"/>-->
+            <!--</intent-filter>-->
         </activity>
         <activity android:name="com.march.wxcube.ui.WebActivity"/>
     </application>

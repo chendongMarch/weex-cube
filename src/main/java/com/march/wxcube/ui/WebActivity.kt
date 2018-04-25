@@ -12,7 +12,7 @@ import com.march.wxcube.R
  *
  * @author chendong
  */
-class WebActivity : AppCompatActivity() {
+class WebActivity : WxBaseActivity() {
 
     private val mWebFragment by lazy {
         WebFragment.newInst(intent.extras)

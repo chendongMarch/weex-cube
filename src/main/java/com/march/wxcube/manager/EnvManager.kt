@@ -22,6 +22,15 @@ class EnvManager : IManager {
 
     }
 
+    fun registerEnv(mutableMap: Map<Int, String>?) {
+        if (mutableMap == null) {
+            return
+        }
+        for (mutableEntry in mutableMap) {
+            registerEnv(mutableEntry.key, mutableEntry.value)
+        }
+    }
+
 
     fun registerEnv(env: Int, host: String) {
         var mutableHost = host

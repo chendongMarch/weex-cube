@@ -14,7 +14,7 @@ import com.march.wxcube.R
  *
  * @author chendong
  */
-class WeexActivity : AppCompatActivity() {
+class WeexActivity : WxBaseActivity() {
 
     val weexDelegate: WeexDelegate by lazy {
         WeexDelegate(this)

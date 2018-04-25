@@ -1,5 +1,6 @@
 package com.march.wxcube
 
+import android.content.Context
 import com.march.wxcube.loading.ILoadingHandler
 import com.march.wxcube.loading.LoadingHandlerImpl
 import com.taobao.weex.InitConfig
@@ -22,6 +23,8 @@ interface WeexInjector {
     fun onPageCreated() {}
 
     fun onInitOkHttpClient(builder: OkHttpClient.Builder) {}
+
+    fun requestWeexPages(context: Context) {}
 
     fun getLoadingHandler(): ILoadingHandler {
         return LoadingHandlerImpl()

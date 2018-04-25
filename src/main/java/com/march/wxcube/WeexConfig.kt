@@ -1,8 +1,6 @@
 package com.march.wxcube
 
-import android.app.ActivityManager
 import android.app.Application
-import android.content.Context
 import java.io.File
 
 
@@ -22,6 +20,7 @@ class WeexConfig(val application: Application) {
     var jsFileCacheDir: File? = null
     var jsFileCache: WeexJsLoader.IJsFileCache? = null
     var jsMemoryCache: WeexJsLoader.JsMemoryCache? = null
+    var configUrl: String? = null
     var envs: Map<Int, String>? = null
     var nowEnv: Int = -1
 

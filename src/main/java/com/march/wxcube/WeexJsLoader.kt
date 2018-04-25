@@ -21,7 +21,8 @@ import java.util.concurrent.Executors
  *
  * @author chendong
  */
-class WeexJsLoader(config: WeexConfig) {
+class WeexJsLoader(config: WeexConfig) : UpdateHandler {
+
 
     private var fromWhere: String = ""
     // 线程池
@@ -50,11 +51,10 @@ class WeexJsLoader(config: WeexConfig) {
         fun write(key: String, value: String)
     }
 
-    fun update(context: Context, weexPages: List<WeexPage>) {
+
+    override fun updateWeexPages(postIndex: Boolean, context: Context, pages: List<WeexPage>?) {
         if (mJsCacheStrategy == JsCacheStrategy.PREPARE_ALL) {
-            for (page in weexPages) {
-                getTemplateAsync(context, page) {}
-            }
+            pages?.forEach { getTemplateAsync(context, it) {} }
         }
     }
 

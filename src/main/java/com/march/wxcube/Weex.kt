@@ -46,7 +46,7 @@ class Weex private constructor() {
         mWeakCtx = WeakContext(context)
         mWeexJsLoader = WeexJsLoader(config)
         mWeexRouter = WeexRouter()
-        mWeexUpdater = WeexUpdater()
+        mWeexUpdater = WeexUpdater(config.configUrl?:"")
 
         WXEnvironment.setOpenDebugLog(config.debug)
         WXEnvironment.setApkDebugable(config.debug)
@@ -79,6 +79,9 @@ class Weex private constructor() {
         ManagerRegistry.getInst().register(EventManager.instance)
         ManagerRegistry.getInst().register(HttpManager.instance)
         ManagerRegistry.getInst().register(EnvManager.instance)
+
+        ManagerRegistry.ENV.registerEnv(config.envs)
+        ManagerRegistry.ENV.mNowEnv = 0
 
         Common.init(context, JsonParseAdapterImpl())
         WebKit.init(context, WebKit.CORE_SYS,null)
