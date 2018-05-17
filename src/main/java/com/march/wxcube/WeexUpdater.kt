@@ -1,8 +1,9 @@
 package com.march.wxcube
 
 import android.content.Context
-import android.text.TextUtils
 import com.alibaba.fastjson.JSON
+import com.march.common.utils.LogUtils
+import com.march.wxcube.common.DiskLruCache
 import com.march.wxcube.common.report
 import com.march.wxcube.http.HttpListener
 import com.march.wxcube.manager.HttpManager
@@ -18,14 +19,19 @@ import java.lang.Exception
  * @author chendong
  */
 interface UpdateHandler {
-    fun updateWeexPages(postIndex: Boolean, context: Context, pages: List<WeexPage>?)
+    fun updateWeexPages(context: Context, weexPages: List<WeexPage>?)
 }
 
 class WeexUpdater(private val url: String) : UpdateHandler {
 
+    private val mDiskLruCache by lazy {
+        DiskLruCache(Weex.getInst().makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
+    }
 
     companion object {
-        private const val CONFIG_CACHE_KEY = "CONFIG_CACHE_KEY"
+        private const val CONFIG_KEY = "weex-config"
+        private const val CACHE_DIR = "config-cache"
+        private const val DISK_MAX_SIZE = Int.MAX_VALUE.toLong()
     }
 
     class WeexPagesResp {
@@ -33,16 +39,29 @@ class WeexUpdater(private val url: String) : UpdateHandler {
         var datas: List<WeexPage>? = null
     }
 
-    override fun updateWeexPages(postIndex: Boolean, context: Context, weexPages: List<WeexPage>?) {
+    override fun updateWeexPages(context: Context, weexPages: List<WeexPage>?) {
         val pages = weexPages ?: return
         pages.filterNot { it.webUrl.isNullOrBlank() }
                 .forEach { it.webUrl = ManagerRegistry.ENV.checkAddHost(it.webUrl) }
-        Weex.getInst().mWeexRouter.updateWeexPages(postIndex, context, pages)
-        Weex.getInst().mWeexJsLoader.updateWeexPages(postIndex, context, pages)
+        Weex.getInst().mWeexRouter.updateWeexPages(context, pages)
+        Weex.getInst().mWeexJsLoader.updateWeexPages(context, pages)
     }
 
+    fun parseJsonAndUpdate(context: Context, json: String) {
+        try {
+            val weexPagesResp = JSON.parseObject(json, WeexPagesResp::class.java)
+            updateWeexPages(context, weexPagesResp?.datas)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
-    fun requestPages(postIndex: Boolean, context: Context) {
+    fun requestPages(context: Context) {
+        val cacheJson = mDiskLruCache.read(CONFIG_KEY)
+        if (cacheJson != null) {
+            LogUtils.e("先更新本地数据")
+            parseJsonAndUpdate(context, cacheJson)
+        }
         val http = ManagerRegistry.HTTP
         val listener: HttpListener = object : HttpListener {
             override fun onHttpFinish(response: WXResponse) {
@@ -50,12 +69,8 @@ class WeexUpdater(private val url: String) : UpdateHandler {
                     report("请求配置文件失败")
                 } else {
                     val json = response.data ?: return
-                    try {
-                        val weexPagesResp = JSON.parseObject(json, WeexPagesResp::class.java)
-                        updateWeexPages(postIndex, context, weexPagesResp?.datas)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+                    mDiskLruCache.write(CONFIG_KEY, json)
+                    parseJsonAndUpdate(context, json)
                 }
             }
         }
@@ -65,7 +80,7 @@ class WeexUpdater(private val url: String) : UpdateHandler {
             url.startsWith("file") -> http.requestFile(url.replace("file://", ""), listener)
             url.startsWith("assets") -> http.requestAssets(context, url.replace("assets://", ""), listener)
             else -> {
-                val request = http.makeWxRequest(url = url, from = "request-config")
+                val request = http.makeWxRequest(url = url, from = "request-mWeexConfig")
                 http.request(request, listener, false)
             }
         }
