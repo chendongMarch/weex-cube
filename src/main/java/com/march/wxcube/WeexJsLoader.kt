@@ -57,21 +57,21 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int) 
             }
         }
         val runnable = if (loadStrategy != JsLoadStrategy.DEFAULT) {
-            newLoader(loadStrategy, context, page)
+            makeJsLoader(loadStrategy, context, page)
         } else {
             {
                 var template: String? = ""
                 if (template.isNullOrBlank()) {
-                    template = newLoader(JsLoadStrategy.CACHE_FIRST, context, page)()
+                    template = makeJsLoader(JsLoadStrategy.CACHE_FIRST, context, page)()
                 }
                 if (template.isNullOrBlank() && !page.assetsJs.isNullOrBlank()) {
-                    template = newLoader(JsLoadStrategy.ASSETS_FIRST, context, page)()
+                    template = makeJsLoader(JsLoadStrategy.ASSETS_FIRST, context, page)()
                 }
                 if (template.isNullOrBlank() && !page.localJs.isNullOrBlank()) {
-                    template = newLoader(JsLoadStrategy.FILE_FIRST, context, page)()
+                    template = makeJsLoader(JsLoadStrategy.FILE_FIRST, context, page)()
                 }
                 if (template.isNullOrBlank() && !page.remoteJs.isNullOrBlank()) {
-                    template = newLoader(JsLoadStrategy.NET_FIRST, context, page)()
+                    template = makeJsLoader(JsLoadStrategy.NET_FIRST, context, page)()
                 }
                 template
             }
@@ -105,7 +105,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int) 
     }
 
     // 加载函数
-    private fun newLoader(type: Int, context: Context, page: WeexPage): () -> String? {
+    private fun makeJsLoader(type: Int, context: Context, page: WeexPage): () -> String? {
         return when (type) {
             JsLoadStrategy.CACHE_FIRST -> {
                 {
