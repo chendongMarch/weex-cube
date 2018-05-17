@@ -2,7 +2,6 @@ package com.march.wxcube.ui
 
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
-import com.march.common.utils.LogUtils
 import com.march.wxcube.model.FragmentConfig
 
 /**
@@ -17,7 +16,6 @@ class FragmentLoader(private val mFragmentManager: FragmentManager,
 
 
     fun onViewCreated() {
-        LogUtils.e("FragmentManager onViewCreated")
         checkPreloadFragment()
         val config = mConfigs.firstOrNull { it.indexPage }
         showFragment(config?.tag)
@@ -38,16 +36,14 @@ class FragmentLoader(private val mFragmentManager: FragmentManager,
      */
     private fun checkPreloadFragment() {
         prepareContainerId()
-        LogUtils.e("checkPreloadFragment $containerId")
         if (containerId == -1 || containerId == 0) {
             return
         }
         val beginTransaction = mFragmentManager.beginTransaction()
-        mConfigs.filter { !it.lazyLoad }
+        mConfigs.filter { !it.lazyLoad && !it.tag.isNullOrBlank() }
                 .forEach {
                     val tag = it.tag!!
                     val fragment = mHandler.makeFragment(tag)
-                    LogUtils.e("checkPreloadFragment $fragment")
                     if (fragment != null) {
                         beginTransaction.add(containerId, fragment, tag).hide(fragment)
                     }
