@@ -10,20 +10,20 @@ import android.content.Intent
  */
 interface WeexLifeCycle {
 
-    fun onCreate()
+    fun onCreate() {}
 
-    fun onStart()
+    fun onStart() {}
 
-    fun onResume()
+    fun onResume() {}
 
-    fun onPause()
+    fun onPause() {}
 
-    fun onStop()
+    fun onStop() {}
 
-    fun onDestroy()
+    fun onDestroy() {}
 
-    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent)
+    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {}
 
-    fun close()
+    fun close() {}
 
 }
