@@ -1,5 +1,6 @@
 package com.march.wxcube.ui
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -17,6 +18,7 @@ import com.march.wxcube.model.WeexPage
  * @author chendong
  */
 class WeexFragment : Fragment() {
+
 
     companion object {
 

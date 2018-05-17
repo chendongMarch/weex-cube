@@ -1,6 +1,7 @@
 package com.march.wxcube
 
 import android.app.Activity
+import android.util.Log
 import com.march.wxcube.loading.ILoadingHandler
 import com.march.wxcube.loading.LoadingHandlerImpl
 import com.taobao.weex.InitConfig
@@ -14,10 +15,13 @@ import okhttp3.OkHttpClient
  */
 interface WeexInjector {
 
+    fun onErrorReport(throwable: Throwable?, errorMsg: String) {
 
-    fun onErrorReport(throwable: Throwable?, errorMsg: String) {}
+    }
 
-    fun onLog(tag: String, msg: String) {}
+    fun onLog(tag: String, msg: String) {
+        Log.e(tag, msg)
+    }
 
     fun onInitWeex(builder: InitConfig.Builder) {}
 
