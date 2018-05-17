@@ -55,16 +55,18 @@ class WeexRouter : UpdateHandler {
     /**
      * 打开一个 web url
      */
-    fun openUrl(context: Context, url: String) {
-        val page = findPage(url) ?: return
+    fun openUrl(context: Context, url: String): Boolean {
+        val page = findPage(url) ?: return false
         val intent = Intent()
         intent.putExtra(WeexPage.KEY_PAGE, page)
         intent.data = Uri.parse("app://weex.cube/weex")
         try {
             context.startActivity(intent)
         } catch (e: Exception) {
-            Weex.getInst().mWeexInjector.onErrorReport(e, "open Url, can not start activity, url => $url")
+            report("open Url, can not start activity, url => $url", e)
+            return false
         }
+        return true
     }
 
 
@@ -94,23 +96,26 @@ class WeexRouter : UpdateHandler {
         return weexPage.make(url)
     }
 
-    override fun updateWeexPages(postIndex: Boolean, context: Context, pages: List<WeexPage>?) {
+    override fun updateWeexPages(context: Context, weexPages: List<WeexPage>?) {
         mWeexPageMap.isNotEmpty().let { mWeexPageMap.clear() }
-        pages?.forEach {
+        weexPages?.forEach {
             mWeexPageMap[WeexRouter.UrlKey.fromUrl(it.webUrl!!)] = it
         }
-        if (postIndex) {
-            var page: WeexPage? = null
-            for (mutableEntry in mWeexPageMap) {
-                if (mutableEntry.value.indexPage) {
-                    page = mutableEntry.value
-                    break
-                }
-            }
-            if (page != null && !page.webUrl.isNullOrBlank()) {
-                Weex.getInst().mWeexRouter.openUrl(context, page.webUrl!!)
+    }
+
+
+    fun openIndexPage(context: Context): Boolean {
+        var page: WeexPage? = null
+        for (mutableEntry in mWeexPageMap) {
+            if (mutableEntry.value.indexPage) {
+                page = mutableEntry.value
+                break
             }
         }
+        if (page != null && !page.webUrl.isNullOrBlank()) {
+            return Weex.getInst().mWeexRouter.openUrl(context, page.webUrl!!)
+        }
+        return false
     }
 
 }
