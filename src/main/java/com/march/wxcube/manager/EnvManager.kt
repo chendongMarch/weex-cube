@@ -15,14 +15,14 @@ class EnvManager : IManager {
         val instance: EnvManager by lazy { EnvManager() }
     }
 
-    private val mEnvHostMap by lazy { mutableMapOf<Int, String>() }
-    var mNowEnv: Int? = null
+    private val mEnvHostMap by lazy { mutableMapOf<String, String>() }
+    var mNowEnv: String? = null
 
     override fun onWxInstRelease(weexPage: WeexPage?, instance: WXSDKInstance?) {
 
     }
 
-    fun registerEnv(mutableMap: Map<Int, String>?) {
+    fun registerEnv(mutableMap: Map<String, String>?) {
         if (mutableMap == null) {
             return
         }
@@ -32,7 +32,7 @@ class EnvManager : IManager {
     }
 
 
-    fun registerEnv(env: Int, host: String) {
+    fun registerEnv(env: String, host: String) {
         var mutableHost = host
         if (mutableHost.endsWith("/")) {
             mutableHost = host.substring(0, mutableHost.length - 1)
@@ -57,7 +57,7 @@ class EnvManager : IManager {
             return url
         }
         var path = url
-        var host = mEnvHostMap[mNowEnv] ?: return url
+        val host = mEnvHostMap[mNowEnv] ?: return url
 
         if (!path.startsWith("/")) {
             path = "/$path"

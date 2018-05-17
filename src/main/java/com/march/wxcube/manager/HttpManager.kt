@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 
 /**
  * CreateAt : 2018/4/20
- * Describe :
+ * Describe : 网络请求管理
  *
  * @author chendong
  */
