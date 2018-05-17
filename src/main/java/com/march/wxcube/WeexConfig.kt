@@ -1,6 +1,7 @@
 package com.march.wxcube
 
 import android.app.Application
+import com.march.wxcube.common.memory
 import java.io.File
 
 
@@ -10,18 +11,16 @@ import java.io.File
  *
  * @author chendong
  */
-class WeexConfig(val application: Application) {
+class WeexConfig(val ctx: Application) {
 
     var debug: Boolean = true
     var jsLoadStrategy: Int = JsLoadStrategy.DEFAULT
     var jsCacheStrategy: Int = JsCacheStrategy.PREPARE_ALL
-    var jsMemoryCacheMaxSize: Int? = null
-    var jsFileCacheMaxSize: Long? = null
-    var jsFileCacheDir: File? = null
-    var jsFileCache: WeexJsLoader.IJsFileCache? = null
-    var jsMemoryCache: WeexJsLoader.JsMemoryCache? = null
-    var configUrl: String? = null
-    var envs: Map<Int, String>? = null
-    var nowEnv: Int = -1
+    var configUrl: String = ""
+    var envs: Map<String, String>? = null
+    var nowEnv: String = ""
 
+    fun prepare(): WeexConfig {
+        return this
+    }
 }
