@@ -2,8 +2,6 @@ package com.march.wxcube.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.view.ViewGroup
 
 import com.march.wxcube.R
 import com.march.wxcube.Weex
@@ -15,7 +13,7 @@ import com.march.wxcube.Weex
  *
  * @author chendong
  */
-class WeexActivity : WxBaseActivity() {
+class WeexActivity : BaseActivity() {
 
     val weexDelegate: WeexDelegate by lazy {
         WeexDelegate(this)
@@ -25,6 +23,7 @@ class WeexActivity : WxBaseActivity() {
         super.onCreate(savedInstanceState)
         Weex.getInst().mWeexInjector.onPageCreated(this, Weex.PAGE_WEEX)
         setContentView(R.layout.weex_activity)
+        weexDelegate.onCreate()
         weexDelegate.render()
     }
 

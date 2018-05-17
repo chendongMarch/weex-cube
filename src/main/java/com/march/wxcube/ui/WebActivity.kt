@@ -1,8 +1,6 @@
 package com.march.wxcube.ui
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import com.march.common.utils.immersion.ImmersionStatusBarUtils
 import com.march.webkit.WebFragment
 import com.march.wxcube.R
 import com.march.wxcube.Weex
@@ -13,7 +11,7 @@ import com.march.wxcube.Weex
  *
  * @author chendong
  */
-class WebActivity : WxBaseActivity() {
+class WebActivity : BaseActivity() {
 
     private val mWebFragment by lazy {
         WebFragment.newInst(intent.extras)
