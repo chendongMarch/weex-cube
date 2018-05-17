@@ -3,7 +3,6 @@ package com.march.wxcube.module
 import android.content.Intent
 import android.support.v4.app.Fragment
 import android.text.TextUtils
-
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.march.common.utils.LogUtils
@@ -12,9 +11,9 @@ import com.march.wxcube.Weex
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.FragmentConfig
-import com.march.wxcube.ui.WeexFragment
 import com.march.wxcube.ui.FragmentLoader
 import com.march.wxcube.ui.WebActivity
+import com.march.wxcube.ui.WeexFragment
 import com.taobao.weex.annotation.JSMethod
 import com.taobao.weex.bridge.JSCallback
 import com.taobao.weex.common.WXModule
@@ -28,17 +27,29 @@ import com.taobao.weex.common.WXModule
  */
 class BasicModule : WXModule() {
 
+    companion object {
+        const val KEY = "cube-basic"
+    }
 
+    /**
+     * 读取 instantId
+     */
     @JSMethod(uiThread = true)
     fun readInstanceId(jsCallback: JSCallback) {
         jsCallback.invoke(mWXSDKInstance.instanceId)
     }
 
+    /**
+     * 针对某个 url 存数据
+     */
     @JSMethod(uiThread = true)
     fun putExtraData(url: String, data: JSONObject) {
         ManagerRegistry.DATA.putData(url, data)
     }
 
+    /**
+     * 关闭页面，dialog 会 dismiss
+     */
     @JSMethod(uiThread = true)
     fun close() {
         val delegate = weexDelegate ?: return
@@ -64,6 +75,9 @@ class BasicModule : WXModule() {
         Weex.getInst().mWeexRouter.openDialog(act, webUrl, config)
     }
 
+    /**
+     * 打开 web 界面
+     */
     @JSMethod(uiThread = true)
     fun openWeb(webUrl: String) {
         val act = activity ?: return
@@ -76,7 +90,7 @@ class BasicModule : WXModule() {
      * 加载 tab
      */
     @JSMethod(uiThread = true)
-    fun loadTabPages(array: JSONArray) {
+    fun loadTabs(array: JSONArray) {
         LogUtils.e("loadTabPages")
         val weexAct = weexActivity ?: return
         val configs = jsonArray2List(array, FragmentConfig::class.java)
@@ -84,9 +98,7 @@ class BasicModule : WXModule() {
                 configs, object : FragmentLoader.FragmentHandler {
             override fun containerIdFinder(): () -> Int {
                 return {
-                    val view = findView {
-                        it.tag == "container"
-                    }
+                    val view = findView { it.tag == "container" }
                     view?.id ?: -1
                 }
             }
@@ -104,6 +116,7 @@ class BasicModule : WXModule() {
 
     /**
      * 显示 tab
+     * @param tag tab 对应的 tag
      */
     @JSMethod(uiThread = true)
     fun showTab(tag: String) {
@@ -111,4 +124,28 @@ class BasicModule : WXModule() {
         val loader = weexAct.weexDelegate.mFragmentLoader ?: return
         loader.showFragment(tag)
     }
+
+
+    /**
+     * 注册接受某事件
+     * const event = weex.requireModule('cube-event')
+     * event.registerEvent('myEvent')
+     * globalEvent.addEventListener('myEvent', (params) => {});
+     */
+    @JSMethod(uiThread = true)
+    fun registerEvent(key: String?) {
+        ManagerRegistry.EVENT.registerEvent(key, instantId)
+    }
+
+
+    /**
+     * 发送事件
+     * const event = weex.requireModule('cube-event')
+     * event.post('myEvent',{isOk:true});
+     */
+    @JSMethod(uiThread = true)
+    fun postEvent(key: String, params: Map<String, Any>) {
+        ManagerRegistry.EVENT.postEvent(key, params)
+    }
+
 }

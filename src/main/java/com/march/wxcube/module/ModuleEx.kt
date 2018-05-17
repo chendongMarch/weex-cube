@@ -9,13 +9,14 @@ import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.march.common.utils.LogUtils
+import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.ui.WeexActivity
 import com.march.wxcube.ui.WeexDelegate
 import com.taobao.weex.common.WXModule
 
 /**
  * CreateAt : 2018/3/28
- * Describe : Module
+ * Describe : Module 扩展
  *
  * @author chendong
  */
@@ -39,6 +40,7 @@ val WXModule.activity: AppCompatActivity?
         return null
     }
 
+
 // 获取 instantId
 val WXModule.instantId: String?
     get() {
@@ -47,6 +49,7 @@ val WXModule.instantId: String?
         }
         return null
     }
+
 
 // 获取 weexActivity
 val WXModule.weexActivity: WeexActivity?
@@ -60,10 +63,11 @@ val WXModule.weexActivity: WeexActivity?
         return null
     }
 
+
 // 获取 weexDelegate
 val WXModule.weexDelegate: WeexDelegate?
     get() {
-        return WeexDelegate.instanceDelegateMap[mWXSDKInstance.instanceId]?.get()
+        return ManagerRegistry.WEEXINST.findWeexDelegateByInstanceId(mWXSDKInstance.instanceId)
     }
 
 

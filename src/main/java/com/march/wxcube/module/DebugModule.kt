@@ -14,27 +14,40 @@ import com.taobao.weex.common.WXModule
  */
 class DebugModule : WXModule() {
 
+    companion object {
+        val TAG = DebugModule::class.java.simpleName!!
+        const val KEY = "cube-debug"
+    }
+
+    /**
+     * 打印日志带 tag
+     */
     @JSMethod(uiThread = true)
     fun log(tag: String, msg: String) {
         Log.e(tag, msg)
     }
 
+    /**
+     * 打印日志使用默认 tag
+     */
     @JSMethod(uiThread = true)
     fun logMsg(msg: String) {
         Log.e(TAG, msg)
     }
 
+    /**
+     * 弹 toast
+     */
     @JSMethod(uiThread = true)
     fun toast(msg: String) {
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
     }
 
+    /**
+     * 弹长 toast
+     */
     @JSMethod(uiThread = true)
     fun toastLong(msg: String) {
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
-    }
-
-    companion object {
-        val TAG = DebugModule::class.java.simpleName!!
     }
 }

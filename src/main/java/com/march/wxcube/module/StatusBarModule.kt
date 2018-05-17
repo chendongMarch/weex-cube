@@ -6,7 +6,7 @@ import com.taobao.weex.common.WXModule
 
 /**
  * CreateAt : 2018/4/2
- * Describe : 状态栏
+ * Describe : 状态栏，仅 Android 需要更改状态栏，单独分离 module
  *
  * @author chendong
  */
