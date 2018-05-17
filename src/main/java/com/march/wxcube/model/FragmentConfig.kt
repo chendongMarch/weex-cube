@@ -6,7 +6,7 @@ import android.os.Parcelable
 
 /**
  * CreateAt : 2018/3/29
- * Describe :
+ * Describe : 碎片配置
  *
  * @author chendong
  */
