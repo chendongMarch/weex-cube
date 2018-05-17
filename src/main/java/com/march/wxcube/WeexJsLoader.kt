@@ -1,15 +1,14 @@
 package com.march.wxcube
 
-import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
 import android.util.LruCache
-import com.march.common.disklru.DiskLruCache
+import com.march.wxcube.common.DiskLruCache
+import com.march.wxcube.common.memory
 import com.march.wxcube.manager.ManagerRegistry
 
 import com.march.wxcube.model.WeexPage
 import com.taobao.weex.utils.WXFileUtils
-import java.io.Closeable
 import java.io.File
 
 import java.util.concurrent.ExecutorService
@@ -21,66 +20,55 @@ import java.util.concurrent.Executors
  *
  * @author chendong
  */
-class WeexJsLoader(config: WeexConfig) : UpdateHandler {
+class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int) : UpdateHandler {
 
+    companion object {
+        private val TAG = WeexJsLoader::class.java.simpleName!!
+        const val CACHE_DIR = "weex-js-disk-cache"
+        const val DISK_MAX_SIZE = 20 * 1024 * 1024L
+    }
 
     private var fromWhere: String = ""
     // 线程池
     private val mService: ExecutorService = Executors.newFixedThreadPool(1)
     // 加载策略
-    private val mJsLoadStrategy = config.jsLoadStrategy
+    private val mJsLoadStrategy = jsLoadStrategy
     // 缓存策略
-    private val mJsCacheStrategy = config.jsCacheStrategy
+    private val mJsCacheStrategy = jsCacheStrategy
     // 内存缓存
-    private val mJsMemoryCache = config.jsMemoryCache ?: let {
-        val size = config.jsMemoryCacheMaxSize ?: let {
-            val activityManager = config.application.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-            (activityManager.memoryClass * 1024 * 1024 * 0.3f).toInt()
-        }
-        WeexJsLoader.JsMemoryCache(size)
-    }
+    private val mJsMemoryCache = JsMemoryCache(context.memory(.3f))
     // 文件缓存
-    private val mJsFileCache = config.jsFileCache ?: let {
-        WeexJsLoader.JsFileCache(File(config.jsFileCacheDir
-                ?: config.application.cacheDir, WeexJsLoader.CACHE_DIR),
-                config.jsFileCacheMaxSize ?: 30 * 1024 * 1024)
-    }
+    private val mJsFileCache = JsFileCache(Weex.getInst().makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
 
-    interface IJsFileCache : Closeable {
-        fun read(key: String): String?
-        fun write(key: String, value: String)
-    }
-
-
-    override fun updateWeexPages(postIndex: Boolean, context: Context, pages: List<WeexPage>?) {
+    override fun updateWeexPages(context: Context, weexPages: List<WeexPage>?) {
         if (mJsCacheStrategy == JsCacheStrategy.PREPARE_ALL) {
-            pages?.forEach { getTemplateAsync(context, it) {} }
+            weexPages?.forEach { getTemplateAsync(context, it) {} }
         }
     }
 
-    fun getTemplateAsync(context: Context, page: WeexPage?, consumer: (String?) -> Unit) {
+    fun getTemplateAsync(context: Context, loadStrategy: Int, cacheStrategy: Int, page: WeexPage?, consumer: (String?) -> Unit) {
         if (page == null) {
             return
         }
         val publishFunc: (String?) -> Unit = {
             consumer(it)
-            if (mJsCacheStrategy != JsCacheStrategy.NO_CACHE) {
+            if (cacheStrategy != JsCacheStrategy.NO_CACHE) {
                 mJsMemoryCache.put(page, it)
             }
         }
-        val runnable = if (mJsLoadStrategy != JsLoadStrategy.DEFAULT) {
-            newLoader(mJsLoadStrategy, context, page)
+        val runnable = if (loadStrategy != JsLoadStrategy.DEFAULT) {
+            newLoader(loadStrategy, context, page)
         } else {
             {
                 var template: String? = ""
                 if (template.isNullOrBlank()) {
                     template = newLoader(JsLoadStrategy.CACHE_FIRST, context, page)()
                 }
-                if (template.isNullOrBlank() && !page.localJs.isNullOrBlank()) {
-                    template = newLoader(JsLoadStrategy.FILE_FIRST, context, page)()
-                }
                 if (template.isNullOrBlank() && !page.assetsJs.isNullOrBlank()) {
                     template = newLoader(JsLoadStrategy.ASSETS_FIRST, context, page)()
+                }
+                if (template.isNullOrBlank() && !page.localJs.isNullOrBlank()) {
+                    template = newLoader(JsLoadStrategy.FILE_FIRST, context, page)()
                 }
                 if (template.isNullOrBlank() && !page.remoteJs.isNullOrBlank()) {
                     template = newLoader(JsLoadStrategy.NET_FIRST, context, page)()
@@ -90,9 +78,13 @@ class WeexJsLoader(config: WeexConfig) : UpdateHandler {
         }
         mService.execute {
             val template = runnable.invoke()
-            log("JS加载${page.pageName} cache[${mJsMemoryCache.size()}] $fromWhere")
+            Weex.getInst().mWeexInjector.onLog(TAG, "JS加载${page.pageName} cache[${mJsMemoryCache.size()}] $fromWhere")
             publishFunc(template)
         }
+    }
+
+    fun getTemplateAsync(context: Context, page: WeexPage?, consumer: (String?) -> Unit) {
+        getTemplateAsync(context, mJsLoadStrategy, mJsCacheStrategy, page, consumer)
     }
 
     fun clearCache() {
@@ -115,10 +107,10 @@ class WeexJsLoader(config: WeexConfig) : UpdateHandler {
     // 加载函数
     private fun newLoader(type: Int, context: Context, page: WeexPage): () -> String? {
         return when (type) {
-            JsLoadStrategy.NET_FIRST -> {
+            JsLoadStrategy.CACHE_FIRST -> {
                 {
-                    fromWhere = "网络"
-                    downloadJs(page)
+                    fromWhere = "缓存"
+                    mJsMemoryCache.get(page)
                 }
             }
             JsLoadStrategy.ASSETS_FIRST -> {
@@ -133,10 +125,10 @@ class WeexJsLoader(config: WeexConfig) : UpdateHandler {
                     page.localJs?.let { mJsFileCache.read(it) }
                 }
             }
-            JsLoadStrategy.CACHE_FIRST -> {
+            JsLoadStrategy.NET_FIRST -> {
                 {
-                    fromWhere = "缓存"
-                    mJsMemoryCache.get(page)
+                    fromWhere = "网络"
+                    downloadJs(page)
                 }
             }
             else -> {
@@ -144,43 +136,17 @@ class WeexJsLoader(config: WeexConfig) : UpdateHandler {
             }
         }
     }
+}
 
-    companion object {
-        private val TAG = WeexJsLoader::class.java.simpleName!!
-        const val CACHE_DIR = "weex-js-disk-cache"
-        fun log(msg: String) {
-            Weex.getInst().mWeexInjector.onLog(TAG, msg)
-        }
-
-    }
-
-    class JsMemoryCache(maxNum: Int) : LruCache<WeexPage, String>(maxNum) {
-        override fun sizeOf(key: WeexPage, value: String): Int {
-            return value.length
-        }
-    }
-
-    class JsFileCache(dir: File, maxSize: Long) : WeexJsLoader.IJsFileCache {
-
-        private val diskCache by lazy { DiskLruCache.open(dir, 1, 1, maxSize) }
-
-        override fun read(key: String): String? {
-            return diskCache.get(key)?.getString(0)
-        }
-
-        override fun write(key: String, value: String) {
-            val edit = diskCache.edit(key)
-            edit?.set(0, value)
-            edit?.commit()
-        }
-
-        override fun close() {
-            if (!diskCache.isClosed) {
-                diskCache.close()
-            }
-        }
+// js 内存缓存
+class JsMemoryCache(maxSize: Int) : LruCache<WeexPage, String>(maxSize) {
+    override fun sizeOf(key: WeexPage, value: String): Int {
+        return value.length
     }
 }
+
+// js 文件缓存
+class JsFileCache(dir: File, maxSize: Long) : DiskLruCache(dir, maxSize)
 
 // 加载策略
 object JsLoadStrategy {
