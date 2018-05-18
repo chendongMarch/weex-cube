@@ -46,6 +46,23 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int) 
         }
     }
 
+
+    /**
+     * 异步获取模板
+     * 使用默认的加载和缓存策略
+     */
+    fun getTemplateAsync(context: Context, page: WeexPage?, consumer: (String?) -> Unit) {
+        getTemplateAsync(context, mJsLoadStrategy, mJsCacheStrategy, page, consumer)
+    }
+
+    /**
+     * 异步获取模板
+     * @param context Ctx
+     * @param loadStrategy 加载策略
+     * @param cacheStrategy 缓存策略
+     * @param page 页面数据
+     * @param consumer 处理结果的函数
+     */
     fun getTemplateAsync(context: Context, loadStrategy: Int, cacheStrategy: Int, page: WeexPage?, consumer: (String?) -> Unit) {
         if (page == null) {
             return
@@ -53,7 +70,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int) 
         val publishFunc: (String?) -> Unit = {
             consumer(it)
             if (cacheStrategy != JsCacheStrategy.NO_CACHE) {
-                mJsMemoryCache.put(page, it)
+                mJsMemoryCache.put(page.key, it)
             }
         }
         val runnable = if (loadStrategy != JsLoadStrategy.DEFAULT) {
@@ -83,10 +100,6 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int) 
         }
     }
 
-    fun getTemplateAsync(context: Context, page: WeexPage?, consumer: (String?) -> Unit) {
-        getTemplateAsync(context, mJsLoadStrategy, mJsCacheStrategy, page, consumer)
-    }
-
     fun clearCache() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             mJsMemoryCache.trimToSize(-1)
@@ -110,7 +123,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int) 
             JsLoadStrategy.CACHE_FIRST -> {
                 {
                     fromWhere = "缓存"
-                    mJsMemoryCache.get(page)
+                    mJsMemoryCache.get(page.key)
                 }
             }
             JsLoadStrategy.ASSETS_FIRST -> {
@@ -139,8 +152,8 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int) 
 }
 
 // js 内存缓存
-class JsMemoryCache(maxSize: Int) : LruCache<WeexPage, String>(maxSize) {
-    override fun sizeOf(key: WeexPage, value: String): Int {
+class JsMemoryCache(maxSize: Int) : LruCache<String, String>(maxSize) {
+    override fun sizeOf(key: String, value: String): Int {
         return value.length
     }
 }
