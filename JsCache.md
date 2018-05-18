@@ -21,10 +21,9 @@ assets 目录结构
 
 ## Js 配置文件加载方案
 
-为了提供良好的加载体验，必须在 assets 中打包一份合适的配置文件，避免网络下载过慢或者无法下载的情况。
 
 ```
-启动时尝试从 Local(config.json) 读取数据，来源可能是 Assets | Net，保证配置文件最新
+启动时尝试从 Local(config.json) 读取数据，来源是 Net，保证配置文件最新
 无法读取到则尝试从 Assets(config.json) 读取，保证读取速度，完毕后存储到 Local 中
 启动配置文件下载，下载完毕后存储到 Local 供下次启动时读取
 当配置文件读取完毕，检索首页跳转
@@ -35,10 +34,12 @@ assets 目录结构
 
 Js 的来源有 4 个地方
 
+```
 Cache   内存缓存
 Assets  包内资源文件
 Local   磁盘存储
 Net     网络数据
+```
 
 访问速度 Cache > Assets > Local > Net
 
