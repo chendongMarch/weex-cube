@@ -2,7 +2,6 @@ package com.march.wxcube.http;
 
 import android.util.Log;
 
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -104,6 +103,7 @@ public final class LogInterceptor implements Interceptor {
             return;
         }
         log("\n=============================== Response Start =======================================================\n");
+
         StringBuilder sb = new StringBuilder();
         long tookMs = 0;//TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
         sb.append("[ ").append(response.request().method()).append(" ]  ").append(response.request().url()).append("\n");
@@ -115,7 +115,11 @@ public final class LogInterceptor implements Interceptor {
                 sb.append("headers:[ ").append(headers.name(i)).append(": ").append(headers.value(i)).append(" ]").append("\n");
             }
         }
-
+        if (response.request().url().toString().endsWith("js")) {
+            log("请求 js 文件 =>" + response.request().url() +" 结束");
+            log("\n=============================== Request End =======================================================\n\n");
+            return;
+        }
         if (isLogPart(RESP_BODY)) {
             ResponseBody responseBody = response.body();
             if (responseBody == null) {
@@ -143,6 +147,9 @@ public final class LogInterceptor implements Interceptor {
                             respStr = jsonArray.toString(2);
                         } else {
                             respStr = "无法转换 JsonObj+\n" + respStr;
+                        }
+                        if (respStr.length() > 500) {
+                            respStr = respStr.substring(0, 490) + "...";
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -199,7 +206,11 @@ public final class LogInterceptor implements Interceptor {
                 }
             }
         }
-        log(sb.toString());
+        String respStr = sb.toString();
+        if (respStr.length() > 500) {
+            respStr = respStr.substring(0, 490) + "...";
+        }
+        log(respStr);
         log("\n=============================== Request End =======================================================\n\n");
     }
 
@@ -207,7 +218,6 @@ public final class LogInterceptor implements Interceptor {
     public interface Consumer<T> {
         void accept(T resp);
     }
-
 
     private static void breakLog4K(String msg, Consumer<String> consumer) {
         if (msg.length() < 3800) {
