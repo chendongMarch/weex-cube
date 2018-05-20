@@ -1,9 +1,8 @@
 package com.march.wxcube.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.os.Looper
-import com.march.common.utils.LogUtils
 import com.march.wxcube.Weex
 
 
@@ -20,26 +19,33 @@ class IndexActivity : BaseActivity() {
     }
 
     private val mCtx by lazy { IndexActivity@ this }
-    private val mIndexRunnable = object : Runnable {
-        override fun run() {
-            if (!Weex.getInst().mWeexRouter.openIndexPage(mCtx)) {
-                LogUtils.e("检测一次，没有准备好")
-                mHandler.postDelayed(this, 50)
-            } else {
-                mHandler.removeCallbacksAndMessages(null)
+
+    private val mIndexRunnable = Runnable {
+        // 先打开一次，无法打开的话注册一个未来打开的 callback
+        if (Weex.getInst().mWeexRouter.openIndexPage(mCtx)) {
+            finish()
+        } else {
+            Weex.getInst().mWeexRouter.mRouterReadyCallback = {
                 finish()
-                overridePendingTransition(0, 0)
             }
         }
     }
-
-    val mHandler by lazy { Handler(Looper.getMainLooper()) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Weex.getInst().mWeexInjector.onPageCreated(this, Weex.PAGE_INDEX)
         Weex.getInst().mWeexInjector.getLoadingHandler().setIndexPageContent(this)
-        // 2s 后启动
-        mHandler.postDelayed(mIndexRunnable, TIME_START)
+        // 1.5s 后启动
+        Handler().postDelayed(mIndexRunnable, TIME_START)
+    }
+
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(0, 0)
+    }
+
+    override fun startActivity(intent: Intent?) {
+        super.startActivity(intent)
+        Weex.getInst().mWeexRouter.mRouterReadyCallback = null
     }
 }
