@@ -1,5 +1,6 @@
 package com.march.wxcube.manager
 
+import com.march.wxcube.Weex
 import com.march.wxcube.model.WeexPage
 import com.taobao.weex.WXSDKInstance
 
@@ -47,28 +48,31 @@ class EnvManager : IManager {
         return url
     }
 
-
-    // for pages.json
-    fun checkAddHost(url: String?): String {
+    fun validUrl(url: String?): String {
         if (url == null) {
             return ""
         }
-        if (url.startsWith("http") || url.contains("//")) {
-            return url
+        var mutableUrl = url
+        if (mutableUrl.startsWith("http")) {
+            if (!Weex.getInst().mWeexConfig.https) {
+                mutableUrl = mutableUrl.replace("https","http",true)
+            }
         }
-        var path = url
-        val host = mEnvHostMap[mNowEnv] ?: return url
+        if (mutableUrl.contains("//")) {
+            return mutableUrl
+        }
+        val host = mEnvHostMap[mNowEnv] ?: return mutableUrl
 
-        if (!path.startsWith("/")) {
-            path = "/$path"
+        if (!mutableUrl.startsWith("/")) {
+            mutableUrl = "/$mutableUrl"
         }
-        return "$host$path"
+        return "$host$mutableUrl"
     }
 
 
     fun safeUrl(url: String?): String {
         var mutableUrl = url ?: return ""
-        mutableUrl = checkAddHost(mutableUrl)
+        mutableUrl = validUrl(mutableUrl)
         if (mutableUrl.startsWith("//")) {
             mutableUrl = "http:$mutableUrl"
         }
