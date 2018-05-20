@@ -26,6 +26,10 @@ class WeexRender(activity: Activity,
         mWxInst.registerRenderListener(listener)
     }
 
+    fun renderJs(page: WeexPage, opts: Map<String, Any>, js: String) {
+        mWxInst.render(page.pageName, js, opts, null, WXRenderStrategy.APPEND_ASYNC)
+    }
+
     fun render(page: WeexPage, opts: Map<String, Any>, consumer: ((String?) -> Unit)? = null) {
         if (!page.isValid) {
             listener.onException(mWxInst, "100", "页面数据有问题")
