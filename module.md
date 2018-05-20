@@ -1,11 +1,19 @@
 ## cube-basic
 
 ```js
+readInstanceId(callback:Function)
+putExtraData(url:String,params:Object)
+close()
+
 openUrl(webUrl:String)
 openDialog(webUrl:String, params:Object)
 openWeb(webUrl:String)
-loadTabPages(array:Array)
+
+loadTabs(array:Array)
 showTab(tag:String)
+
+registerEvent(key:String)
+postEvent(key:String, params:Object)
 ```
 
 ## cube-debug
@@ -15,13 +23,6 @@ log(tag: String, msg: String)
 logMsg(msg: String)
 toast(msg: String)
 toastLong(msg: String)
-```
-
-## cube-event
-
-```js
-registerEvent(key: String)
-postEvent(key: String, params: Object)
 ```
 
 ## cube-modal

@@ -5,7 +5,7 @@
 为了提供良好的加载体验：
 
 - 「强制」必须在 `assets` 中打包一份合适的配置文件，避免网络下载过慢或者无法下载的情况。
-- 「建议」最好能在 assets 中打包一份 js 资源文件，在网络资源还没加载下来时，保证流畅渲染。
+- 「建议」最好能在 `assets` 中打包一份 `js` 资源文件，在网络资源还没加载下来时，保证流畅渲染。
 
 assets 目录结构
 
@@ -53,6 +53,18 @@ Local
 Net(存储到 Local，加快下次访问)
 ```
 
+## 3 种加载策略的区分
+
+预加载策略（指的是应用启动时，预加载 Js 的策略）
+
+```kotlin
+object JsPrepareStrategy {
+    const val PREPARE_ALL = 0 // 提前准备所有的js到缓存中
+    const val LAZY_LOAD = 1 // 使用时才加载
+    const val NO_CACHE = 2 // 不缓存
+}
+```
+
 
 加载策略（指的是为 Weex 页面加载 Js 的策略）
 
@@ -66,13 +78,12 @@ object JsLoadStrategy {
 }
 ```
 
-缓存策略（指的是 Js 向内存中缓存的的策略）
+缓存策略（指的是 Js 向内存和文件中缓存的的策略）
 
 ```kotlin
-// 缓存策略
 object JsCacheStrategy {
-    const val PREPARE_ALL = 0 // 提前准备所有的js到缓存中
-    const val LAZY_LOAD = 2 // 使用时才加载
-    const val NO_CACHE = 3 // 不缓存
+     const val NO_CACHE = 0 // 不缓存，加载后仅使用一次，下次仍旧从原资源加载
+     const val CACHE_MEMORY_ONLY = 1 // 仅缓存到内存中
+     const val CACHE_MEMORY_DISK_BOTH = 2 // 内存和磁盘都缓存
 }
 ```
