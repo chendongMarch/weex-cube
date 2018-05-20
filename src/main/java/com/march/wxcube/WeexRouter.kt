@@ -4,13 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
-import com.march.common.model.WeakContext
 import com.march.wxcube.common.report
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
 
 import com.march.wxcube.model.WeexPage
-import com.march.wxcube.ui.WeexActivity
 import com.march.wxcube.ui.WeexDialogFragment
 
 /**
@@ -19,7 +17,7 @@ import com.march.wxcube.ui.WeexDialogFragment
  *
  * @author chendong
  */
-class WeexRouter : UpdateHandler {
+class WeexRouter : WeexUpdater.UpdateHandler {
 
     // url-page 的 map，url 需要是不带有协议头的、没有参数的 url
     private var mWeexPageMap = mutableMapOf<UrlKey, WeexPage>()
@@ -85,7 +83,7 @@ class WeexRouter : UpdateHandler {
      */
     fun findPage(url: String): WeexPage? {
         var safeUrl = ManagerRegistry.ENV.delHttp(url)
-        safeUrl = ManagerRegistry.ENV.checkAddHost(safeUrl)
+        safeUrl = ManagerRegistry.ENV.validUrl(safeUrl)
         val weexPage = mWeexPageMap[UrlKey.fromUrl(safeUrl)]
         if (weexPage == null) {
             report("open Url, can not find page, url => $url")
@@ -96,15 +94,20 @@ class WeexRouter : UpdateHandler {
         return weexPage.make(url)
     }
 
-    override fun updateWeexPages(context: Context, weexPages: List<WeexPage>?) {
+    override fun onUpdateConfig(context: Context, weexPages: List<WeexPage>?) {
         mWeexPageMap.isNotEmpty().let { mWeexPageMap.clear() }
         weexPages?.forEach {
             mWeexPageMap[WeexRouter.UrlKey.fromUrl(it.webUrl!!)] = it
         }
+        mRouterReadyCallback?.invoke()
     }
 
+    var mRouterReadyCallback: (() -> Unit)? = null
 
     fun openIndexPage(context: Context): Boolean {
+        if (mWeexPageMap.isEmpty()) {
+            return false
+        }
         var page: WeexPage? = null
         for (mutableEntry in mWeexPageMap) {
             if (mutableEntry.value.indexPage) {

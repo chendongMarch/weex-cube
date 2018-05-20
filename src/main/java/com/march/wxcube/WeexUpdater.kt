@@ -2,31 +2,32 @@ package com.march.wxcube
 
 import android.content.Context
 import com.alibaba.fastjson.JSON
-import com.march.common.utils.LogUtils
+import com.march.common.utils.StreamUtils
 import com.march.wxcube.common.DiskLruCache
 import com.march.wxcube.common.report
 import com.march.wxcube.http.HttpListener
-import com.march.wxcube.manager.HttpManager
 import com.march.wxcube.manager.ManagerRegistry
+import com.march.wxcube.manager.RequestManager
 import com.march.wxcube.model.WeexPage
 import com.taobao.weex.common.WXResponse
-import java.lang.Exception
+import java.util.concurrent.Executors
 
 /**
  * CreateAt : 2018/4/21
  * Describe :
- *
  * @author chendong
  */
-interface UpdateHandler {
-    fun updateWeexPages(context: Context, weexPages: List<WeexPage>?)
-}
+class WeexUpdater(private val url: String) {
 
-class WeexUpdater(private val url: String) : UpdateHandler {
+    interface UpdateHandler {
+        fun onUpdateConfig(context: Context, weexPages: List<WeexPage>?)
+    }
 
     private val mDiskLruCache by lazy {
         DiskLruCache(Weex.getInst().makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
     }
+    private val mExecutorService by lazy { Executors.newCachedThreadPool() }
+    private val mUpdateHandlers by lazy { mutableListOf<UpdateHandler>() }
 
     companion object {
         private const val CONFIG_KEY = "weex-config"
@@ -39,50 +40,74 @@ class WeexUpdater(private val url: String) : UpdateHandler {
         var datas: List<WeexPage>? = null
     }
 
-    override fun updateWeexPages(context: Context, weexPages: List<WeexPage>?) {
-        val pages = weexPages ?: return
-        pages.filterNot { it.webUrl.isNullOrBlank() }
-                .forEach { it.webUrl = ManagerRegistry.ENV.checkAddHost(it.webUrl) }
-        Weex.getInst().mWeexRouter.updateWeexPages(context, pages)
-        Weex.getInst().mWeexJsLoader.updateWeexPages(context, pages)
+    /**
+     * 1. 启动时尝试从 Local(config.json) 读取数据，来源是 Net，保证配置文件最新
+     * 2. 无法读取到则尝试从 Assets(config.json) 读取，保证读取速度，完毕后存储到 Local 中
+     * 3. 启动配置文件下载，下载完毕后存储到 Local 供下次启动时读取
+     * 4. 当配置文件读取完毕，检索首页跳转
+     */
+    fun update(context: Context) {
+        mExecutorService.execute {
+            // 磁盘缓存读取
+            var configJson = mDiskLruCache.read(CONFIG_KEY)
+            if (configJson.isNullOrBlank()) {
+                // assets 读取
+                configJson = readAssets(context, "config/config.json")
+            }
+            // 更新配置
+            val json = configJson ?: {
+                report("本地和assets都无法读取 config")
+                ""
+            }()
+            parseJsonAndUpdate(context, json)
+            // 发起网络，并存文件
+            val request = ManagerRegistry.REQ.makeWxRequest(url = url, from = "request-wx-config")
+            ManagerRegistry.REQ.request(request, object : HttpListener {
+                override fun onHttpFinish(response: WXResponse) {
+                    if (response.errorCode == RequestManager.ERROR_CODE_FAILURE) {
+                        report("请求配置文件失败")
+                    } else {
+                        val netJson = response.data ?: return
+                        mDiskLruCache.write(CONFIG_KEY, netJson)
+                        parseJsonAndUpdate(context, netJson)
+                    }
+                }
+            }, false)
+        }
     }
 
-    fun parseJsonAndUpdate(context: Context, json: String) {
+
+    // 解析配置文件，并通知出去
+    private fun parseJsonAndUpdate(context: Context, json: String) {
+        if (json.isBlank()) return
         try {
             val weexPagesResp = JSON.parseObject(json, WeexPagesResp::class.java)
-            updateWeexPages(context, weexPagesResp?.datas)
+            val weexPages = weexPagesResp?.datas
+            val pages = weexPages ?: return
+            val validPages = pages.filter { it.isValid }
+            validPages.forEach { it.webUrl = ManagerRegistry.ENV.validUrl(it.webUrl) }
+            mUpdateHandlers.forEach { it.onUpdateConfig(context, pages) }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    fun requestPages(context: Context) {
-        val cacheJson = mDiskLruCache.read(CONFIG_KEY)
-        if (cacheJson != null) {
-            LogUtils.e("先更新本地数据")
-            parseJsonAndUpdate(context, cacheJson)
-        }
-        val http = ManagerRegistry.HTTP
-        val listener: HttpListener = object : HttpListener {
-            override fun onHttpFinish(response: WXResponse) {
-                if (response.errorCode == HttpManager.ERROR_CODE) {
-                    report("请求配置文件失败")
-                } else {
-                    val json = response.data ?: return
-                    mDiskLruCache.write(CONFIG_KEY, json)
-                    parseJsonAndUpdate(context, json)
-                }
-            }
-        }
-        when {
-            url.isBlank() -> {
-            }
-            url.startsWith("file") -> http.requestFile(url.replace("file://", ""), listener)
-            url.startsWith("assets") -> http.requestAssets(context, url.replace("assets://", ""), listener)
-            else -> {
-                val request = http.makeWxRequest(url = url, from = "request-mWeexConfig")
-                http.request(request, listener, false)
-            }
+    private fun readAssets(context: Context, assetsPath: String): String {
+        return try {
+            StreamUtils.saveStreamToString(context.assets.open(assetsPath))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ""
         }
     }
+
+    fun registerUpdateHandler(updateHandler: UpdateHandler) {
+        mUpdateHandlers.add(updateHandler)
+    }
+
+    fun unRegisterUpdateHandler(updateHandler: UpdateHandler) {
+        mUpdateHandlers.remove(updateHandler)
+    }
+
+
 }
