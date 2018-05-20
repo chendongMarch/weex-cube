@@ -32,11 +32,11 @@ class WeexPage() : Parcelable {
     val key: String?
         get() = "$pageName($jsVersion)".replace(".", "")
 
-    val localJs: String? // 本地 js 文件名
+    val localJs: String? // 本地 js 文件名 home-page-weex-1-1-0-js
         get() = "$pageName-$jsVersion-js".replace(".", "-")
 
-    val assetsJs: String? // assets js 文件名
-        get() = "js/$pageName-$jsVersion-js".replace(".", "-")
+    val assetsJs: String? // assets js 文件名 js/home-page-weex-1-1-0-js
+        get() = "$pageName-$jsVersion-js".replace(".", "-")
 
     val isValid: Boolean //
         get() = (!TextUtils.isEmpty(pageName)
@@ -69,8 +69,6 @@ class WeexPage() : Parcelable {
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeString(this.pageName)
         dest.writeString(this.remoteJs)
-        dest.writeString(this.localJs)
-        dest.writeString(this.assetsJs)
         dest.writeString(this.appVersion)
         dest.writeString(this.jsVersion)
         dest.writeString(this.webUrl)
