@@ -64,6 +64,6 @@ fun String.md5(): String {
     }
 }
 
-fun View.click(f: (View) -> Unit) {
-    setOnClickListener { f(this) }
+fun View?.click(f: (View) -> Unit) {
+    this?.setOnClickListener { f(this) }
 }
