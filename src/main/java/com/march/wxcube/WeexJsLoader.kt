@@ -5,6 +5,7 @@ import android.os.Build
 import android.util.LruCache
 import com.march.wxcube.common.DiskLruCache
 import com.march.wxcube.common.memory
+import com.march.wxcube.common.report
 import com.march.wxcube.manager.ManagerRegistry
 
 import com.march.wxcube.model.WeexPage
@@ -20,7 +21,7 @@ import java.util.concurrent.Executors
  *
  * @author chendong
  */
-class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int) : UpdateHandler {
+class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, jsPrepareStrategy: Int) : WeexUpdater.UpdateHandler {
 
     companion object {
         private val TAG = WeexJsLoader::class.java.simpleName!!
@@ -35,17 +36,18 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int) 
     private val mJsLoadStrategy = jsLoadStrategy
     // 缓存策略
     private val mJsCacheStrategy = jsCacheStrategy
+    // 预加载策略
+    private val mJsPrepareStrategy = jsPrepareStrategy
     // 内存缓存
     private val mJsMemoryCache = JsMemoryCache(context.memory(.3f))
     // 文件缓存
     private val mJsFileCache = JsFileCache(Weex.getInst().makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
 
-    override fun updateWeexPages(context: Context, weexPages: List<WeexPage>?) {
-        if (mJsCacheStrategy == JsCacheStrategy.PREPARE_ALL) {
+    override fun onUpdateConfig(context: Context, weexPages: List<WeexPage>?) {
+        if (mJsPrepareStrategy == JsPrepareStrategy.PREPARE_ALL) {
             weexPages?.forEach { getTemplateAsync(context, it) {} }
         }
     }
-
 
     /**
      * 异步获取模板
@@ -70,7 +72,9 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int) 
         val publishFunc: (String?) -> Unit = {
             consumer(it)
             if (cacheStrategy != JsCacheStrategy.NO_CACHE) {
-                mJsMemoryCache.put(page.key, it)
+                it?.let {
+                    mJsMemoryCache.checkPut(page.key, it)
+                }
             }
         }
         val runnable = if (loadStrategy != JsLoadStrategy.DEFAULT) {
@@ -108,10 +112,10 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int) 
 
     private fun downloadJs(page: WeexPage): String? {
         val url = page.remoteJs ?: return null
-        val http = ManagerRegistry.HTTP
+        val http = ManagerRegistry.REQ
         val wxRequest = http.makeWxRequest(url = url, from = "download-js")
         val resp = http.requestSync(wxRequest, false)
-        if (page.localJs != null && resp.data != null) {
+        if (page.localJs != null && resp.data != null && mJsCacheStrategy == JsCacheStrategy.CACHE_MEMORY_DISK_BOTH) {
             mJsFileCache.write(page.localJs!!, resp.data)
         }
         return resp.data
@@ -128,8 +132,12 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int) 
             }
             JsLoadStrategy.ASSETS_FIRST -> {
                 {
-                    fromWhere = "assets"
-                    WXFileUtils.loadAsset(page.assetsJs, context)
+                    if (isAssetsExist(page.assetsJs ?: "", context)) {
+                        fromWhere = "assets"
+                        WXFileUtils.loadAsset(page.assetsJs, context)
+                    } else {
+                        ""
+                    }
                 }
             }
             JsLoadStrategy.FILE_FIRST -> {
@@ -149,12 +157,34 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int) 
             }
         }
     }
+
+
+    private fun isAssetsExist(name: String, context: Context): Boolean {
+        return try {
+            val files = context.assets.list("js")
+            files.any { name === it }
+        } catch (e: Exception) {
+            false
+        }
+    }
 }
 
 // js 内存缓存
 class JsMemoryCache(maxSize: Int) : LruCache<String, String>(maxSize) {
     override fun sizeOf(key: String, value: String): Int {
         return value.length
+    }
+
+    fun checkPut(key: String?, value: String?) {
+        if (key.isNullOrBlank()) {
+            report("JsMemCache key is empty $key")
+            return
+        }
+        if (value.isNullOrBlank()) {
+            report("JsMemCache value is empty $value")
+            return
+        }
+        put(key, value)
     }
 }
 
@@ -170,9 +200,16 @@ object JsLoadStrategy {
     const val DEFAULT = 4 // 默认 缓存、文件、assets、网络 一次检查
 }
 
+// 预加载策略
+object JsPrepareStrategy {
+    const val PREPARE_ALL = 0 // 提前准备所有的js到缓存中
+    const val LAZY_LOAD = 1 // 使用时才加载
+    const val NO_CACHE = 2 // 不缓存
+}
+
 // 缓存策略
 object JsCacheStrategy {
-    const val PREPARE_ALL = 0 // 提前准备所有的js到缓存中
-    const val LAZY_LOAD = 2 // 使用时才加载
-    const val NO_CACHE = 3 // 不缓存
+    const val NO_CACHE = 0 // 不缓存，加载后仅使用一次，下次仍旧从原资源加载
+    const val CACHE_MEMORY_ONLY = 1 // 仅缓存到内存中
+    const val CACHE_MEMORY_DISK_BOTH = 2 // 内存和磁盘都缓存
 }

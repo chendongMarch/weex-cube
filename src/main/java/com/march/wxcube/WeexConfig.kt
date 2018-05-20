@@ -1,8 +1,6 @@
 package com.march.wxcube
 
 import android.app.Application
-import com.march.wxcube.common.memory
-import java.io.File
 
 
 /**
@@ -13,9 +11,11 @@ import java.io.File
  */
 class WeexConfig(val ctx: Application) {
 
+    var https: Boolean = false
     var debug: Boolean = true
     var jsLoadStrategy: Int = JsLoadStrategy.DEFAULT
-    var jsCacheStrategy: Int = JsCacheStrategy.PREPARE_ALL
+    var jsCacheStrategy: Int = JsCacheStrategy.CACHE_MEMORY_DISK_BOTH
+    var jsPrepareStrategy: Int = JsPrepareStrategy.PREPARE_ALL
     var configUrl: String = ""
     var envs: Map<String, String>? = null
     var nowEnv: String = ""

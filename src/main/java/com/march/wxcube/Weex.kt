@@ -2,11 +2,15 @@ package com.march.wxcube
 
 import com.march.common.Common
 import com.march.common.model.WeakContext
+import com.march.common.utils.FileUtils
 import com.march.webkit.WebKit
 import com.march.wxcube.common.JsonParseAdapterImpl
 import com.march.wxcube.common.sdFile
 import com.march.wxcube.manager.*
-import com.march.wxcube.module.*
+import com.march.wxcube.module.BasicModule
+import com.march.wxcube.module.DebugModule
+import com.march.wxcube.module.ModalModule
+import com.march.wxcube.module.StatusBarModule
 import com.march.wxcube.widget.Container
 import com.march.wxcube.wxadapter.ImgAdapter
 import com.march.wxcube.wxadapter.OkHttpAdapter
@@ -26,7 +30,7 @@ import java.io.File
 class Weex private constructor() {
 
     private val mWeakCtx by lazy { WeakContext(mWeexConfig.ctx) } // 上下文虚引用
-    val mWeexJsLoader by lazy { WeexJsLoader(mWeexConfig.ctx, mWeexConfig.jsLoadStrategy, mWeexConfig.jsCacheStrategy) } // 加载 js
+    val mWeexJsLoader by lazy { WeexJsLoader(mWeexConfig.ctx, mWeexConfig.jsLoadStrategy, mWeexConfig.jsCacheStrategy, mWeexConfig.jsPrepareStrategy) } // 加载 js
     val mWeexRouter by lazy { WeexRouter() } // 路由页面管理
     val mWeexUpdater by lazy { WeexUpdater(mWeexConfig.configUrl) } // weex 页面更新
 
@@ -66,7 +70,7 @@ class Weex private constructor() {
 
         ManagerRegistry.getInst().register(DataManager.instance)
         ManagerRegistry.getInst().register(EventManager.instance)
-        ManagerRegistry.getInst().register(HttpManager.instance)
+        ManagerRegistry.getInst().register(RequestManager.instance)
         ManagerRegistry.getInst().register(EnvManager.instance)
         ManagerRegistry.getInst().register(WeexInstManager.instance)
 
@@ -76,7 +80,9 @@ class Weex private constructor() {
         Common.init(config.ctx, JsonParseAdapterImpl())
         WebKit.init(config.ctx, WebKit.CORE_SYS, null)
 
-        Weex.getInst().mWeexUpdater.requestPages(config.ctx)
+        mWeexUpdater.registerUpdateHandler(mWeexRouter)
+        mWeexUpdater.registerUpdateHandler(mWeexJsLoader)
+        Weex.getInst().mWeexUpdater.update(config.ctx)
     }
 
     fun getContext() = mWeakCtx.get()
@@ -101,7 +107,7 @@ class Weex private constructor() {
         }
     }
 
-    public fun makeCacheDir(key: String): File {
+    fun makeCacheDir(key: String): File {
         val sdFile = sdFile()
         var rootFile = getContext()?.cacheDir ?: sdFile
         if (Weex.getInst().mWeexConfig.debug) {
@@ -112,6 +118,18 @@ class Weex private constructor() {
         val destDir = File(cacheFile, key)
         destDir.mkdirs()
         return destDir
+    }
+
+    fun clearDiskCache(){
+        val sdFile = sdFile()
+        var rootFile = getContext()?.cacheDir ?: sdFile
+        if (Weex.getInst().mWeexConfig.debug) {
+            rootFile = sdFile
+        }
+        val cacheFile = File(rootFile, CACHE_DIR)
+        if(cacheFile.exists()) {
+            FileUtils.delete(cacheFile)
+        }
     }
 
     companion object {
