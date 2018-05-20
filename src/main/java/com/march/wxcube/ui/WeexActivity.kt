@@ -22,7 +22,7 @@ class WeexActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Weex.getInst().mWeexInjector.onPageCreated(this, Weex.PAGE_WEEX)
-        setContentView(R.layout.weex_activity)
+        setContentView(R.layout.weex_container)
         weexDelegate.onCreate()
         weexDelegate.render()
     }
