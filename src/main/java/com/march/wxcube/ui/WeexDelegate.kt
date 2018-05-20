@@ -8,21 +8,18 @@ import android.view.View
 import android.view.ViewGroup
 import com.march.common.utils.LogUtils
 import com.march.webkit.IWebView
+import com.march.webkit.sys.SysWebView
 import com.march.webkit.x5.X5WebView
-import com.march.wxcube.JsCacheStrategy
-import com.march.wxcube.JsLoadStrategy
 import com.march.wxcube.R
 import com.march.wxcube.Weex
 import com.march.wxcube.common.report
 import com.march.wxcube.debug.WeexDebugger
-
 import com.march.wxcube.lifecycle.WeexLifeCycle
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.WeexPage
 import com.taobao.weex.IWXRenderListener
 import com.taobao.weex.WXSDKInstance
-
-import java.util.HashMap
+import java.util.*
 
 /**
  * CreateAt : 2018/3/27
@@ -41,17 +38,16 @@ class WeexDelegate : WeexLifeCycle {
     private val mHost: Any
     // 负责加载多个 fragment
     var mFragmentLoader: FragmentLoader? = null
-    var mWeexDebuger: WeexDebugger? = null
+    var mWeexDebugger: WeexDebugger? = null
     // 容器
     private lateinit var mContainerView: ViewGroup // 容器 View
     private var mWeexView: ViewGroup? = null // weex root view
     // 页面数据
-    private var mWeexPage: WeexPage? = null
+    private var mWeexPage: WeexPage
     // loading
     private val mLoadingHandler by lazy { Weex.getInst().mWeexInjector.getLoadingHandler() }
     // 降级 webview
     private var iWebView: IWebView? = null
-
 
     // 为 Fragment 提供构造方法
     constructor(fragment: Fragment) {
@@ -62,10 +58,10 @@ class WeexDelegate : WeexLifeCycle {
 
     // 为 Activity 提供构造方法
     constructor(activity: Activity) {
-        initContainerView(activity.findViewById(R.id.weex_activity_root))
         mHost = activity
         mWeexPage = activity.intent.getParcelableExtra(WeexPage.KEY_PAGE)
         init(activity)
+        initContainerView(activity.findViewById(R.id.weex_root))
     }
 
     // 初始化方法
@@ -76,44 +72,33 @@ class WeexDelegate : WeexLifeCycle {
         ManagerRegistry.getInst().onWxInstInit(mWeexPage, mWeexInst, this)
     }
 
-
-    fun render() {
-        val page = mWeexPage ?: return
-        val realUrl = page.webUrl ?: return
-        if (realUrl.isBlank()) return
+    fun parseRenderOptions(): Map<String, Any> {
         val opts = HashMap<String, Any>()
         // parse url
-        val uri = Uri.parse(realUrl)
+        val uri = Uri.parse(mWeexPage.webUrl)
         uri.queryParameterNames.forEach { opts[it] = uri.getQueryParameter(it) }
-        // parse data
-        val data = ManagerRegistry.DATA.getData(realUrl)
-        data?.let { opts["extraData"] = data }
-        mWeexRender.render(page, opts) { mLastTemplate = it }
-    }
-
-    var mLastTemplate: String? = null
-    fun refresh() {
-        Weex.getInst().mWeexJsLoader.getTemplateAsync(mActivity,
-                JsLoadStrategy.NET_FIRST,
-                JsCacheStrategy.NO_CACHE, mWeexPage) {
-            it?.let {
-                if (mLastTemplate == null || !mLastTemplate.equals(it)) {
-                    mActivity.runOnUiThread {
-                        onDestroy()
-                        init(mActivity)
-                        onCreate()
-                        render()
-                    }
-                } else {
-                    Weex.getInst().mWeexInjector.onLog("refresh", "获取到但是没有改变，不作渲染")
-                }
+        mWeexPage.webUrl?.let {
+            val data = ManagerRegistry.DATA.getData(it)
+            if (data != null) {
+                opts["extraData"] = data
             }
         }
+        return opts
+    }
+
+
+    fun render() {
+        mWeexRender.render(mWeexPage, parseRenderOptions())
+    }
+
+    fun renderJs(js: String) {
+        mWeexRender.renderJs(mWeexPage, parseRenderOptions(), js)
     }
 
     fun initContainerView(view: ViewGroup) {
         mContainerView = view
         mLoadingHandler.addLoadingView(mContainerView)
+        mWeexDebugger = WeexDebugger(this, mActivity, mWeexPage)
     }
 
 
@@ -149,7 +134,13 @@ class WeexDelegate : WeexLifeCycle {
         mWeexInst.onActivityDestroy()
         mWeexInst.registerRenderListener(null)
         ManagerRegistry.getInst().onWxInstRelease(mWeexPage, mWeexInst)
-        mWeexDebuger?.onDestroy()
+        mWeexDebugger?.onDestroy()
+    }
+
+    fun onDebugDestroy() {
+        mWeexInst.onActivityDestroy()
+        mWeexInst.registerRenderListener(null)
+        ManagerRegistry.getInst().onWxInstRelease(mWeexPage, mWeexInst)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
@@ -168,19 +159,24 @@ class WeexDelegate : WeexLifeCycle {
             mWeexView = view as ViewGroup
             mContainerView.removeAllViews()
             mContainerView.addView(view, 0)
-            mWeexDebuger?.addDebugBtn()
+            mWeexDebugger?.addDebugBtn(mContainerView)
             LogUtils.e("onViewCreated")
         }
 
         override fun onException(instance: WXSDKInstance?, errCode: String?, msg: String?) {
             report("code = $errCode, msg = $msg")
-            if (mWeexPage?.webUrl != null) {
+
+            if (mWeexDebugger != null && mWeexDebugger?.isRefreshing != null && mWeexDebugger?.isRefreshing!!) {
+                report("调试模式js出错，改正后会重新渲染")
+                return
+            }
+            if (mWeexPage.webUrl != null) {
                 if (iWebView == null) {
-                    iWebView = X5WebView(mActivity)
+                    iWebView = SysWebView(mActivity)
                 }
                 mContainerView.removeAllViews()
                 mContainerView.addView(iWebView as View)
-                iWebView?.loadPage(mWeexPage?.webUrl)
+                iWebView?.loadPage(mWeexPage.webUrl)
             }
         }
 
