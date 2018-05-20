@@ -20,7 +20,7 @@ class ManagerRegistry : IManager {
 
         val EVENT by lazy { getInst().get(EventManager::class.java) as EventManager }
         val DATA by lazy { getInst().get(DataManager::class.java) as DataManager }
-        val HTTP by lazy { getInst().get(HttpManager::class.java) as HttpManager }
+        val REQ by lazy { getInst().get(RequestManager::class.java) as RequestManager }
         val ENV by lazy { getInst().get(EnvManager::class.java) as EnvManager }
         val WEEXINST by lazy { getInst().get(WeexInstManager::class.java) as WeexInstManager }
     }
