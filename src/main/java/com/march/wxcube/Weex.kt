@@ -1,16 +1,14 @@
 package com.march.wxcube
 
+import android.content.Context
 import com.march.common.Common
 import com.march.common.model.WeakContext
 import com.march.common.utils.FileUtils
+import com.march.common.utils.LogUtils
 import com.march.webkit.WebKit
 import com.march.wxcube.common.JsonParseAdapterImpl
 import com.march.wxcube.common.sdFile
 import com.march.wxcube.manager.*
-import com.march.wxcube.module.BasicModule
-import com.march.wxcube.module.DebugModule
-import com.march.wxcube.module.ModalModule
-import com.march.wxcube.module.StatusBarModule
 import com.march.wxcube.widget.Container
 import com.march.wxcube.wxadapter.ImgAdapter
 import com.march.wxcube.wxadapter.OkHttpAdapter
@@ -19,6 +17,7 @@ import com.taobao.weex.InitConfig
 import com.taobao.weex.WXEnvironment
 import com.taobao.weex.WXSDKEngine
 import com.taobao.weex.common.WXException
+import com.taobao.weex.common.WXModule
 import java.io.File
 
 /**
@@ -62,11 +61,11 @@ class Weex private constructor() {
                 // .setWebSocketAdapterFactory(WebSocketAdapter.createFactory())
                 // 图片加载
                 .setImgAdapter(ImgAdapter())
-        injector.onInitWeex(builder)
+        injector.onWxSdkEngineInit(builder)
         WXSDKEngine.initialize(config.ctx, builder.build())
-
-        registerModule()
+        registerModule(config.ctx)
         registerComponent()
+        injector.onWxModuleCompRegister()
 
         ManagerRegistry.getInst().register(DataManager.instance)
         ManagerRegistry.getInst().register(EventManager.instance)
@@ -96,16 +95,28 @@ class Weex private constructor() {
         }
     }
 
-    private fun registerModule() {
+    private fun registerModule(context: Context) {
         try {
-            WXSDKEngine.registerModule("cube-basic", BasicModule::class.java, true)
-            WXSDKEngine.registerModule("cube-debug", DebugModule::class.java, true)
-            WXSDKEngine.registerModule("cube-statusbar", StatusBarModule::class.java, true)
-            WXSDKEngine.registerModule("cube-modal", ModalModule::class.java, true)
+            registerModulePatch(context,R.array.internal_module)
+            registerModulePatch(context,R.array.extension_module)
         } catch (e: WXException) {
             e.printStackTrace()
         }
     }
+
+    @SuppressWarnings("unchecked")
+    private fun registerModulePatch(context: Context, array: Int) {
+        val moduleArray = context.resources.getStringArray(array)
+        for (str in moduleArray) {
+            val strArray = str.split(":")
+            if (strArray.size == 2) {
+                val forName = Class.forName(strArray[1])
+                WXSDKEngine.registerModule(strArray[0], forName as Class<WXModule>, true)
+                // LogUtils.e("注册成功 ${strArray[0]}  ${strArray[1]}  ${forName}")
+            }
+        }
+    }
+
 
     fun makeCacheDir(key: String): File {
         val sdFile = sdFile()
