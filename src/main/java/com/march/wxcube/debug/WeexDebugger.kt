@@ -47,12 +47,13 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
     fun addDebugBtn(container: ViewGroup) {
         if (mDebugBtn == null) {
             mDebugBtn = DragButton(container.context)
-            mDebugBtn?.text = "test"
+            mDebugBtn?.textSize = 12f
+            mDebugBtn?.text = "debug"
             mDebugBtn.click {
                 mDebugDialog.show()
             }
         }
-        val params = FrameLayout.LayoutParams(150, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val params = FrameLayout.LayoutParams(200, ViewGroup.LayoutParams.WRAP_CONTENT)
         params.gravity = Gravity.RIGHT or Gravity.TOP
         params.rightMargin = 200
         params.topMargin = 200
