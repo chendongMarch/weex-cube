@@ -4,7 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
     android:padding="20dp">
+
+    <TextView
+        android:id="@+id/desc_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#1a1210"
+        android:textSize="16sp"
+        tools:text="测试测试测试测试测试测试测试"/>
 
     <Button
         android:id="@+id/close_btn"
@@ -31,6 +40,22 @@
             android:layout_weight="1"
             android:text="清理磁盘js"/>
     </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/req_config_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="更新远端配置文件"/>
+
+    </LinearLayout>
+
 
     <Switch
         android:id="@+id/js_in_cache_sw"

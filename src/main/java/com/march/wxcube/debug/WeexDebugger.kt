@@ -15,7 +15,10 @@ import android.widget.FrameLayout
 import android.widget.Switch
 import android.widget.TextView
 import com.march.common.utils.ToastUtils
-import com.march.wxcube.*
+import com.march.wxcube.JsCacheStrategy
+import com.march.wxcube.JsLoadStrategy
+import com.march.wxcube.R
+import com.march.wxcube.Weex
 import com.march.wxcube.common.click
 import com.march.wxcube.lifecycle.WeexLifeCycle
 import com.march.wxcube.model.WeexPage
@@ -92,7 +95,6 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
         }
     }
 
-
     private fun stopRefresh() {
         mLastTemplate = null
         mHandler.removeCallbacksAndMessages(null)
@@ -118,11 +120,14 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+            val msg = StringBuilder().append("页面：").append(mWeexPage?.pageName).toString()
+            findViewById<TextView>(R.id.desc_tv)?.text = msg
+            findViewById<View>(R.id.req_config_btn).click { Weex.getInst().mWeexUpdater.update(context) }
             // 关闭
             findViewById<View>(R.id.close_btn).click { dismiss() }
             // 清理缓存的js
             findViewById<View>(R.id.clear_cache_btn).click { Weex.getInst().mWeexJsLoader.clearCache() }
-            // 清理磁盘js
+            // 清理磁盘js`
             findViewById<View>(R.id.clear_disk_btn).click { Weex.getInst().clearDiskCache() }
             val jsInCacheSw = findViewById<Switch>(R.id.js_in_cache_sw)
             jsInCacheSw?.isChecked = mDebugConfig.debugJsInCache
