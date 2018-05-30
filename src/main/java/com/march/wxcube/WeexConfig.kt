@@ -17,8 +17,9 @@ class WeexConfig(val ctx: Application) {
     var jsCacheStrategy: Int = JsCacheStrategy.CACHE_MEMORY_DISK_BOTH
     var jsPrepareStrategy: Int = JsPrepareStrategy.PREPARE_ALL
     var configUrl: String = ""
-    var envs: Map<String, String>? = null
-    var nowEnv: String = ""
+    var apiHost: String = ""
+    var jsResHost: String = ""
+    var webHost: String = ""
 
     fun prepare(): WeexConfig {
         return this

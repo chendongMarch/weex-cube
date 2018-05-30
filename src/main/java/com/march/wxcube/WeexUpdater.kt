@@ -17,10 +17,14 @@ import java.util.concurrent.Executors
  * Describe :
  * @author chendong
  */
-class WeexUpdater(private val url: String) {
+class WeexUpdater(private var url: String) {
 
     interface UpdateHandler {
         fun onUpdateConfig(context: Context, weexPages: List<WeexPage>?)
+    }
+
+    init {
+        //url = ManagerRegistry.HOST.makeConfigUrl()
     }
 
     private val mDiskLruCache by lazy {
@@ -85,12 +89,72 @@ class WeexUpdater(private val url: String) {
             val weexPages = weexPagesResp?.datas
             val pages = weexPages ?: return
             val validPages = pages.filter { it.isValid }
-            validPages.forEach { it.webUrl = ManagerRegistry.ENV.validUrl(it.webUrl) }
+            validPages.forEach {
+                it.webUrl = ManagerRegistry.HOST.makeWebUrl(it.webUrl!!)
+            }
             mUpdateHandlers.forEach { it.onUpdateConfig(context, pages) }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
+
+
+    // 1. 相同页面只保留 jsVersion 较高的一个
+    // 2. 页面数据支持的 appVersion 小于等于当前 app
+    fun simplifyPages(pages: List<WeexPage>): List<WeexPage> {
+        val curVersionCodes = getVersionCodes(Weex.getInst().mWeexInjector.getBuildConfig().versionName)
+        if (curVersionCodes.size != 3) {
+            return pages
+        }
+        val mutablePages = mutableListOf<WeexPage>()
+        pages.filterTo(mutablePages) {
+            // 过滤支持的 app 版本小于等于当前 app 版本
+            val appVersionCodes = getVersionCodes(it.appVersion)
+            val jsVersionCodes = getVersionCodes(it.jsVersion)
+            var result = jsVersionCodes.size == 3 && appVersionCodes.size == 3
+            if (result) {
+                for (i in 0..2) {
+                    if (appVersionCodes[i] > curVersionCodes[i]) {
+                        result = false
+                    } else if (appVersionCodes[i] < curVersionCodes[i]) {
+                        result = true
+                    }
+                }
+            }
+            result
+        }
+        val pageNameWeexPageMap = mutableMapOf<String?, WeexPage>()
+        for (page in mutablePages) {
+            val pageName = page.pageName ?: continue
+            val value: WeexPage? = pageNameWeexPageMap[pageName]
+            if (value == null) {
+                // 新页面
+                pageNameWeexPageMap[pageName] = page
+            } else {
+                // 比较 jsVersion，选择较大的一个
+                val curJsVersionCodes = getVersionCodes(page.jsVersion)
+                val lastJsVersionCodes = getVersionCodes(value.jsVersion)
+                for (i in 0..2) {
+                    if (curJsVersionCodes[i] > lastJsVersionCodes[i]) {
+                        pageNameWeexPageMap[pageName] = page
+                        break
+                    }
+                }
+            }
+        }
+        mutablePages.clear()
+        mutablePages.addAll(pageNameWeexPageMap.values)
+        return mutablePages
+    }
+
+    private fun getVersionCodes(version: String?): List<Int> {
+        if (version == null) {
+            return listOf()
+        }
+        val vs = version.split(".")
+        return vs.map { it.toInt() }
+    }
+
 
     private fun readAssets(context: Context, assetsPath: String): String {
         return try {
@@ -108,6 +172,4 @@ class WeexUpdater(private val url: String) {
     fun unRegisterUpdateHandler(updateHandler: UpdateHandler) {
         mUpdateHandlers.remove(updateHandler)
     }
-
-
 }

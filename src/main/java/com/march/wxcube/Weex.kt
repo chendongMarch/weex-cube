@@ -4,7 +4,6 @@ import android.content.Context
 import com.march.common.Common
 import com.march.common.model.WeakContext
 import com.march.common.utils.FileUtils
-import com.march.common.utils.LogUtils
 import com.march.webkit.WebKit
 import com.march.wxcube.common.JsonParseAdapterImpl
 import com.march.wxcube.common.sdFile
@@ -70,11 +69,12 @@ class Weex private constructor() {
         ManagerRegistry.getInst().register(DataManager.instance)
         ManagerRegistry.getInst().register(EventManager.instance)
         ManagerRegistry.getInst().register(RequestManager.instance)
-        ManagerRegistry.getInst().register(EnvManager.instance)
+        ManagerRegistry.getInst().register(HostManager.instance)
         ManagerRegistry.getInst().register(WeexInstManager.instance)
 
-        ManagerRegistry.ENV.registerEnv(config.envs)
-        ManagerRegistry.ENV.mNowEnv = config.nowEnv
+        ManagerRegistry.HOST.mWebHost = config.webHost
+        ManagerRegistry.HOST.mJsResHost = config.jsResHost
+        ManagerRegistry.HOST.mApiHost = config.apiHost
 
         Common.init(config.ctx, JsonParseAdapterImpl())
         WebKit.init(config.ctx, WebKit.CORE_SYS, null)

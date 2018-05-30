@@ -15,6 +15,7 @@ import okhttp3.OkHttpClient
  */
 interface WeexInjector {
 
+    data class WxBuildConfig(val versionCode: Int, val versionName: String, val debug: Boolean)
     /**
      * 错误打印
      */
@@ -61,9 +62,13 @@ interface WeexInjector {
         return LoadingHandlerImpl()
     }
 
+    fun getBuildConfig(): WxBuildConfig
+
     companion object {
         val EMPTY = object : WeexInjector {
-
+            override fun getBuildConfig(): WxBuildConfig {
+                return WxBuildConfig(0, "0.0.0", false)
+            }
         }
     }
 
