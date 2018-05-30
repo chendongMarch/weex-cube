@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity
 import com.march.wxcube.common.report
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
-
 import com.march.wxcube.model.WeexPage
 import com.march.wxcube.ui.WeexDialogFragment
 
@@ -31,6 +30,7 @@ class WeexRouter : WeexUpdater.UpdateHandler {
             if (other == null || other !is UrlKey) {
                 return false
             }
+//            LogUtils.e("chendong","${host} == ${other.host}  $port == ${other.port} && $path == ${other.path}" )
             return host == other.host && port == other.port && path == other.path
         }
 
@@ -82,9 +82,8 @@ class WeexRouter : WeexUpdater.UpdateHandler {
      * 根据 web url 查找指定页面
      */
     fun findPage(url: String): WeexPage? {
-        var safeUrl = ManagerRegistry.ENV.delHttp(url)
-        safeUrl = ManagerRegistry.ENV.validUrl(safeUrl)
-        val weexPage = mWeexPageMap[UrlKey.fromUrl(safeUrl)]
+        val validUrl = ManagerRegistry.HOST.makeWebUrl(url)
+        val weexPage = mWeexPageMap[UrlKey.fromUrl(validUrl)]
         if (weexPage == null) {
             report("open Url, can not find page, url => $url")
             val page = WeexPage()

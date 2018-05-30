@@ -17,7 +17,7 @@ import com.taobao.weex.dom.WXImageQuality
 class ImgAdapter : IWXImgLoaderAdapter {
     override fun setImage(url: String?, view: ImageView?, quality: WXImageQuality?, strategy: WXImageStrategy?) {
         if (view != null && url != null) {
-            val safeUrl = ManagerRegistry.ENV.safeUrl(url)
+            val safeUrl = ManagerRegistry.HOST.makeRequestUrl(url)
             Glide.with(view.context).load(safeUrl).into(view)
         }
     }

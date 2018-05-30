@@ -82,7 +82,7 @@ class BasicModule : WXModule() {
     fun openWeb(webUrl: String) {
         val act = activity ?: return
         val intent = Intent(act, WebActivity::class.java)
-        intent.putExtra(WebKit.KEY_URL, ManagerRegistry.ENV.safeUrl(webUrl))
+        intent.putExtra(WebKit.KEY_URL, ManagerRegistry.HOST.makeWebUrl(webUrl))
         act.startActivity(intent)
     }
 

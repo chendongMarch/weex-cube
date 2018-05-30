@@ -6,6 +6,7 @@ import android.util.LruCache
 import com.march.wxcube.common.DiskLruCache
 import com.march.wxcube.common.memory
 import com.march.wxcube.common.report
+import com.march.wxcube.manager.HostManager
 import com.march.wxcube.manager.ManagerRegistry
 
 import com.march.wxcube.model.WeexPage
@@ -113,7 +114,8 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, 
     private fun downloadJs(page: WeexPage): String? {
         val url = page.remoteJs ?: return null
         val http = ManagerRegistry.REQ
-        val wxRequest = http.makeWxRequest(url = url, from = "download-js")
+        val makeJsResUrl = ManagerRegistry.HOST.makeJsResUrl(url)
+        val wxRequest = http.makeWxRequest(url = makeJsResUrl, from = "download-js")
         val resp = http.requestSync(wxRequest, false)
         if (page.localJs != null && resp.data != null && mJsCacheStrategy == JsCacheStrategy.CACHE_MEMORY_DISK_BOTH) {
             mJsFileCache.write(page.localJs!!, resp.data)

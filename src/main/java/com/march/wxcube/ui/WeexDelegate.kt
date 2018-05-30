@@ -72,7 +72,7 @@ class WeexDelegate : WeexLifeCycle {
         ManagerRegistry.getInst().onWxInstInit(mWeexPage, mWeexInst, this)
     }
 
-    fun parseRenderOptions(): Map<String, Any> {
+    private fun parseRenderOptions(): Map<String, Any> {
         val opts = HashMap<String, Any>()
         // parse url
         val uri = Uri.parse(mWeexPage.webUrl)

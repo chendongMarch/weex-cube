@@ -17,6 +17,7 @@ import okhttp3.*
 import okhttp3.internal.Util
 import java.io.File
 import java.io.IOException
+import java.net.Proxy
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -64,6 +65,7 @@ class RequestManager : IManager {
         builder.writeTimeout(5 * 1000, TimeUnit.MILLISECONDS)
         // 失败后重试
         builder.retryOnConnectionFailure(true)
+        builder.proxy(Proxy.NO_PROXY)
 
         // 进行日志打印，扩展自 HttpLoggingInterceptor
         builder.addInterceptor(LogInterceptor())
@@ -224,7 +226,7 @@ class RequestManager : IManager {
     // 通过 weex 请求构建 http 请求
     private fun makeHttpRequest(wxRequest: WXRequest): Request {
         val method = if (wxRequest.method == null) "get" else wxRequest.method
-        val url = ManagerRegistry.ENV.safeUrl(wxRequest.url)
+        val url = ManagerRegistry.HOST.makeRequestUrl(wxRequest.url)
         val body = wxRequest.body
         val paramMap = wxRequest.paramMap
         var reqBuilder = Request.Builder().url(url)
