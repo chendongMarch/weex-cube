@@ -2,6 +2,7 @@ package com.march.wxcube
 
 import android.content.Context
 import com.alibaba.fastjson.JSON
+import com.march.common.utils.LogUtils
 import com.march.common.utils.StreamUtils
 import com.march.wxcube.common.DiskLruCache
 import com.march.wxcube.common.report
@@ -92,7 +93,11 @@ class WeexUpdater(private var url: String) {
             validPages.forEach {
                 it.webUrl = ManagerRegistry.HOST.makeWebUrl(it.webUrl!!)
             }
-            mUpdateHandlers.forEach { it.onUpdateConfig(context, pages) }
+            val simplifyPages = simplifyPages(validPages)
+            for (page in simplifyPages) {
+                LogUtils.e("chendong",page.pageName)
+            }
+            mUpdateHandlers.forEach { it.onUpdateConfig(context, simplifyPages) }
         } catch (e: Exception) {
             e.printStackTrace()
         }
