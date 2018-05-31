@@ -20,6 +20,7 @@ import com.march.wxcube.JsLoadStrategy
 import com.march.wxcube.R
 import com.march.wxcube.Weex
 import com.march.wxcube.common.click
+import com.march.wxcube.common.newLine
 import com.march.wxcube.lifecycle.WeexLifeCycle
 import com.march.wxcube.model.WeexPage
 import com.march.wxcube.ui.WeexDelegate
@@ -46,6 +47,7 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
     private val mDebugDialog by lazy { DebugDialog(mActivity) }
 
     private val mDebugConfig by lazy { DebugConfig(false, false, false) }
+    var mErrorMsg = ""
 
     fun addDebugBtn(container: ViewGroup) {
         if (mDebugBtn == null) {
@@ -120,7 +122,10 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            val msg = StringBuilder().append("页面：").append(mWeexPage?.pageName).toString()
+            val msg = StringBuilder().append("页面：").append(mWeexPage?.pageName).newLine()
+                    .append("错误信息：").newLine()
+                    .append(mErrorMsg)
+                    .toString()
             findViewById<TextView>(R.id.desc_tv)?.text = msg
             findViewById<View>(R.id.req_config_btn).click { Weex.getInst().mWeexUpdater.update(context) }
             // 关闭
