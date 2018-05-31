@@ -10,6 +10,7 @@ import com.march.wxcube.common.sdFile
 import com.march.wxcube.manager.*
 import com.march.wxcube.widget.Container
 import com.march.wxcube.wxadapter.ImgAdapter
+import com.march.wxcube.wxadapter.JsErrorAdapter
 import com.march.wxcube.wxadapter.OkHttpAdapter
 import com.march.wxcube.wxadapter.UriAdapter
 import com.taobao.weex.InitConfig
@@ -53,7 +54,7 @@ class Weex private constructor() {
                 // URI 重写 def
                 .setURIAdapter(UriAdapter())
                 // js 错误
-                // .setJSExceptionAdapter(new JsErrorAdapter())
+                .setJSExceptionAdapter(JsErrorAdapter())
                 // drawable 加载
                 // .setDrawableLoader(new DrawableLoader())
                 // web socket
