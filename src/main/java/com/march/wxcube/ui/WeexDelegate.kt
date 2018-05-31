@@ -8,8 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.march.common.utils.LogUtils
 import com.march.webkit.IWebView
-import com.march.webkit.sys.SysWebView
-import com.march.webkit.x5.X5WebView
 import com.march.wxcube.R
 import com.march.wxcube.Weex
 import com.march.wxcube.common.report
@@ -86,12 +84,20 @@ class WeexDelegate : WeexLifeCycle {
         return opts
     }
 
-
     fun render() {
         mWeexRender.render(mWeexPage, parseRenderOptions())
     }
 
+    private var mCurPage: WeexPage? = null
+
+    fun renderError() {
+        val errPage = Weex.getInst().mWeexRouter.findPage("/status/not-found-weex") ?: return
+        mCurPage = errPage
+        mWeexRender.render(errPage, parseRenderOptions())
+    }
+
     fun renderJs(js: String) {
+        mCurPage = mWeexPage
         mWeexRender.renderJs(mWeexPage, parseRenderOptions(), js)
     }
 
@@ -165,19 +171,24 @@ class WeexDelegate : WeexLifeCycle {
 
         override fun onException(instance: WXSDKInstance?, errCode: String?, msg: String?) {
             report("code = $errCode, msg = $msg")
-
+            mWeexDebugger?.mErrorMsg = "code = $errCode, msg = $msg"
             if (mWeexDebugger != null && mWeexDebugger?.isRefreshing != null && mWeexDebugger?.isRefreshing!!) {
                 report("调试模式js出错，改正后会重新渲染")
                 return
             }
-            if (mWeexPage.webUrl != null) {
-                if (iWebView == null) {
-                    iWebView = SysWebView(mActivity)
-                }
-                mContainerView.removeAllViews()
-                mContainerView.addView(iWebView as View)
-                iWebView?.loadPage(mWeexPage.webUrl)
+
+            if(mCurPage == null || mCurPage?.equals(mWeexPage) == true) {
+                renderError()
             }
+
+//            if (mWeexPage.webUrl != null) {
+//                if (iWebView == null) {
+//                    iWebView = SysWebView(mActivity)
+//                }
+//                mContainerView.removeAllViews()
+//                mContainerView.addView(iWebView as View)
+//                iWebView?.loadPage(mWeexPage.webUrl)
+//            }
         }
 
         override fun onRefreshSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
