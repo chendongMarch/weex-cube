@@ -136,7 +136,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, 
                 {
                     if (isAssetsExist(page.assetsJs ?: "", context)) {
                         fromWhere = "assets"
-                        WXFileUtils.loadAsset(page.assetsJs, context)
+                        WXFileUtils.loadAsset("js/${page.assetsJs}", context)
                     } else {
                         ""
                     }
@@ -164,7 +164,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, 
     private fun isAssetsExist(name: String, context: Context): Boolean {
         return try {
             val files = context.assets.list("js")
-            files.any { name === it }
+            files.any { name == it }
         } catch (e: Exception) {
             false
         }
