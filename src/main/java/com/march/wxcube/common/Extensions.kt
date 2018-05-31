@@ -67,3 +67,7 @@ fun String.md5(): String {
 fun View?.click(f: (View) -> Unit) {
     this?.setOnClickListener { f(this) }
 }
+
+fun StringBuilder.newLine(): StringBuilder {
+    return this.append("\n")
+}
