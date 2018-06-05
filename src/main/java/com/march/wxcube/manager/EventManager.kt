@@ -18,7 +18,7 @@ class EventManager : IManager {
         val instance: EventManager by lazy { EventManager() }
     }
 
-    // key -> List<instantId>
+    // EventKey -> List<mInstId>
     private val mEventInstanceIdMap by lazy { mutableMapOf<String, MutableSet<String>>() }
 
     override fun onWxInstRelease(weexPage: WeexPage?, instance: WXSDKInstance?) {
@@ -30,25 +30,42 @@ class EventManager : IManager {
         }
     }
 
+    fun unRegisterEvent(event: String?, instantId: String?) {
+        val nonNullId = instantId ?: return
+        if (event.isNullOrBlank()) {
+            // 删除本页面所有的事件
+            for (mutableEntry in mEventInstanceIdMap) {
+                if (mutableEntry.value.isNotEmpty()) {
+                    mutableEntry.value.remove(nonNullId)
+                }
+            }
+        } else {
+            // 删除本页面的指定事件
+            val mutableSet = mEventInstanceIdMap[event]
+            mutableSet?.remove(nonNullId)
+        }
+
+    }
+
     // 注册接受某事件
     // weex
     // event.registerEvent('myEvent')
     // globalEvent.addEventListener('myEvent', (params) => {});
-    fun registerEvent(key: String?, instantId: String?) {
+    fun registerEvent(event: String?, instantId: String?) {
         if (instantId == null) {
-            report("registerEvent error instantId = null")
+            report("registerEvent error mInstId = null")
             return
         }
-        val nonNullKey = key ?: return
-        val registerInstantIds = mEventInstanceIdMap[nonNullKey] ?: mutableSetOf()
+        val nonNullEvent = event ?: return
+        val registerInstantIds = mEventInstanceIdMap[nonNullEvent] ?: mutableSetOf()
         registerInstantIds.add(instantId)
-        mEventInstanceIdMap[nonNullKey] = registerInstantIds
+        mEventInstanceIdMap[nonNullEvent] = registerInstantIds
     }
 
     // 发送事件
     // weex
     // event.post('myEvent',{isOk:true});
-    fun postEvent(key: String, params: Map<String, Any>) {
+    fun postEvent(event: String, params: Map<String, Any>) {
         if (WXSDKManager.getInstance() == null) {
             report("post event WXSDKManager.getInstance() == null")
             return
@@ -58,14 +75,14 @@ class EventManager : IManager {
             report("post event WXSDKManager.getInstance().wxRenderManager == null")
             return
         }
-        val registerInstantIds = mEventInstanceIdMap[key] ?: listOf<String>()
+        val registerInstantIds = mEventInstanceIdMap[event] ?: listOf<String>()
         val allInstants = renderManager.allInstances
         for (instance in allInstants) {
             // 该事件被该 instant 注册过
             if (instance != null
                     && !instance.instanceId.isNullOrEmpty()
                     && registerInstantIds.contains(instance.instanceId)) {
-                instance.fireGlobalEventCallback(key, params)
+                instance.fireGlobalEventCallback(event, params)
             }
         }
     }
