@@ -4,10 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
+import com.march.webkit.WebKit
 import com.march.wxcube.common.report
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.WeexPage
+import com.march.wxcube.ui.WebActivity
 import com.march.wxcube.ui.WeexDialogFragment
 
 /**
@@ -67,7 +69,24 @@ class WeexRouter : WeexUpdater.UpdateHandler {
         return true
     }
 
+    /**
+     * 内置 webview 打开 web
+     */
+    fun openWeb(act: Context?, webUrl: String) {
+        val intent = Intent(act, WebActivity::class.java)
+        intent.putExtra(WebKit.KEY_URL, ManagerRegistry.HOST.makeWebUrl(webUrl))
+        act?.startActivity(intent)
+    }
 
+    /**
+     * 系统浏览器打开 web
+     */
+    fun openBroswer(ctx: Context?, webUrl: String) {
+        val intent = Intent()
+        intent.action = Intent.ACTION_VIEW
+        intent.data = Uri.parse(ManagerRegistry.HOST.makeWebUrl(webUrl))
+        ctx?.startActivity(intent)
+    }
     /**
      * 打开一个弹窗
      */
