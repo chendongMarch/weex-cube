@@ -65,7 +65,7 @@ class RequestManager : IManager {
         builder.writeTimeout(5 * 1000, TimeUnit.MILLISECONDS)
         // 失败后重试
         builder.retryOnConnectionFailure(true)
-        builder.proxy(Proxy.NO_PROXY)
+        // builder.proxy(Proxy.NO_PROXY)
 
         // 进行日志打印，扩展自 HttpLoggingInterceptor
         builder.addInterceptor(LogInterceptor())
