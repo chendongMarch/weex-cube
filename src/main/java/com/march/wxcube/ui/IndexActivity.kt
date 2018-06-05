@@ -1,9 +1,12 @@
 package com.march.wxcube.ui
 
+import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import com.march.common.utils.ToastUtils
 import com.march.wxcube.Weex
+import com.march.wxcube.common.Permission
 
 
 /**
@@ -35,8 +38,19 @@ class IndexActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         Weex.getInst().mWeexInjector.onPageCreated(this, Weex.PAGE_INDEX)
         Weex.getInst().mWeexInjector.getLoadingHandler().setIndexPageContent(this)
-        // 1.5s 后启动
-        Handler().postDelayed(mIndexRunnable, TIME_START)
+        checkPermissionAndLaunch();
+    }
+
+    private fun checkPermissionAndLaunch() {
+        val result = Permission.checkPermission(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE))
+        if (result) {
+            // 1.5s 后启动
+            Weex.getInst().mWeexUpdater.update(this)
+            Handler().postDelayed(mIndexRunnable, TIME_START)
+        } else {
+            ToastUtils.show("请授予达人店存储权限～")
+        }
     }
 
     override fun finish() {
@@ -47,5 +61,10 @@ class IndexActivity : BaseActivity() {
     override fun startActivity(intent: Intent?) {
         super.startActivity(intent)
         Weex.getInst().mWeexRouter.mRouterReadyCallback = null
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        checkPermissionAndLaunch()
     }
 }
