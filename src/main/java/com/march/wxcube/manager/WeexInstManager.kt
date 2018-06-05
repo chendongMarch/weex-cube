@@ -7,7 +7,7 @@ import java.lang.ref.WeakReference
 
 /**
  * CreateAt : 2018/5/3
- * Describe : 存储 WeexDelegate，可以借助 instantId 获取到指定 WeexDelegate
+ * Describe : 存储 WeexDelegate，可以借助 mInstId 获取到指定 WeexDelegate
  *
  * @author chendong
  */
@@ -17,6 +17,7 @@ class WeexInstManager : IManager {
         val instance by lazy { WeexInstManager() }
     }
     private val mWeexDelegateMap by lazy { mutableMapOf<String, WeakReference<WeexDelegate>>() }
+    private val mWeexActivityMap by lazy { mutableMapOf<String, WeakReference<WeexDelegate>>() }
 
     override fun onWxInstInit(weexPage: WeexPage?, instance: WXSDKInstance?, weexDelegate: WeexDelegate?) {
         super.onWxInstInit(weexPage, instance, weexDelegate)
