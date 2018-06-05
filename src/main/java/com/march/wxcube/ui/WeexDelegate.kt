@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment
 import android.view.View
 import android.view.ViewGroup
 import com.march.common.utils.LogUtils
-import com.march.webkit.IWebView
 import com.march.wxcube.R
 import com.march.wxcube.Weex
 import com.march.wxcube.common.report
@@ -15,6 +14,7 @@ import com.march.wxcube.debug.WeexDebugger
 import com.march.wxcube.lifecycle.WeexLifeCycle
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.WeexPage
+import com.march.wxcube.performer.IPerformer
 import com.taobao.weex.IWXRenderListener
 import com.taobao.weex.WXSDKInstance
 import java.util.*
@@ -35,7 +35,6 @@ class WeexDelegate : WeexLifeCycle {
     private lateinit var mActivity: Activity
     private val mHost: Any
     // 负责加载多个 fragment
-    var mFragmentLoader: FragmentLoader? = null
     var mWeexDebugger: WeexDebugger? = null
     // 容器
     private lateinit var mContainerView: ViewGroup // 容器 View
@@ -44,17 +43,23 @@ class WeexDelegate : WeexLifeCycle {
     private var mWeexPage: WeexPage
     // loading
     private val mLoadingHandler by lazy { Weex.getInst().mWeexInjector.getLoadingHandler() }
-    // 降级 webview
-    private var iWebView: IWebView? = null
+    private var mIsRenderSuccess = false
+    private var mCurPage: WeexPage? = null
+    private val mPerformers by lazy { mutableMapOf<String, IPerformer>() }
+    private val mLifeCallbacks by lazy { mutableListOf<WeexLifeCycle>() }
 
-    // 为 Fragment 提供构造方法
+    /**
+     * 为 Fragment 提供构造方法
+     */
     constructor(fragment: Fragment) {
         mHost = fragment
         mWeexPage = fragment.arguments.getParcelable(WeexPage.KEY_PAGE)
         init(fragment.activity)
     }
 
-    // 为 Activity 提供构造方法
+    /**
+     * 为 Activity 提供构造方法
+     */
     constructor(activity: Activity) {
         mHost = activity
         mWeexPage = activity.intent.getParcelableExtra(WeexPage.KEY_PAGE)
@@ -62,14 +67,95 @@ class WeexDelegate : WeexLifeCycle {
         initContainerView(activity.findViewById(R.id.weex_root))
     }
 
-    // 初始化方法
-    fun init(activity: Activity) {
+    /**
+     * 初始化方法
+     */
+    private fun init(activity: Activity) {
         mActivity = activity
+        createWxInst()
+    }
+
+    fun addPerformer(performer: IPerformer) {
+        mPerformers[performer.javaClass.simpleName] = performer
+        mLifeCallbacks.add(performer)
+    }
+
+    fun <T> getPerformer(clazz: Class<T>): T? {
+        val performer = mPerformers[clazz.simpleName]
+        return if (performer == null) {
+            null
+        } else {
+            performer as T
+        }
+    }
+
+    /**
+     * 销毁 weex 实例
+     */
+    private fun destroyWxInst() {
+        mWeexInst.onActivityDestroy()
+        mWeexRender.onDestroy()
+        ManagerRegistry.getInst().onWxInstRelease(mWeexPage, mWeexInst)
+    }
+
+    /**
+     * 创建 weex 实例
+     */
+    private fun createWxInst() {
         mWeexInst = WXSDKInstance(mActivity)
         mWeexRender = WeexRender(mActivity, mWeexInst, RenderListener())
         ManagerRegistry.getInst().onWxInstInit(mWeexPage, mWeexInst, this)
     }
 
+
+    fun initContainerView(view: ViewGroup) {
+        mContainerView = view
+        mLoadingHandler.addLoadingView(mContainerView)
+        mWeexDebugger = WeexDebugger(this, mActivity, mWeexPage)
+    }
+
+
+    fun close() {
+        when (mHost) {
+            is WeexActivity -> mHost.finish()
+            is WeexFragment -> mHost.activity.finish()
+            is WeexDialogFragment -> mHost.dismiss()
+        }
+    }
+
+    inner class RenderListener : IWXRenderListener {
+        override fun onRenderSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
+            LogUtils.e("onRenderSuccess")
+            mIsRenderSuccess = true
+            mLoadingHandler.finish(mContainerView)
+        }
+
+        override fun onViewCreated(instance: WXSDKInstance?, view: View?) {
+            this@WeexDelegate.onViewCreated(view)
+        }
+
+        override fun onException(instance: WXSDKInstance?, errCode: String?, msg: String?) {
+            report("code = $errCode, msg = $msg")
+            mWeexDebugger?.mErrorMsg = "code = $errCode, msg = $msg"
+            if (mWeexDebugger != null && mWeexDebugger?.isRefreshing != null && mWeexDebugger?.isRefreshing!!) {
+                report("调试模式js出错，改正后会重新渲染")
+                return
+            }
+            if (mCurPage == null || mCurPage?.equals(mWeexPage) == true) {
+                renderNotFound()
+            }
+        }
+
+        override fun onRefreshSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
+        }
+    }
+
+    //************************渲染页面*********************//
+
+
+    /**
+     * 准备渲染的参数
+     */
     private fun parseRenderOptions(): Map<String, Any> {
         val opts = HashMap<String, Any>()
         // parse url
@@ -84,114 +170,102 @@ class WeexDelegate : WeexLifeCycle {
         return opts
     }
 
+    /**
+     * 渲染之前处理
+     */
+    private fun preRender() {
+        if (mIsRenderSuccess) {
+            destroyWxInst()
+            createWxInst()
+            onCreate()
+        }
+    }
+
+    /**
+     * 渲染页面
+     */
+    private fun render(page: WeexPage) {
+        preRender()
+        mCurPage = page
+        mWeexRender.render(page, parseRenderOptions())
+    }
+
+    /**
+     * 渲染当前页面
+     */
     fun render() {
-        mWeexRender.render(mWeexPage, parseRenderOptions())
+        render(mWeexPage)
     }
 
-    private var mCurPage: WeexPage? = null
-
-    fun renderError() {
-        val errPage = Weex.getInst().mWeexRouter.findPage("/status/not-found-weex") ?: return
-        mCurPage = errPage
-        mWeexRender.render(errPage, parseRenderOptions())
-    }
-
+    /**
+     * 渲染指定的js，参数还是用本页面参数
+     */
     fun renderJs(js: String) {
+        preRender()
         mCurPage = mWeexPage
         mWeexRender.renderJs(mWeexPage, parseRenderOptions(), js)
     }
 
-    fun initContainerView(view: ViewGroup) {
-        mContainerView = view
-        mLoadingHandler.addLoadingView(mContainerView)
-        mWeexDebugger = WeexDebugger(this, mActivity, mWeexPage)
+    /**
+     * 渲染 not found 页面
+     */
+    fun renderNotFound() {
+        val errPage = Weex.getInst().mWeexRouter.findPage("/status/not-found-weex") ?: return
+        render(errPage)
     }
 
 
-    override fun close() {
-        when (mHost) {
-            is WeexActivity -> mHost.finish()
-            is WeexFragment -> mHost.activity.finish()
-            is WeexDialogFragment -> mHost.dismiss()
-        }
+    //************************同步生命周期函数*********************//
+
+    override fun onDestroy() {
+        mWeexInst.onActivityDestroy()
+        destroyWxInst()
+        mWeexDebugger?.onDestroy()
+        mLifeCallbacks.forEach { it.onDestroy() }
+    }
+
+    override fun onViewCreated(view: View?) {
+        super.onViewCreated(view)
+        LogUtils.e("onViewCreated")
+        mWeexView = view as ViewGroup
+        mContainerView.removeAllViews()
+        mContainerView.addView(view, 0)
+        mWeexDebugger?.addDebugBtn(mContainerView)
+        mLifeCallbacks.forEach { it.onViewCreated(view) }
     }
 
     override fun onCreate() {
         mWeexInst.onActivityCreate()
+        mLifeCallbacks.forEach { it.onCreate() }
     }
 
     override fun onStart() {
         mWeexInst.onActivityStart()
+        mLifeCallbacks.forEach { it.onStart() }
     }
 
     override fun onResume() {
         mWeexInst.onActivityResume()
+        mLifeCallbacks.forEach { it.onResume() }
     }
 
     override fun onPause() {
         mWeexInst.onActivityPause()
+        mLifeCallbacks.forEach { it.onPause() }
     }
 
     override fun onStop() {
         mWeexInst.onActivityStop()
-    }
-
-    override fun onDestroy() {
-        mWeexInst.onActivityDestroy()
-        mWeexInst.registerRenderListener(null)
-        ManagerRegistry.getInst().onWxInstRelease(mWeexPage, mWeexInst)
-        mWeexDebugger?.onDestroy()
-    }
-
-    fun onDebugDestroy() {
-        mWeexInst.onActivityDestroy()
-        mWeexInst.registerRenderListener(null)
-        ManagerRegistry.getInst().onWxInstRelease(mWeexPage, mWeexInst)
+        mLifeCallbacks.forEach { it.onStop() }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         mWeexInst.onActivityResult(requestCode, resultCode, data)
+        mLifeCallbacks.forEach { it.onActivityResult(requestCode, resultCode, data) }
     }
 
-
-    inner class RenderListener : IWXRenderListener {
-        override fun onRenderSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
-            mFragmentLoader?.onViewCreated()
-            LogUtils.e("onRenderSuccess")
-            mLoadingHandler.finish(mContainerView)
-        }
-
-        override fun onViewCreated(instance: WXSDKInstance?, view: View?) {
-            mWeexView = view as ViewGroup
-            mContainerView.removeAllViews()
-            mContainerView.addView(view, 0)
-            mWeexDebugger?.addDebugBtn(mContainerView)
-            LogUtils.e("onViewCreated")
-        }
-
-        override fun onException(instance: WXSDKInstance?, errCode: String?, msg: String?) {
-            report("code = $errCode, msg = $msg")
-            mWeexDebugger?.mErrorMsg = "code = $errCode, msg = $msg"
-            if (mWeexDebugger != null && mWeexDebugger?.isRefreshing != null && mWeexDebugger?.isRefreshing!!) {
-                report("调试模式js出错，改正后会重新渲染")
-                return
-            }
-
-            if(mCurPage == null || mCurPage?.equals(mWeexPage) == true) {
-                renderError()
-            }
-
-//            if (mWeexPage.webUrl != null) {
-//                if (iWebView == null) {
-//                    iWebView = SysWebView(mActivity)
-//                }
-//                mContainerView.removeAllViews()
-//                mContainerView.addView(iWebView as View)
-//                iWebView?.loadPage(mWeexPage.webUrl)
-//            }
-        }
-
-        override fun onRefreshSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
-        }
+    override fun onPermissionResult(requestCode: Int, resultCode: Int, data: Intent) {
+        super.onPermissionResult(requestCode, resultCode, data)
+        mLifeCallbacks.forEach { it.onPermissionResult(requestCode, resultCode, data) }
     }
 }

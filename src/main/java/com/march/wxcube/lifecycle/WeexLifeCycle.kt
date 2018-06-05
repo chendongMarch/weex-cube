@@ -1,6 +1,7 @@
 package com.march.wxcube.lifecycle
 
 import android.content.Intent
+import android.view.View
 
 /**
  * CreateAt : 2018/3/27
@@ -11,6 +12,8 @@ import android.content.Intent
 interface WeexLifeCycle {
 
     fun onCreate() {}
+
+    fun onViewCreated(view: View?) {}
 
     fun onStart() {}
 
@@ -24,6 +27,6 @@ interface WeexLifeCycle {
 
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {}
 
-    fun close() {}
+    fun onPermissionResult(requestCode: Int, resultCode: Int, data: Intent) {}
 
 }
