@@ -1,6 +1,7 @@
 package com.march.wxcube
 
 import android.content.Context
+import com.alibaba.android.bindingx.plugin.weex.BindingX
 import com.march.common.Common
 import com.march.common.model.WeakContext
 import com.march.common.utils.FileUtils
@@ -65,6 +66,7 @@ class Weex private constructor() {
         WXSDKEngine.initialize(config.ctx, builder.build())
         registerModule(config.ctx)
         registerComponent()
+        registerBindingX()
         injector.onWxModuleCompRegister()
 
         ManagerRegistry.getInst().register(DataManager.instance)
@@ -82,11 +84,17 @@ class Weex private constructor() {
 
         mWeexUpdater.registerUpdateHandler(mWeexRouter)
         mWeexUpdater.registerUpdateHandler(mWeexJsLoader)
-        Weex.getInst().mWeexUpdater.update(config.ctx)
+    }
+
+    private fun registerBindingX() {
+        try {
+            BindingX.register()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     fun getContext() = mWeakCtx.get()
-
 
     private fun registerComponent() {
         try {
