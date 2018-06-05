@@ -17,7 +17,7 @@ class StatusBarModule : WXModule() {
      */
     @JSMethod(uiThread = true)
     fun transluteStatusBar() {
-        val act = activity ?: return
+        val act = mAct ?: return
         ImmersionStatusBarUtils.translucent(act)
     }
 
@@ -26,7 +26,7 @@ class StatusBarModule : WXModule() {
      */
     @JSMethod(uiThread = true)
     fun setStatusBarLight() {
-        val act = activity ?: return
+        val act = mAct ?: return
         ImmersionStatusBarUtils.setStatusBarLightMode(act)
     }
 
@@ -35,7 +35,7 @@ class StatusBarModule : WXModule() {
      */
     @JSMethod(uiThread = true)
     fun setStatusBarDark() {
-        val act = activity ?: return
+        val act = mAct ?: return
         ImmersionStatusBarUtils.setStatusBarDarkMode(act)
     }
 }

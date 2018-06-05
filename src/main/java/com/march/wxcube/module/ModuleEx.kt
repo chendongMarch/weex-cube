@@ -21,15 +21,15 @@ import com.taobao.weex.common.WXModule
  * @author chendong
  */
 
-// 获取 context
-val WXModule.context: Context?
+// 获取 mCtx
+val WXModule.mCtx: Context?
     get() = if (mWXSDKInstance != null) {
         mWXSDKInstance.context
     } else null
 
 
-// 获取 activity
-val WXModule.activity: AppCompatActivity?
+// 获取 mAct
+val WXModule.mAct: AppCompatActivity?
     get() {
         if (mWXSDKInstance != null) {
             val context = mWXSDKInstance.context
@@ -41,8 +41,8 @@ val WXModule.activity: AppCompatActivity?
     }
 
 
-// 获取 instantId
-val WXModule.instantId: String?
+// 获取 mInstId
+val WXModule.mInstId: String?
     get() {
         if (mWXSDKInstance != null) {
             return mWXSDKInstance.instanceId
@@ -51,8 +51,8 @@ val WXModule.instantId: String?
     }
 
 
-// 获取 weexActivity
-val WXModule.weexActivity: WeexActivity?
+// 获取 mWeexAct
+val WXModule.mWeexAct: WeexActivity?
     get() {
         if (mWXSDKInstance != null) {
             val context = mWXSDKInstance.context
@@ -64,8 +64,8 @@ val WXModule.weexActivity: WeexActivity?
     }
 
 
-// 获取 weexDelegate
-val WXModule.weexDelegate: WeexDelegate?
+// 获取 mDelegate
+val WXModule.mWeexDelegate: WeexDelegate?
     get() {
         return ManagerRegistry.WEEXINST.findWeexDelegateByInstanceId(mWXSDKInstance.instanceId)
     }

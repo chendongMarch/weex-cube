@@ -40,7 +40,7 @@ class DebugModule : WXModule() {
      */
     @JSMethod(uiThread = true)
     fun toast(msg: String) {
-        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        Toast.makeText(mCtx, msg, Toast.LENGTH_SHORT).show()
     }
 
     /**
@@ -48,6 +48,6 @@ class DebugModule : WXModule() {
      */
     @JSMethod(uiThread = true)
     fun toastLong(msg: String) {
-        Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+        Toast.makeText(mCtx, msg, Toast.LENGTH_LONG).show()
     }
 }

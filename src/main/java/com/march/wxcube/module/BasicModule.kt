@@ -5,13 +5,12 @@ import android.support.v4.app.Fragment
 import android.text.TextUtils
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import com.march.common.utils.LogUtils
 import com.march.webkit.WebKit
 import com.march.wxcube.Weex
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.FragmentConfig
-import com.march.wxcube.ui.FragmentLoader
+import com.march.wxcube.performer.FragmentPerformer
 import com.march.wxcube.ui.WebActivity
 import com.march.wxcube.ui.WeexFragment
 import com.taobao.weex.annotation.JSMethod
@@ -32,7 +31,7 @@ class BasicModule : WXModule() {
     }
 
     /**
-     * 读取 instantId
+     * 读取 mInstId
      */
     @JSMethod(uiThread = true)
     fun readInstanceId(jsCallback: JSCallback) {
@@ -52,7 +51,7 @@ class BasicModule : WXModule() {
      */
     @JSMethod(uiThread = true)
     fun close() {
-        val delegate = weexDelegate ?: return
+        val delegate = mWeexDelegate ?: return
         delegate.close()
     }
 
@@ -61,7 +60,7 @@ class BasicModule : WXModule() {
      */
     @JSMethod(uiThread = true)
     fun openUrl(webUrl: String) {
-        val ctx = context ?: return
+        val ctx = mCtx ?: return
         Weex.getInst().mWeexRouter.openUrl(ctx, webUrl)
     }
 
@@ -70,7 +69,7 @@ class BasicModule : WXModule() {
      */
     @JSMethod(uiThread = true)
     fun openDialog(webUrl: String, params: JSONObject) {
-        val act = activity ?: return
+        val act = mAct ?: return
         val config = jsonObj2Obj(params, DialogConfig::class.java)
         Weex.getInst().mWeexRouter.openDialog(act, webUrl, config)
     }
@@ -80,7 +79,7 @@ class BasicModule : WXModule() {
      */
     @JSMethod(uiThread = true)
     fun openWeb(webUrl: String) {
-        val act = activity ?: return
+        val act = mAct ?: return
         val intent = Intent(act, WebActivity::class.java)
         intent.putExtra(WebKit.KEY_URL, ManagerRegistry.HOST.makeWebUrl(webUrl))
         act.startActivity(intent)
@@ -91,11 +90,10 @@ class BasicModule : WXModule() {
      */
     @JSMethod(uiThread = true)
     fun loadTabs(array: JSONArray) {
-        LogUtils.e("loadTabPages")
-        val weexAct = weexActivity ?: return
+        val weexAct = mWeexAct ?: return
         val configs = jsonArray2List(array, FragmentConfig::class.java)
-        weexAct.weexDelegate.mFragmentLoader = FragmentLoader(weexAct.supportFragmentManager,
-                configs, object : FragmentLoader.FragmentHandler {
+        weexAct.mDelegate.addPerformer(FragmentPerformer(weexAct.supportFragmentManager,
+                configs, object : FragmentPerformer.FragmentHandler {
             override fun containerIdFinder(): () -> Int {
                 return {
                     val view = findView { it.tag == "container" }
@@ -111,7 +109,7 @@ class BasicModule : WXModule() {
                 }
                 return null
             }
-        })
+        }))
     }
 
     /**
@@ -120,9 +118,10 @@ class BasicModule : WXModule() {
      */
     @JSMethod(uiThread = true)
     fun showTab(tag: String) {
-        val weexAct = weexActivity ?: return
-        val loader = weexAct.weexDelegate.mFragmentLoader ?: return
-        loader.showFragment(tag)
+        val weexAct = mWeexAct ?: return
+        val performer = weexAct.mDelegate.getPerformer(FragmentPerformer::class.java)
+                ?: return
+        performer.showFragment(tag)
     }
 
 
@@ -133,19 +132,29 @@ class BasicModule : WXModule() {
      * globalEvent.addEventListener('myEvent', (params) => {});
      */
     @JSMethod(uiThread = true)
-    fun registerEvent(key: String?) {
-        ManagerRegistry.EVENT.registerEvent(key, instantId)
+    fun registerEvent(event: String?) {
+        ManagerRegistry.EVENT.registerEvent(event, mInstId)
     }
 
 
     /**
      * 发送事件
      * const event = weex.requireModule('cube-event')
-     * event.post('myEvent',{isOk:true});
+     * event.postEvent('myEvent',{isOk:true});
      */
     @JSMethod(uiThread = true)
-    fun postEvent(key: String, params: Map<String, Any>) {
-        ManagerRegistry.EVENT.postEvent(key, params)
+    fun postEvent(event: String, params: Map<String, Any>) {
+        ManagerRegistry.EVENT.postEvent(event, params)
     }
 
+
+    /**
+     * 取消注册事件
+     * const event = weex.requireModule('cube-event')
+     * event.unRegisterEvent('myEvent');
+     */
+    @JSMethod(uiThread = true)
+    fun unRegisterEvent(event: String) {
+        ManagerRegistry.EVENT.unRegisterEvent(event, mInstId)
+    }
 }
