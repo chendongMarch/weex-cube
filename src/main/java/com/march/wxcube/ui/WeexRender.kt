@@ -20,6 +20,7 @@ class WeexRender(activity: Activity,
                  private val mWxInst: WXSDKInstance,
                  private val listener: IWXRenderListener) {
 
+
     init {
         val renderContainer = RenderContainer(activity)
         mWxInst.setRenderContainer(renderContainer)
@@ -46,4 +47,9 @@ class WeexRender(activity: Activity,
             }
         }
     }
+
+    fun onDestroy() {
+        mWxInst.registerRenderListener(null)
+    }
+
 }
