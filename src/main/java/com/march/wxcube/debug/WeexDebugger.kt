@@ -35,7 +35,6 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
                    private val mActivity: Activity,
                    private val mWeexPage: WeexPage?) : WeexLifeCycle {
 
-
     private var mLastTemplate: String? = null
 
     private val mHandler by lazy { Handler(Looper.getMainLooper()) { startRefresh() } }
@@ -81,9 +80,6 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
                 it?.let {
                     if (mLastTemplate == null || !mLastTemplate.equals(it)) {
                         mActivity.runOnUiThread {
-                            onDebugDestroy()
-                            init(mActivity)
-                            onCreate()
                             renderJs(it)
                             mLastTemplate = it
                         }
