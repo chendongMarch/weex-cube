@@ -11,7 +11,7 @@ import android.widget.TextView
  *
  * @author chendong
  */
-class DragButton(context: Context) : Button(context) {
+class DragButton(context: Context) : TextView(context) {
 
     private var lastX: Int = 0
     private var lastY: Int = 0

@@ -58,10 +58,10 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
             }
         }
         val params = FrameLayout.LayoutParams(200, ViewGroup.LayoutParams.WRAP_CONTENT)
-        params.gravity = Gravity.RIGHT or Gravity.TOP
-        params.rightMargin = 200
-        params.topMargin = 200
-        mDebugBtn?.setPadding(20, 20, 20, 20)
+        params.gravity = Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
+        params.leftMargin = 200
+        mDebugBtn?.gravity = Gravity.CENTER
+        mDebugBtn?.setPadding(20, 5, 20, 5)
         mDebugBtn?.setBackgroundColor(Color.parseColor("#60e5df"))
         mDebugBtn?.setTextColor(Color.BLACK)
         container.addView(mDebugBtn, params)
