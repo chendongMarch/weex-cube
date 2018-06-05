@@ -6,13 +6,10 @@ import android.util.LruCache
 import com.march.wxcube.common.DiskLruCache
 import com.march.wxcube.common.memory
 import com.march.wxcube.common.report
-import com.march.wxcube.manager.HostManager
 import com.march.wxcube.manager.ManagerRegistry
-
 import com.march.wxcube.model.WeexPage
 import com.taobao.weex.utils.WXFileUtils
 import java.io.File
-
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -39,6 +36,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, 
     private val mJsCacheStrategy = jsCacheStrategy
     // 预加载策略
     private val mJsPrepareStrategy = jsPrepareStrategy
+
     // 内存缓存
     private val mJsMemoryCache = JsMemoryCache(context.memory(.3f))
     // 文件缓存
