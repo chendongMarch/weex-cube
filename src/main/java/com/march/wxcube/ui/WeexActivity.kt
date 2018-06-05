@@ -15,7 +15,7 @@ import com.march.wxcube.Weex
  */
 class WeexActivity : BaseActivity() {
 
-    val weexDelegate: WeexDelegate by lazy {
+    val mDelegate: WeexDelegate by lazy {
         WeexDelegate(this)
     }
 
@@ -23,39 +23,39 @@ class WeexActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         Weex.getInst().mWeexInjector.onPageCreated(this, Weex.PAGE_WEEX)
         setContentView(R.layout.weex_container)
-        weexDelegate.onCreate()
-        weexDelegate.render()
+        mDelegate.onCreate()
+        mDelegate.render()
     }
 
     override fun onResume() {
         super.onResume()
-        weexDelegate.onResume()
+        mDelegate.onResume()
     }
 
 
     override fun onPause() {
         super.onPause()
-        weexDelegate.onPause()
+        mDelegate.onPause()
 
     }
 
     override fun onStart() {
         super.onStart()
-        weexDelegate.onStart()
+        mDelegate.onStart()
     }
 
     override fun onStop() {
         super.onStop()
-        weexDelegate.onStop()
+        mDelegate.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        weexDelegate.onDestroy()
+        mDelegate.onDestroy()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         super.onActivityResult(requestCode, resultCode, data)
-        weexDelegate.onActivityResult(requestCode, resultCode, data)
+        mDelegate.onActivityResult(requestCode, resultCode, data)
     }
 }
