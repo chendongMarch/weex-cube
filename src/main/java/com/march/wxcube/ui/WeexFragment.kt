@@ -1,6 +1,5 @@
 package com.march.wxcube.ui
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -19,7 +18,6 @@ import com.march.wxcube.model.WeexPage
  */
 class WeexFragment : Fragment() {
 
-
     companion object {
 
         fun newInstance(bundle: WeexPage): WeexFragment {
@@ -31,50 +29,50 @@ class WeexFragment : Fragment() {
         }
     }
 
-    private val weexDelegate: WeexDelegate by lazy { WeexDelegate(this) }
+    private val mDelegate: WeexDelegate by lazy { WeexDelegate(this) }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        weexDelegate.onCreate()
+        mDelegate.onCreate()
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater?.inflate(R.layout.weex_container, container, false) as ViewGroup
-        weexDelegate.initContainerView(view)
-        weexDelegate.render()
+        mDelegate.initContainerView(view)
+        mDelegate.render()
         return view
     }
 
     override fun onResume() {
         super.onResume()
-        weexDelegate.onResume()
+        mDelegate.onResume()
     }
 
 
     override fun onPause() {
         super.onPause()
-        weexDelegate.onPause()
+        mDelegate.onPause()
 
     }
 
     override fun onStart() {
         super.onStart()
-        weexDelegate.onStart()
+        mDelegate.onStart()
     }
 
     override fun onStop() {
         super.onStop()
-        weexDelegate.onStop()
+        mDelegate.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        weexDelegate.onDestroy()
+        mDelegate.onDestroy()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         super.onActivityResult(requestCode, resultCode, data)
-        weexDelegate.onActivityResult(requestCode, resultCode, data)
+        mDelegate.onActivityResult(requestCode, resultCode, data)
     }
 }

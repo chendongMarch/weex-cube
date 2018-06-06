@@ -23,19 +23,19 @@ open class WeexDialogFragment : DialogFragment() {
 
     private lateinit var mConfig: DialogConfig
 
-    private val mWeexDelegate: WeexDelegate by lazy { WeexDelegate(this) }
+    private val mDelegate: WeexDelegate by lazy { WeexDelegate(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(DialogFragment.STYLE_NO_FRAME, R.style.dialog_theme)
-        mWeexDelegate.onCreate()
+        mDelegate.onCreate()
         mConfig = arguments.getParcelable(DialogConfig.KEY_DIALOG_CONFIG) ?: DialogConfig()
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater?.inflate(R.layout.weex_container, container, false) as ViewGroup
-        mWeexDelegate.initContainerView(view)
-        mWeexDelegate.render()
+        mDelegate.initContainerView(view)
+        mDelegate.render()
         return view
     }
 
@@ -62,35 +62,35 @@ open class WeexDialogFragment : DialogFragment() {
 
     override fun onResume() {
         super.onResume()
-        mWeexDelegate.onResume()
+        mDelegate.onResume()
     }
 
 
     override fun onPause() {
         super.onPause()
-        mWeexDelegate.onPause()
+        mDelegate.onPause()
 
     }
 
     override fun onStart() {
         super.onStart()
-        mWeexDelegate.onStart()
+        mDelegate.onStart()
         setDialogAttributes(dialog, mConfig)
     }
 
     override fun onStop() {
         super.onStop()
-        mWeexDelegate.onStop()
+        mDelegate.onStop()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mWeexDelegate.onDestroy()
+        mDelegate.onDestroy()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         super.onActivityResult(requestCode, resultCode, data)
-        mWeexDelegate.onActivityResult(requestCode, resultCode, data)
+        mDelegate.onActivityResult(requestCode, resultCode, data)
     }
 
     companion object {

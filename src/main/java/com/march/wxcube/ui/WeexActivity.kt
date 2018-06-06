@@ -22,7 +22,7 @@ class WeexActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Weex.getInst().mWeexInjector.onPageCreated(this, Weex.PAGE_WEEX)
-        setContentView(R.layout.weex_container)
+//        setContentView(R.layout.weex_container)
         mDelegate.onCreate()
         mDelegate.render()
     }
@@ -32,11 +32,9 @@ class WeexActivity : BaseActivity() {
         mDelegate.onResume()
     }
 
-
     override fun onPause() {
         super.onPause()
         mDelegate.onPause()
-
     }
 
     override fun onStart() {

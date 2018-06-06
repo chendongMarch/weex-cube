@@ -50,7 +50,6 @@ val WXModule.mInstId: String?
         return null
     }
 
-
 // 获取 mWeexAct
 val WXModule.mWeexAct: WeexActivity?
     get() {
@@ -63,20 +62,17 @@ val WXModule.mWeexAct: WeexActivity?
         return null
     }
 
-
 // 获取 mDelegate
 val WXModule.mWeexDelegate: WeexDelegate?
     get() {
         return ManagerRegistry.WEEXINST.findWeexDelegateByInstanceId(mWXSDKInstance.instanceId)
     }
 
-
 // 获取 查找 view
 fun WXModule.findView(f: (View) -> Boolean): View? {
     val containerView: ViewGroup = mWXSDKInstance.containerView as ViewGroup
     return findView(containerView, f)
 }
-
 
 private fun WXModule.findView(viewGroup: ViewGroup, f: (View) -> Boolean): View? {
     var view: View? = null
