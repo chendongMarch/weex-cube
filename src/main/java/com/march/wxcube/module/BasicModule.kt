@@ -1,17 +1,14 @@
 package com.march.wxcube.module
 
-import android.content.Intent
 import android.support.v4.app.Fragment
 import android.text.TextUtils
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import com.march.webkit.WebKit
 import com.march.wxcube.Weex
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.FragmentConfig
 import com.march.wxcube.performer.FragmentPerformer
-import com.march.wxcube.ui.WebActivity
 import com.march.wxcube.ui.WeexFragment
 import com.taobao.weex.annotation.JSMethod
 import com.taobao.weex.bridge.JSCallback
@@ -75,14 +72,27 @@ class BasicModule : WXModule() {
     }
 
     /**
+     * 打开浏览器
+     */
+    @JSMethod(uiThread = true)
+    fun openBrowser(webUrl: String) {
+        Weex.getInst().mWeexRouter.openBrowser(mCtx, webUrl)
+    }
+
+    /**
+     * 重新 load 这个页面
+     */
+    @JSMethod(uiThread = true)
+    fun refresh() {
+        mWeexDelegate?.render()
+    }
+
+    /**
      * 打开 web 界面
      */
     @JSMethod(uiThread = true)
     fun openWeb(webUrl: String) {
-        val act = mAct ?: return
-        val intent = Intent(act, WebActivity::class.java)
-        intent.putExtra(WebKit.KEY_URL, ManagerRegistry.HOST.makeWebUrl(webUrl))
-        act.startActivity(intent)
+        Weex.getInst().mWeexRouter.openWeb(mCtx, webUrl)
     }
 
     /**
