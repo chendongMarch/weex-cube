@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment
 import android.view.View
 import android.view.ViewGroup
 import com.march.common.utils.LogUtils
-import com.march.wxcube.R
 import com.march.wxcube.Weex
 import com.march.wxcube.common.report
 import com.march.wxcube.debug.WeexDebugger
@@ -37,7 +36,7 @@ class WeexDelegate : WeexLifeCycle {
     // 负责加载多个 fragment
     var mWeexDebugger: WeexDebugger? = null
     // 容器
-    private lateinit var mContainerView: ViewGroup // 容器 View
+    lateinit var mContainerView: ViewGroup // 容器 View
     private var mWeexView: ViewGroup? = null // weex root view
     // 页面数据
     private var mWeexPage: WeexPage
@@ -64,7 +63,7 @@ class WeexDelegate : WeexLifeCycle {
         mHost = activity
         mWeexPage = activity.intent.getParcelableExtra(WeexPage.KEY_PAGE)
         init(activity)
-        initContainerView(activity.findViewById(R.id.weex_root))
+        initContainerView(activity.findViewById(android.R.id.content))
     }
 
     /**
