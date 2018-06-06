@@ -2,6 +2,9 @@ package com.march.wxcube
 
 import android.content.Context
 import com.alibaba.android.bindingx.plugin.weex.BindingX
+import com.facebook.stetho.DumperPluginsProvider
+import com.facebook.stetho.Stetho
+import com.facebook.stetho.dumpapp.DumperPlugin
 import com.march.common.Common
 import com.march.common.model.WeakContext
 import com.march.common.utils.FileUtils
@@ -41,7 +44,11 @@ class Weex private constructor() {
     fun init(config: WeexConfig, injector: WeexInjector) {
         mWeexConfig = config.prepare()
         mWeexInjector = injector
+        val ctx = config.ctx
 
+        Stetho.initialize(Stetho.newInitializerBuilder(ctx)
+                .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(ctx))
+                .build())
         WXEnvironment.setOpenDebugLog(config.debug)
         WXEnvironment.setApkDebugable(config.debug)
         WXSDKEngine.addCustomOptions("container", "weex-cube")
@@ -64,8 +71,8 @@ class Weex private constructor() {
                 // 图片加载
                 .setImgAdapter(ImgAdapter())
         injector.onWxSdkEngineInit(builder)
-        WXSDKEngine.initialize(config.ctx, builder.build())
-        registerModule(config.ctx)
+        WXSDKEngine.initialize(ctx, builder.build())
+        registerModule(ctx)
         registerComponent()
         registerBindingX()
         injector.onWxModuleCompRegister()
@@ -80,8 +87,8 @@ class Weex private constructor() {
         ManagerRegistry.HOST.mJsResHost = config.jsResHost
         ManagerRegistry.HOST.mApiHost = config.apiHost
 
-        Common.init(config.ctx, JsonParseAdapterImpl())
-        WebKit.init(config.ctx, WebKit.CORE_SYS, null)
+        Common.init(ctx, JsonParseAdapterImpl())
+        WebKit.init(ctx, WebKit.CORE_SYS, null)
 
         mWeexUpdater.registerUpdateHandler(mWeexRouter)
         mWeexUpdater.registerUpdateHandler(mWeexJsLoader)
