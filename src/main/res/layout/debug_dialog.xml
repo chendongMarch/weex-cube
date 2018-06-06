@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,21 +7,32 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:padding="20dp">
 
-    <TextView
-        android:id="@+id/desc_tv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="#1a1210"
-        android:textSize="16sp"
-        tools:text="测试测试测试测试测试测试测试"/>
-
     <Button
         android:id="@+id/close_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
         android:text="关闭"/>
 
+    <ScrollView
+        android:id="@+id/msg_sc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="50dp">
+
+        <TextView
+            android:id="@+id/desc_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#1a1210"
+            android:textSize="16sp"
+            tools:text="测试测试测试测s试"/>
+    </ScrollView>
+
+
     <LinearLayout
+        android:id="@+id/clear_btn_ll"
+        android:layout_below="@+id/msg_sc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -43,6 +54,8 @@
 
 
     <LinearLayout
+        android:id="@+id/update_btn_ll"
+        android:layout_below="@+id/clear_btn_ll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -57,28 +70,35 @@
     </LinearLayout>
 
 
-    <Switch
-        android:id="@+id/js_in_cache_sw"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:switchPadding="10dp"
-        android:text="调试js是否加入缓存"/>
+        android:layout_below="@+id/update_btn_ll"
+        android:orientation="vertical">
 
-    <Switch
-        android:id="@+id/js_in_disk_sw"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:switchPadding="10dp"
-        android:text="调试js是否加入磁盘"/>
+        <Switch
+            android:id="@+id/js_in_cache_sw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:switchPadding="10dp"
+            android:text="调试js是否加入缓存"/>
 
-    <Switch
-        android:id="@+id/debug_local_js_sw"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:switchPadding="10dp"
-        android:text="本地调试JS"/>
+        <Switch
+            android:id="@+id/js_in_disk_sw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:switchPadding="10dp"
+            android:text="调试js是否加入磁盘"/>
 
-</LinearLayout>
+        <Switch
+            android:id="@+id/debug_local_js_sw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:switchPadding="10dp"
+            android:text="本地调试JS"/>
+    </LinearLayout>
+
+</RelativeLayout>
