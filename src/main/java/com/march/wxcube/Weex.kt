@@ -9,6 +9,7 @@ import com.march.webkit.WebKit
 import com.march.wxcube.common.JsonParseAdapterImpl
 import com.march.wxcube.common.sdFile
 import com.march.wxcube.manager.*
+import com.march.wxcube.module.OneModule
 import com.march.wxcube.widget.Container
 import com.march.wxcube.wxadapter.ImgAdapter
 import com.march.wxcube.wxadapter.JsErrorAdapter
@@ -105,7 +106,8 @@ class Weex private constructor() {
     }
 
     private fun registerModule(context: Context) {
-        try {
+            try {
+            WXSDKEngine.registerModule("native", OneModule::class.java, true)
             registerModulePatch(context,R.array.internal_module)
             registerModulePatch(context,R.array.extension_module)
         } catch (e: WXException) {
