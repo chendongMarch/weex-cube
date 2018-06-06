@@ -1,5 +1,6 @@
 package com.march.wxcube.module
 
+import android.graphics.Color
 import android.support.v4.app.Fragment
 import android.text.TextUtils
 import com.alibaba.fastjson.JSONArray
@@ -94,6 +95,17 @@ class BasicModule : WXModule() {
     fun openWeb(webUrl: String) {
         Weex.getInst().mWeexRouter.openWeb(mCtx, webUrl)
     }
+
+    @JSMethod(uiThread = true)
+    fun initPage(params: JSONObject) {
+        val color = try {
+            Color.parseColor(params.getString("bgColor") ?: "#ffffff")
+        } catch (e: Exception) {
+            Color.WHITE
+        }
+        mWeexDelegate?.mContainerView?.setBackgroundColor(color)
+    }
+
 
     /**
      * 加载 tab
