@@ -20,23 +20,7 @@ import java.security.MessageDigest
  *
  * @author chendong
  */
-// jsonObj -> Obj
-fun <T> JSONObject?.toObj(clz: Class<T>): T? {
-    if (this == null) {
-        return null
-    }
-    val json = JSON.toJSONString(this)
-    return JSONObject.parseObject(json, clz)
-}
 
-// jsonArray -> List
-fun <T> JSONArray?.toList(clz: Class<T>): List<T> {
-    if (this == null) {
-        return listOf()
-    }
-    val json = JSON.toJSONString(this)
-    return JSONArray.parseArray(json, clz)
-}
 
 // 提交错误
 fun Any.report(msg: String, throwable: Throwable? = null) {
