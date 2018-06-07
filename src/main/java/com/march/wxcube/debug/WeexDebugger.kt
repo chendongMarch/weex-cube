@@ -69,6 +69,7 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
 
     private fun startRefresh(): Boolean {
         return with(mWeexDelegate) {
+            isRefreshing = true
             var cacheStrategy = JsCacheStrategy.NO_CACHE
             if(mDebugConfig.debugJsInCache) {
                 cacheStrategy = JsCacheStrategy.CACHE_MEMORY_ONLY
@@ -96,6 +97,7 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
     private fun stopRefresh() {
         mLastTemplate = null
         mHandler.removeCallbacksAndMessages(null)
+        isRefreshing = false
     }
 
     override fun onDestroy() {
