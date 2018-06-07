@@ -26,6 +26,10 @@ import java.util.*
  */
 class WeexDelegate : WeexLifeCycle {
 
+    companion object {
+        const val EXTRA = "extra"
+    }
+
     // weex 实例
     private lateinit var mWeexInst: WXSDKInstance
     // 渲染
@@ -84,7 +88,7 @@ class WeexDelegate : WeexLifeCycle {
         return if (performer == null) {
             null
         } else {
-            performer as T
+            performer as? T
         }
     }
 
@@ -95,6 +99,8 @@ class WeexDelegate : WeexLifeCycle {
         mWeexInst.onActivityDestroy()
         mWeexRender.onDestroy()
         ManagerRegistry.getInst().onWxInstRelease(mWeexPage, mWeexInst)
+        mLifeCallbacks.forEach { it.onDestroy() }
+        mLifeCallbacks.clear()
     }
 
     /**
@@ -160,10 +166,11 @@ class WeexDelegate : WeexLifeCycle {
         // parse url
         val uri = Uri.parse(mWeexPage.webUrl)
         uri.queryParameterNames.forEach { opts[it] = uri.getQueryParameter(it) }
+        opts["instanceId"] = mWeexInst.instanceId
         mWeexPage.webUrl?.let {
             val data = ManagerRegistry.DATA.getData(it)
             if (data != null) {
-                opts["extraData"] = data
+                opts[EXTRA] = data
             }
         }
         return opts
@@ -213,14 +220,11 @@ class WeexDelegate : WeexLifeCycle {
         render(errPage)
     }
 
-
     //************************同步生命周期函数*********************//
 
     override fun onDestroy() {
-        mWeexInst.onActivityDestroy()
         destroyWxInst()
         mWeexDebugger?.onDestroy()
-        mLifeCallbacks.forEach { it.onDestroy() }
     }
 
     override fun onViewCreated(view: View?) {
