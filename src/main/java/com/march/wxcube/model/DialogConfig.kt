@@ -5,11 +5,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.view.Gravity
 import android.view.ViewGroup
-
 import com.march.wxcube.R
-import android.R.attr.gravity
-import android.R.attr.tag
-
 
 
 /**
@@ -60,18 +56,18 @@ class DialogConfig() : Parcelable {
         if (width < 0) {
             return width
         }
-        val rate = width / 750f
         val widthPixels = context.resources.displayMetrics.widthPixels
-        return (rate * widthPixels).toInt()
+        val rate = widthPixels / 750f
+        return (rate * width).toInt()
     }
 
     fun getHeightParse(context: Context): Int {
         if (height < 0) {
             return height
         }
-        val rate = width / 750f
-        val heightPixels = context.resources.displayMetrics.heightPixels
-        return (rate * heightPixels).toInt()
+        val widthPixels = context.resources.displayMetrics.widthPixels
+        val rate = widthPixels / 750f
+        return (rate * height).toInt()
     }
 
 
