@@ -1,39 +1,49 @@
 package com.march.wxcube.module
 
-import android.content.Context
-import android.support.v7.app.AppCompatActivity
 import com.alibaba.fastjson.JSONObject
-import com.march.wxcube.Weex
-import com.march.wxcube.model.DialogConfig
+import com.march.wxcube.module.dispatcher.*
 import com.taobao.weex.annotation.JSMethod
 import com.taobao.weex.bridge.JSCallback
 import com.taobao.weex.common.WXModule
 
 /**
  * CreateAt : 2018/6/5
- * Describe :
+ * Describe : 单 module 实现
  *
  * @author chendong
  */
 class OneModule : WXModule() {
 
-    companion object {
-        // key
-        const val KEY_SUCCESS = "success"
-        const val KEY_MSG = "msg"
-        const val KEY_URL = "url"
-        // method
-        const val openUrl = "openUrl"
-        const val openWeb = "openWeb"
-        const val openDialog = "openDialog"
-        const val openBrowser = "openBrowser"
+    private val mMethodDispatcher by lazy { mutableMapOf<String, AbsDispatcher>() }
+
+    init {
+        registerDispatcher(RouterDispatcher())
+        registerDispatcher(DebugDispatcher())
+        registerDispatcher(ModalDispatcher())
+        registerDispatcher(PageDispatcher())
+        registerDispatcher(EventDispatcher())
+        registerDispatcher(ToolsDispatcher())
+        registerDispatcher(StatusBarDispatcher())
     }
+
+    /**
+     * 注册方法的处理者
+     */
+    private fun registerDispatcher(dispatcher: AbsDispatcher) {
+        for (method in dispatcher.getMethods()) {
+            dispatcher.mModule = this
+            mMethodDispatcher[method] = dispatcher
+        }
+    }
+
 
     /**
      * 优点：
      * 1. 避免版本不同造成的方法不兼容
-     * 2. 方法参数回调统一规范性更好
-     * 3. 方法调用失败时，可以从 msg 快速定位问题
+     * 2. 更好的兼容客户端和H5，不会因为某个方法没有造成渲染失败
+     * 3. 方法参数回调统一规范性更好
+     * 4. 方法调用失败时，可以从 msg 快速定位问题
+     * 5. 更好的扩展性，由于统一了参数，扩展 params 也变得简单啦
      * 缺点：
      * 1. 写起来比较繁琐
      * 2. 调用起来不好识别，最好能有 vue 层的支持
@@ -69,47 +79,17 @@ class OneModule : WXModule() {
     @JSMethod(uiThread = true)
     fun call(method: String, params: JSONObject, callback: JSCallback) {
         try {
-            val ctx = mCtx ?: throw RuntimeException("ctx is null")
-            val act = mAct ?: throw RuntimeException("act is null")
-            when (method) {
-                openUrl -> openUrl(ctx, params, callback)
-                openWeb -> openWeb(ctx, params, callback)
-                openDialog -> openDialog(act, params, callback)
-                openBrowser -> openBrowser(ctx, params, callback)
-                else -> throw RuntimeException("method not match")
-            }
+            val dispatcher = mMethodDispatcher[method] ?: throw RuntimeException("method not match")
+            dispatcher.dispatch(method, params, callback)
         } catch (e: Exception) {
             e.printStackTrace()
-            callback.invoke(mapOf(
-                    KEY_SUCCESS to false,
-                    KEY_MSG to e.message))
+            postJsResult(callback, false to (e.message ?: ""))
         }
     }
 
-    private fun openWeb(ctx: Context, params: JSONObject, callback: JSCallback) {
-        val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("webUrl is null")
-        postJsResult(callback, Weex.getInst().mWeexRouter.openWeb(ctx, webUrl))
-    }
-
-    private fun openDialog(act: AppCompatActivity, params: JSONObject, callback: JSCallback) {
-        val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("webUrl is null")
-        val config = jsonObj2Obj(params, DialogConfig::class.java)
-        postJsResult(callback, Weex.getInst().mWeexRouter.openDialog(act, webUrl, config))
-    }
-
-    private fun openBrowser(ctx: Context, params: JSONObject, callback: JSCallback) {
-        val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("webUrl is null")
-        postJsResult(callback, Weex.getInst().mWeexRouter.openBrowser(ctx, webUrl))
-    }
-
-    private fun openUrl(ctx: Context, params: JSONObject, callback: JSCallback) {
-        val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("webUrl is null")
-        postJsResult(callback, Weex.getInst().mWeexRouter.openUrl(ctx, webUrl))
-    }
-
-    private fun postJsResult(jsCallback: JSCallback, result: Pair<Boolean, String>) {
+    fun postJsResult(jsCallback: JSCallback, result: Pair<Boolean, String>) {
         jsCallback.invoke(mapOf(
-                KEY_SUCCESS to result.first,
-                KEY_MSG to result.second))
+                AbsDispatcher.KEY_SUCCESS to result.first,
+                AbsDispatcher.KEY_MSG to result.second))
     }
 }
