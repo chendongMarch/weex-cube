@@ -72,7 +72,7 @@ class Weex private constructor() {
                 .setImgAdapter(ImgAdapter())
         injector.onWxSdkEngineInit(builder)
         WXSDKEngine.initialize(ctx, builder.build())
-        registerModule(ctx)
+        registerModule()
         registerComponent()
         registerBindingX()
         injector.onWxModuleCompRegister()
@@ -112,29 +112,13 @@ class Weex private constructor() {
         }
     }
 
-    private fun registerModule(context: Context) {
-            try {
-            WXSDKEngine.registerModule("native", OneModule::class.java, true)
-            registerModulePatch(context,R.array.internal_module)
-            registerModulePatch(context,R.array.extension_module)
+    private fun registerModule() {
+        try {
+            WXSDKEngine.registerModule("bridge", OneModule::class.java, true)
         } catch (e: WXException) {
             e.printStackTrace()
         }
     }
-
-    @SuppressWarnings("unchecked")
-    private fun registerModulePatch(context: Context, array: Int) {
-        val moduleArray = context.resources.getStringArray(array)
-        for (str in moduleArray) {
-            val strArray = str.split(":")
-            if (strArray.size == 2) {
-                val forName = Class.forName(strArray[1])
-                WXSDKEngine.registerModule(strArray[0], forName as Class<WXModule>, true)
-                // LogUtils.e("注册成功 ${strArray[0]}  ${strArray[1]}  ${forName}")
-            }
-        }
-    }
-
 
     fun makeCacheDir(key: String): File {
         val sdFile = sdFile()
