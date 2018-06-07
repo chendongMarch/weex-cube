@@ -3,6 +3,7 @@ package com.march.wxcube.module.dispatcher
 import android.graphics.Color
 import android.support.v4.app.Fragment
 import android.text.TextUtils
+import android.view.ViewGroup
 import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.Weex
 import com.march.wxcube.common.toListEx
@@ -68,7 +69,10 @@ class PageDispatcher : AbsDispatcher() {
                 configs, object : FragmentPerformer.FragmentHandler {
             override fun containerIdFinder(): () -> Int {
                 return {
-                    val view = mModule.findView { it.tag == "container" }
+                    val view = mModule.findView { it is ViewGroup && it.tag == "container" }
+                    if (view !is ViewGroup) {
+                        -1
+                    }
                     view?.id ?: -1
                 }
             }

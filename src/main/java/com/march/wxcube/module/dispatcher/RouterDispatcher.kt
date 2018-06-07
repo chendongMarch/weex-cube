@@ -60,8 +60,8 @@ class RouterDispatcher : AbsDispatcher() {
     }
 
     private fun putExtraData(ctx: Context, params: JSONObject, callback: JSCallback) {
-        val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openWeb url is null")
-        val data = params.getJSONObject(KEY_DATA) ?: throw RuntimeException("Router#openWeb data is null")
+        val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#putExtraData url is null")
+        val data = params[KEY_DATA] ?: throw RuntimeException("Router#putExtraData data is null")
         ManagerRegistry.DATA.putData(webUrl, data)
         mModule.postJsResult(callback, true to "Router#putExtraData finish")
     }
@@ -77,7 +77,12 @@ class RouterDispatcher : AbsDispatcher() {
 
     private fun openDialog(act: AppCompatActivity, params: JSONObject, callback: JSCallback) {
         val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openDialog url is null")
-        val config = mModule.jsonObj2Obj(params, DialogConfig::class.java)
+        val configJsonObj = params.getJSONObject(KEY_CONFIG)
+        val config = if (configJsonObj != null) {
+            mModule.jsonObj2Obj(configJsonObj, DialogConfig::class.java)
+        } else {
+            DialogConfig()
+        }
         mModule.postJsResult(callback, Weex.getInst().mWeexRouter.openDialog(act, webUrl, config))
     }
 

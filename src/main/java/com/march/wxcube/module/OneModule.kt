@@ -1,6 +1,7 @@
 package com.march.wxcube.module
 
 import com.alibaba.fastjson.JSONObject
+import com.march.common.utils.LogUtils
 import com.march.wxcube.module.dispatcher.*
 import com.taobao.weex.annotation.JSMethod
 import com.taobao.weex.bridge.JSCallback
@@ -46,28 +47,7 @@ class OneModule : WXModule() {
      * 5. 更好的扩展性，由于统一了参数，扩展 params 也变得简单啦
      * 缺点：
      * 1. 写起来比较繁琐
-     * 2. 调用起来不好识别，最好能有 vue 层的支持
-     *
-     * const one = weex.requireModule('one-module');
-     *
-     * Vue.callNative = (method,params,callback) => {
-     *     const p = params || {};
-     *     const cb = callback || ()=>{};
-     *     one.call(method,params,callback);
-     *     if(isWeb) {
-     *
-     *     }
-     * }
-     *
-     * Vue.openUrl = (params,callback) => {
-     *     const p = params || {};
-     *     const cb = callback || ()=>{};
-     *     one.call('openUrl',params,callback);
-     * }
-     *
-     * native.openUrl({},()=>{});
-     * native.openUrl();
-     * one.call('openUrl',{},()=>{});
+     * 2. 调用起来不好识别，最好能有 vue 中间层的支持
      *
      * OneModule$call()
      * #method 调用方法的唯一标识
@@ -78,8 +58,9 @@ class OneModule : WXModule() {
      */
     @JSMethod(uiThread = true)
     fun call(method: String, params: JSONObject, callback: JSCallback) {
+        LogUtils.e("prepare method $method ${params.toJSONString()}")
         try {
-            val dispatcher = mMethodDispatcher[method] ?: throw RuntimeException("method not match")
+            val dispatcher = mMethodDispatcher[method] ?: throw RuntimeException("method $method not match")
             dispatcher.dispatch(method, params, callback)
         } catch (e: Exception) {
             e.printStackTrace()

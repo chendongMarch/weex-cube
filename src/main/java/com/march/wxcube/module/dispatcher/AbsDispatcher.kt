@@ -25,6 +25,7 @@ abstract class AbsDispatcher {
         const val KEY_EVENT = "event"
         const val KEY_DATA = "data"
         const val KEY_DURATION = "duration"
+        const val KEY_CONFIG = "config"
 
     }
 
