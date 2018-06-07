@@ -64,6 +64,7 @@ class WeexRouter : WeexUpdater.UpdateHandler {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         return start(ctx, intent)
     }
+
     /**
      * 打开一个弹窗
      */
@@ -119,9 +120,11 @@ class WeexRouter : WeexUpdater.UpdateHandler {
 }
 
 private class UrlKey {
-    internal var host: String? = ""
-    internal var port: String? = ""
-    internal var path: String? = ""
+
+    private var url: String? = ""
+    private var host: String? = ""
+    private var port: String? = ""
+    private var path: String? = ""
 
     override fun equals(other: Any?): Boolean {
         if (other == null || other !is UrlKey) {
@@ -138,6 +141,7 @@ private class UrlKey {
         internal fun fromUrl(url: String): UrlKey {
             val urlKey = UrlKey()
             val uri = Uri.parse(url)
+            urlKey.url = url
             urlKey.host = uri.host
             urlKey.port = uri.port.toString()
             urlKey.path = uri.path
