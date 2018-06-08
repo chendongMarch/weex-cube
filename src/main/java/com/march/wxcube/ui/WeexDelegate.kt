@@ -45,7 +45,7 @@ class WeexDelegate : WeexLifeCycle {
     // 页面数据
     private var mWeexPage: WeexPage
     // loading
-    private val mLoadingHandler by lazy { Weex.getInst().mWeexInjector.getLoadingHandler() }
+    private val mLoadingHandler by lazy { Weex.getInst().mWeexInjector.getLoading() }
     private var mIsRenderSuccess = false
     private var mCurPage: WeexPage? = null
     private val mPerformers by lazy { mutableMapOf<String, IPerformer>() }
@@ -115,7 +115,7 @@ class WeexDelegate : WeexLifeCycle {
 
     fun initContainerView(view: ViewGroup) {
         mContainerView = view
-        mLoadingHandler.addLoadingView(mContainerView)
+        mLoadingHandler.startWeexLoading(mContainerView)
         mWeexDebugger = WeexDebugger(this, mActivity, mWeexPage)
     }
 
@@ -132,7 +132,7 @@ class WeexDelegate : WeexLifeCycle {
         override fun onRenderSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
             LogUtils.e("onRenderSuccess")
             mIsRenderSuccess = true
-            mLoadingHandler.finish(mContainerView)
+            mLoadingHandler.finishWeexLoading(mContainerView)
         }
 
         override fun onViewCreated(instance: WXSDKInstance?, view: View?) {
@@ -144,6 +144,9 @@ class WeexDelegate : WeexLifeCycle {
             mWeexDebugger?.mErrorMsg = "code = $errCode, msg = $msg"
             if (mWeexDebugger != null && mWeexDebugger?.isRefreshing != null && mWeexDebugger?.isRefreshing!!) {
                 report("调试模式js出错，改正后会重新渲染")
+                return
+            }
+            if (mIsRenderSuccess) {
                 return
             }
             if (mCurPage == null || mCurPage?.equals(mWeexPage) == true) {
@@ -222,6 +225,10 @@ class WeexDelegate : WeexLifeCycle {
 
     //************************同步生命周期函数*********************//
 
+    private fun fireEvent(event: String, data: Map<String,Any> = mapOf()) {
+        mWeexInst.fireGlobalEventCallback(event, data)
+    }
+
     override fun onDestroy() {
         destroyWxInst()
         mWeexDebugger?.onDestroy()
@@ -250,6 +257,7 @@ class WeexDelegate : WeexLifeCycle {
     override fun onResume() {
         mWeexInst.onActivityResume()
         mLifeCallbacks.forEach { it.onResume() }
+        fireEvent("resume")
     }
 
     override fun onPause() {
@@ -270,5 +278,10 @@ class WeexDelegate : WeexLifeCycle {
     override fun onPermissionResult(requestCode: Int, resultCode: Int, data: Intent) {
         super.onPermissionResult(requestCode, resultCode, data)
         mLifeCallbacks.forEach { it.onPermissionResult(requestCode, resultCode, data) }
+    }
+
+    var mHandleBackPressed = false
+    fun onBackPressed() {
+        fireEvent("onBackPressed")
     }
 }

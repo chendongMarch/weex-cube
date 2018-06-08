@@ -2,8 +2,8 @@ package com.march.wxcube
 
 import android.app.Activity
 import com.march.common.utils.LogUtils
-import com.march.wxcube.loading.ILoadingHandler
-import com.march.wxcube.loading.LoadingHandlerImpl
+import com.march.wxcube.loading.Loading
+import com.march.wxcube.loading.SimpleLoading
 import com.taobao.weex.InitConfig
 import okhttp3.OkHttpClient
 
@@ -58,8 +58,8 @@ interface WeexInjector {
      * 容器渲染时支持蒙版
      * 使用内置首页的自定义界面
      */
-    fun getLoadingHandler(): ILoadingHandler {
-        return LoadingHandlerImpl()
+    fun getLoading(): Loading {
+        return SimpleLoading()
     }
 
     fun getBuildConfig(): WxBuildConfig
