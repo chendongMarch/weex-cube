@@ -63,7 +63,7 @@ class RouterDispatcher : AbsDispatcher() {
         val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#putExtraData url is null")
         val data = params[KEY_DATA] ?: throw RuntimeException("Router#putExtraData data is null")
         ManagerRegistry.DATA.putData(webUrl, data)
-        mModule.postJsResult(callback, true to "Router#putExtraData finish")
+        mModule.postJsResult(callback, true to "Router#putExtraData finishWeexLoading")
     }
 
     private fun openApp(ctx: Context, params: JSONObject, callback: JSCallback) {
