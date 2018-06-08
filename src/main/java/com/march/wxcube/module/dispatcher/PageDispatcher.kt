@@ -6,6 +6,7 @@ import android.text.TextUtils
 import android.view.ViewGroup
 import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.Weex
+import com.march.wxcube.common.getDef
 import com.march.wxcube.common.toListEx
 import com.march.wxcube.model.FragmentConfig
 import com.march.wxcube.module.findView
@@ -55,6 +56,11 @@ class PageDispatcher : AbsDispatcher() {
             Color.WHITE
         }
         mModule.mWeexDelegate?.mContainerView?.setBackgroundColor(color)
+
+        val back = params.getDef("back", false)
+        if(back) {
+            mModule.mWeexDelegate?.mHandleBackPressed = true
+        }
         mModule.postJsResult(callback, true to "Page#initPage ${params.toJSONString()}")
     }
 
@@ -108,6 +114,6 @@ class PageDispatcher : AbsDispatcher() {
      */
     private fun reloadPage(act: WeexActivity, params: JSONObject, callback: JSCallback) {
         mModule.mWeexDelegate?.render()
-        mModule.postJsResult(callback, true to "Page#reloadPage reload page finish")
+        mModule.postJsResult(callback, true to "Page#reloadPage reload page finishWeexLoading")
     }
 }
