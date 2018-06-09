@@ -2,19 +2,22 @@ package com.march.wxcube.module.dispatcher
 
 import android.support.v7.app.AppCompatActivity
 import com.alibaba.fastjson.JSONObject
-import com.march.wxcube.module.OneModule
-import com.march.wxcube.module.mAct
 import com.taobao.weex.bridge.JSCallback
 
 /**
  * CreateAt : 2018/6/6
- * Describe :
+ * Describe : 方法分发处理的 base 类
  *
  * @author chendong
  */
-abstract class AbsDispatcher {
+abstract class BaseDispatcher {
 
-    lateinit var mModule: OneModule
+    interface Provider {
+        fun provideActivity(): AppCompatActivity?
+        fun doBySelf(method: String, params: JSONObject)
+    }
+
+    lateinit var mProvider: Provider
 
     companion object {
         // key
@@ -31,9 +34,15 @@ abstract class AbsDispatcher {
 
     abstract fun getMethods(): List<String>
 
-    abstract fun dispatch(method: String, params: JSONObject, callback: JSCallback)
+    abstract fun dispatch(method: String, params: JSONObject)
 
     fun findAct(): AppCompatActivity {
-        return mModule.mAct ?: throw RuntimeException("ModuleDispatcher#act error")
+        return mProvider.provideActivity() ?: throw RuntimeException("ModuleDispatcher#act error")
+    }
+
+    fun postJsResult(jsCallback: JSCallback, result: Pair<Boolean, String>) {
+        jsCallback.invoke(mapOf(
+                BaseDispatcher.KEY_SUCCESS to result.first,
+                BaseDispatcher.KEY_MSG to result.second))
     }
 }

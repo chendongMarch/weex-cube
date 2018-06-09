@@ -1,7 +1,12 @@
 package com.march.wxcube.module
 
+import android.support.v7.app.AppCompatActivity
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import com.alibaba.fastjson.JSONObject
-import com.march.common.utils.LogUtils
+import com.march.wxcube.common.getDef
 import com.march.wxcube.module.dispatcher.*
 import com.taobao.weex.annotation.JSMethod
 import com.taobao.weex.bridge.JSCallback
@@ -15,26 +20,17 @@ import com.taobao.weex.common.WXModule
  */
 class OneModule : WXModule() {
 
-    private val mMethodDispatcher by lazy { mutableMapOf<String, AbsDispatcher>() }
-
-    init {
-        registerDispatcher(RouterDispatcher())
-        registerDispatcher(DebugDispatcher())
-        registerDispatcher(ModalDispatcher())
-        registerDispatcher(PageDispatcher())
-        registerDispatcher(EventDispatcher())
-        registerDispatcher(ToolsDispatcher())
-        registerDispatcher(StatusBarDispatcher())
-    }
-
-    /**
-     * 注册方法的处理者
-     */
-    private fun registerDispatcher(dispatcher: AbsDispatcher) {
-        for (method in dispatcher.getMethods()) {
-            dispatcher.mModule = this
-            mMethodDispatcher[method] = dispatcher
-        }
+    private val mDispatcherRegistry by lazy {
+        DispatcherRegistry(
+                OneModuleBridgeProvider(),
+                RouterDispatcher(),
+                DebugDispatcher(),
+                ModalDispatcher(),
+                EventDispatcher(this),
+                ToolsDispatcher(),
+                StatusBarDispatcher(),
+                PageDispatcher(this)
+        )
     }
 
 
@@ -58,19 +54,52 @@ class OneModule : WXModule() {
      */
     @JSMethod(uiThread = true)
     fun call(method: String, params: JSONObject, callback: JSCallback) {
-        LogUtils.e("prepare method $method ${params.toJSONString()}")
         try {
-            val dispatcher = mMethodDispatcher[method] ?: throw RuntimeException("method $method not match")
-            dispatcher.dispatch(method, params, callback)
+            mDispatcherRegistry.dispatch(method, params)
+            callback.invoke(mapOf(
+                    BaseDispatcher.KEY_SUCCESS to true,
+                    BaseDispatcher.KEY_MSG to "finish method$method with $params"
+            ))
         } catch (e: Exception) {
             e.printStackTrace()
-            postJsResult(callback, false to (e.message ?: ""))
+            callback.invoke(mapOf(
+                    BaseDispatcher.KEY_SUCCESS to false,
+                    BaseDispatcher.KEY_MSG to e.message))
         }
     }
 
-    fun postJsResult(jsCallback: JSCallback, result: Pair<Boolean, String>) {
-        jsCallback.invoke(mapOf(
-                AbsDispatcher.KEY_SUCCESS to result.first,
-                AbsDispatcher.KEY_MSG to result.second))
+    inner class OneModuleBridgeProvider : BaseDispatcher.Provider {
+
+        val module = this@OneModule
+
+        override fun provideActivity(): AppCompatActivity? {
+            return module.mAct
+        }
+
+        override fun doBySelf(method: String, params: JSONObject) {
+            when (method) {
+                RouterDispatcher.closePage -> {
+                    val delegate = module.mWeexDelegate ?: throw RuntimeException("Router#closePage delegate is null")
+                    delegate.close()
+                }
+                ModalDispatcher.loading    -> {
+                    // val msg = params.getDef(BaseDispatcher.KEY_MSG, "")
+                    val show = params.getDef("show", false)
+                    val weexAct = module.mWeexAct ?: throw RuntimeException("ModuleDispatcher#mWeexAct error")
+                    val parentView = weexAct.mDelegate.mContainerView
+                    val progressView = weexAct.mProgressBar
+                    val notLoading = parentView.indexOfChild(progressView) == -1
+                    if (show && notLoading) {
+                        val layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                        layoutParams.gravity = Gravity.CENTER
+                        parentView.addView(progressView, layoutParams)
+                        progressView.visibility = View.VISIBLE
+                    } else if (!show && !notLoading) {
+                        progressView.visibility = View.GONE
+                        parentView.removeView(progressView)
+                    }
+                }
+            }
+        }
     }
 }

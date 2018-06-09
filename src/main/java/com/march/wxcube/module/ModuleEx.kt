@@ -91,14 +91,3 @@ private fun WXModule.findView(viewGroup: ViewGroup, f: (View) -> Boolean): View?
     return view
 }
 
-// jsonObj -> Obj
-fun <T> WXModule.jsonObj2Obj(objectMap: JSONObject, clz: Class<T>): T {
-    val json = JSON.toJSONString(objectMap)
-    return JSONObject.parseObject(json, clz)
-}
-
-// jsonArray -> List
-fun <T> WXModule.jsonArray2List(jsonArray: JSONArray, clz: Class<T>): List<T> {
-    val json = JSON.toJSONString(jsonArray)
-    return JSONArray.parseArray(json, clz)
-}

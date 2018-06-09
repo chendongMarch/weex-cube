@@ -4,11 +4,9 @@ import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.Weex
+import com.march.wxcube.common.toObjEx
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
-import com.march.wxcube.module.jsonObj2Obj
-import com.march.wxcube.module.mWeexDelegate
-import com.taobao.weex.bridge.JSCallback
 
 /**
  * CreateAt : 2018/6/6
@@ -16,7 +14,7 @@ import com.taobao.weex.bridge.JSCallback
  *
  * @author chendong
  */
-class RouterDispatcher : AbsDispatcher() {
+class RouterDispatcher : BaseDispatcher() {
 
     companion object {
         // method
@@ -41,59 +39,69 @@ class RouterDispatcher : AbsDispatcher() {
         )
     }
 
-    override fun dispatch(method: String, params: JSONObject, callback: JSCallback) {
+    override fun dispatch(method: String, params: JSONObject) {
         val act = findAct()
         when (method) {
-            openUrl      -> openUrl(act, params, callback)
-            openWeb      -> openWeb(act, params, callback)
-            openDialog   -> openDialog(act, params, callback)
-            openBrowser  -> openBrowser(act, params, callback)
-            openApp      -> openApp(act, params, callback)
-            closePage    -> closePage(act, params, callback)
-            putExtraData -> putExtraData(act, params, callback)
+            openUrl      -> openUrl(act, params)
+            openWeb      -> openWeb(act, params)
+            openDialog   -> openDialog(act, params)
+            openBrowser  -> openBrowser(act, params)
+            openApp      -> openApp(act, params)
+            closePage    -> closePage(params)
+            putExtraData -> putExtraData(params)
         }
     }
 
-    private fun closePage(ctx: Context, params: JSONObject, callback: JSCallback) {
-        val delegate = mModule.mWeexDelegate ?: throw RuntimeException("Router#closePage delegate is null")
-        delegate.close()
+    private fun closePage(params: JSONObject) {
+        mProvider.doBySelf(closePage, params)
     }
 
-    private fun putExtraData(ctx: Context, params: JSONObject, callback: JSCallback) {
+    private fun putExtraData(params: JSONObject) {
         val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#putExtraData url is null")
         val data = params[KEY_DATA] ?: throw RuntimeException("Router#putExtraData data is null")
         ManagerRegistry.DATA.putData(webUrl, data)
-        mModule.postJsResult(callback, true to "Router#putExtraData finishWeexLoading")
     }
 
-    private fun openApp(ctx: Context, params: JSONObject, callback: JSCallback) {
-        openBrowser(ctx, params, callback)
+    private fun openApp(ctx: Context, params: JSONObject) {
+        openBrowser(ctx, params)
     }
 
-    private fun openWeb(ctx: Context, params: JSONObject, callback: JSCallback) {
+    private fun openWeb(ctx: Context, params: JSONObject) {
         val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openWeb url is null")
-        mModule.postJsResult(callback, Weex.getInst().mWeexRouter.openWeb(ctx, webUrl))
+        val result = Weex.getInst().mWeexRouter.openWeb(ctx, webUrl)
+        if (!result.first) {
+            throw RuntimeException("Router#openWeb Error ${result.second}")
+        }
     }
 
-    private fun openDialog(act: AppCompatActivity, params: JSONObject, callback: JSCallback) {
+    private fun openDialog(act: AppCompatActivity, params: JSONObject) {
         val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openDialog url is null")
         val configJsonObj = params.getJSONObject(KEY_CONFIG)
         val config = if (configJsonObj != null) {
-            mModule.jsonObj2Obj(configJsonObj, DialogConfig::class.java)
+            configJsonObj.toObjEx(DialogConfig::class.java)
         } else {
             DialogConfig()
         }
-        mModule.postJsResult(callback, Weex.getInst().mWeexRouter.openDialog(act, webUrl, config))
+        val result = Weex.getInst().mWeexRouter.openDialog(act, webUrl, config)
+        if (!result.first) {
+            throw RuntimeException("Router#openDialog Error ${result.second}")
+        }
     }
 
-    private fun openBrowser(ctx: Context, params: JSONObject, callback: JSCallback) {
+    private fun openBrowser(ctx: Context, params: JSONObject) {
         val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openBrowser url is null")
-        mModule.postJsResult(callback, Weex.getInst().mWeexRouter.openBrowser(ctx, webUrl))
+        val result = Weex.getInst().mWeexRouter.openBrowser(ctx, webUrl)
+        if (!result.first) {
+            throw RuntimeException("Router#openBrowser Error ${result.second}")
+        }
     }
 
-    private fun openUrl(ctx: Context, params: JSONObject, callback: JSCallback) {
+    private fun openUrl(ctx: Context, params: JSONObject) {
         val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openUrl url is null")
-        mModule.postJsResult(callback, Weex.getInst().mWeexRouter.openUrl(ctx, webUrl))
+        val result = Weex.getInst().mWeexRouter.openUrl(ctx, webUrl)
+        if (!result.first) {
+            throw RuntimeException("Router#openUrl Error ${result.second}")
+        }
     }
 
 }

@@ -1,7 +1,6 @@
 package com.march.wxcube.module.dispatcher
 
 import com.alibaba.fastjson.JSONObject
-import com.taobao.weex.bridge.JSCallback
 
 /**
  * CreateAt : 2018/6/6
@@ -9,12 +8,12 @@ import com.taobao.weex.bridge.JSCallback
  *
  * @author chendong
  */
-class ToolsDispatcher : AbsDispatcher() {
+class ToolsDispatcher : BaseDispatcher() {
     override fun getMethods(): List<String> {
         return listOf()
     }
 
-    override fun dispatch(method: String, params: JSONObject, callback: JSCallback) {
+    override fun dispatch(method: String, params: JSONObject) {
     }
 
 }
