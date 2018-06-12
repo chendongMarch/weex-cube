@@ -3,6 +3,7 @@ package com.march.wxcube.module.dispatcher
 import com.alibaba.fastjson.JSONObject
 import com.march.common.utils.ToastUtils
 import com.march.wxcube.common.getDef
+import com.march.wxcube.module.JsCallbackWrap
 
 /**
  * CreateAt : 2018/6/6
@@ -24,7 +25,7 @@ class ModalDispatcher : BaseDispatcher() {
         return listOf(toast, loading)
     }
 
-    override fun dispatch(method: String, params: JSONObject) {
+    override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
         when (method) {
             toast   -> toast(params)
             loading -> loading(params)

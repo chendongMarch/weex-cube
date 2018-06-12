@@ -29,11 +29,11 @@ open class WeexDialogFragment : DialogFragment() {
         super.onCreate(savedInstanceState)
         setStyle(DialogFragment.STYLE_NO_FRAME, R.style.dialog_theme)
         mDelegate.onCreate()
-        mConfig = arguments.getParcelable(DialogConfig.KEY_DIALOG_CONFIG) ?: DialogConfig()
+        mConfig = arguments?.getParcelable(DialogConfig.KEY_DIALOG_CONFIG) ?: DialogConfig()
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater?.inflate(R.layout.weex_container, container, false) as ViewGroup
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.weex_container, container, false) as ViewGroup
         mDelegate.initContainerView(view)
         mDelegate.render()
         return view
@@ -42,6 +42,7 @@ open class WeexDialogFragment : DialogFragment() {
     /* 全部参数设置属性 */
     private fun setDialogAttributes(dialog: Dialog, config: DialogConfig) {
         isCancelable = true
+        val ctx = context?:return
         dialog.setCanceledOnTouchOutside(true)
         val window = dialog.window ?: return
         val params = window.attributes
@@ -49,8 +50,8 @@ open class WeexDialogFragment : DialogFragment() {
         params.alpha = config.alpha
         // 窗口的背景，0为透明，1为全黑
         params.dimAmount = config.dim
-        params.width = config.getWidthParse(context)
-        params.height = config.getHeightParse(context)
+        params.width = config.getWidthParse(ctx)
+        params.height = config.getHeightParse(ctx)
         params.gravity = config.gravityParse
         window.attributes = params
         window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)

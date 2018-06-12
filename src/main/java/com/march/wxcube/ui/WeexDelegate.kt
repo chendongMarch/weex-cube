@@ -43,7 +43,7 @@ class WeexDelegate : WeexLifeCycle {
     lateinit var mContainerView: ViewGroup // 容器 View
     private var mWeexView: ViewGroup? = null // weex root view
     // 页面数据
-    private var mWeexPage: WeexPage
+    private lateinit var mWeexPage: WeexPage
     // loading
     private val mLoadingHandler by lazy { Weex.getInst().mWeexInjector.getLoading() }
     private var mIsRenderSuccess = false
@@ -56,8 +56,9 @@ class WeexDelegate : WeexLifeCycle {
      */
     constructor(fragment: Fragment) {
         mHost = fragment
-        mWeexPage = fragment.arguments.getParcelable(WeexPage.KEY_PAGE)
-        init(fragment.activity)
+        mWeexPage = fragment.arguments?.getParcelable(WeexPage.KEY_PAGE) ?: return
+        val act = fragment.activity ?: return
+        init(act)
     }
 
     /**
@@ -123,7 +124,7 @@ class WeexDelegate : WeexLifeCycle {
     fun close() {
         when (mHost) {
             is WeexActivity -> mHost.finish()
-            is WeexFragment -> mHost.activity.finish()
+            is WeexFragment -> mHost.activity?.finish()
             is WeexDialogFragment -> mHost.dismiss()
         }
     }

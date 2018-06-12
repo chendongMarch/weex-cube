@@ -17,6 +17,7 @@ import com.march.wxcube.module.mWeexDelegate
 import com.march.wxcube.performer.FragmentPerformer
 import com.march.wxcube.ui.WeexActivity
 import com.march.wxcube.ui.WeexFragment
+import com.march.wxcube.module.JsCallbackWrap
 
 /**
  * CreateAt : 2018/6/7
@@ -33,7 +34,7 @@ class PageDispatcher(val module: OneModule) : BaseDispatcher() {
         const val reloadPage = "reloadPage"
     }
 
-    override fun dispatch(method: String, params: JSONObject) {
+    override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
         val weexAct = module.mWeexAct ?: throw RuntimeException("Page#loadTabs mWeexAct is null")
         when (method) {
             initPage   -> initPage(weexAct, params)

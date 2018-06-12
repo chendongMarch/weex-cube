@@ -55,7 +55,7 @@ class OneModule : WXModule() {
     @JSMethod(uiThread = true)
     fun call(method: String, params: JSONObject, callback: JSCallback) {
         try {
-            mDispatcherRegistry.dispatch(method, params)
+            mDispatcherRegistry.dispatch(method, params,JsCallbackWrap(callback))
             mDispatcherRegistry.postJsResult(callback, true to "$method($params) finish ")
         } catch (e: Exception) {
             e.printStackTrace()

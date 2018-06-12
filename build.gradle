@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: 'kotlin-kapt'
+
 // project/build.gradle
 // apply from: 'https://coding.net/u/devlab/p/Resource/git/raw/master/android/project.gradle'
 def libs = rootProject.ext.libs
@@ -30,6 +32,11 @@ dependencies {
     // 新版本需要 RecyclerView 支持
     implementation libs.recyclerView_v7
 
+    // image
+    implementation libs.glide4
+    implementation libs.glideOkHttp
+    kapt libs.glide4Compiler
+
     // weex
     api 'com.taobao.android:weex_sdk:0.18.0'
     implementation 'com.alibaba.android:bindingx-core:1.0.1'
@@ -44,8 +51,7 @@ dependencies {
     implementation 'com.facebook.stetho:stetho:1.5.0'
     implementation 'com.facebook.stetho:stetho-okhttp3:1.5.0'
     implementation 'com.squareup.okhttp3:okhttp:3.9.0'
-    // image
-    implementation libs.glide
+
     // leak
     debugImplementation libs.leakCanaryDebug
     releaseImplementation libs.leakCanaryRelease

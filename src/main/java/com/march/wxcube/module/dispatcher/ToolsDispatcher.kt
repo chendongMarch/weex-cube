@@ -1,6 +1,7 @@
 package com.march.wxcube.module.dispatcher
 
 import com.alibaba.fastjson.JSONObject
+import com.march.wxcube.module.JsCallbackWrap
 
 /**
  * CreateAt : 2018/6/6
@@ -13,7 +14,7 @@ class ToolsDispatcher : BaseDispatcher() {
         return listOf()
     }
 
-    override fun dispatch(method: String, params: JSONObject) {
+    override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
     }
 
 }
