@@ -10,8 +10,8 @@ import com.alibaba.fastjson.JSONObject
  */
 class DispatcherRegistry(provider: BaseDispatcher.Provider, vararg dispatchers: BaseDispatcher) : BaseDispatcher() {
 
-    override fun getMethods(): List<String> {
-        return listOf()
+    override fun getMethods(): Array<String> {
+        return arrayOf()
     }
 
     private val mMethodDispatcher by lazy { mutableMapOf<String, BaseDispatcher>() }

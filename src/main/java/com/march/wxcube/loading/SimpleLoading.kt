@@ -6,12 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.TextView
 import com.march.common.utils.DrawableUtils
 import com.march.wxcube.R
 import com.march.wxcube.ui.IndexActivity
-import com.taobao.weex.WXSDKManager
 
 /**
  * CreateAt : 2018/4/24
@@ -62,15 +61,8 @@ open class SimpleLoading : Loading {
     }
 
     override fun setIndexContent(activity: IndexActivity) {
-        val layout = FrameLayout(activity)
-        layout.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        val imageView = ImageView(activity)
-        imageView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        imageView.scaleType = ImageView.ScaleType.CENTER_CROP
-        WXSDKManager.getInstance().iwxImgLoaderAdapter
-                .setImage("http://olx4t2q6z.bkt.clouddn.com/18-2-1/44700615.jpg", imageView, null, null)
-        layout.addView(imageView)
-        activity.setContentView(layout)
+        activity.setContentView(R.layout.index_page)
+        activity.findViewById<TextView>(R.id.titleTv)?.text = activity.getString(R.string.app_name)
     }
 
     override fun makeLoadingIndicator(activity: Activity): View {

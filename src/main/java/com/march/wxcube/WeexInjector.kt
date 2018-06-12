@@ -1,9 +1,12 @@
 package com.march.wxcube
 
 import android.app.Activity
+import android.view.WindowManager
 import com.march.common.utils.LogUtils
+import com.march.common.utils.immersion.ImmersionStatusBarUtils
 import com.march.wxcube.loading.Loading
 import com.march.wxcube.loading.SimpleLoading
+import com.march.wxcube.module.dispatcher.BaseDispatcher
 import com.taobao.weex.InitConfig
 import okhttp3.OkHttpClient
 
@@ -16,6 +19,7 @@ import okhttp3.OkHttpClient
 interface WeexInjector {
 
     data class WxBuildConfig(val versionCode: Int, val versionName: String, val debug: Boolean)
+
     /**
      * 错误打印
      */
@@ -27,9 +31,7 @@ interface WeexInjector {
     /**
      * log 打印
      */
-    fun onLog(tag: String, msg: String) {
-        LogUtils.e(tag, msg)
-    }
+    fun onLog(tag: String, msg: String) = LogUtils.e(tag, msg)
 
     /**
      * 初始化 WxSdkEngine
@@ -43,9 +45,17 @@ interface WeexInjector {
 
     /**
      * 内置 Activity 创建时调用
+     * 默认行为 weex 页面透明状态栏
+     * web 页面全屏显示
      */
     fun onPageCreated(activity: Activity, type: Int) {
-
+        ImmersionStatusBarUtils.setStatusBarLightMode(activity)
+        if (type == Weex.PAGE_WEEX || type == Weex.PAGE_INDEX) {
+            ImmersionStatusBarUtils.translucent(activity)
+        } else if (type == Weex.PAGE_WEB) {
+            // ImmersionStatusBarColorUtils.setStatusBarColor(mAct, Color.parseColor("#ffffff"))
+            activity.window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        }
     }
 
     /**
@@ -58,18 +68,21 @@ interface WeexInjector {
      * 容器渲染时支持蒙版
      * 使用内置首页的自定义界面
      */
-    fun getLoading(): Loading {
-        return SimpleLoading()
-    }
+    fun getLoading(): Loading = SimpleLoading()
 
-    fun getBuildConfig(): WxBuildConfig
+    /**
+     * 获取构建配置
+     */
+    fun getBuildConfig(): WxBuildConfig = WxBuildConfig(0, "0.0.0", false)
+
+    /**
+     * 获取要注入的 dispatcher
+     */
+    fun getModuleDispatchers(): Array<BaseDispatcher> = arrayOf()
 
     companion object {
         val EMPTY = object : WeexInjector {
-            override fun getBuildConfig(): WxBuildConfig {
-                return WxBuildConfig(0, "0.0.0", false)
-            }
+
         }
     }
-
 }

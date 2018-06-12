@@ -3,6 +3,7 @@ package com.march.wxcube.module.dispatcher
 import android.support.v7.app.AppCompatActivity
 import com.alibaba.fastjson.JSONObject
 import com.taobao.weex.bridge.JSCallback
+import java.sql.Array
 
 /**
  * CreateAt : 2018/6/6
@@ -32,7 +33,7 @@ abstract class BaseDispatcher {
 
     }
 
-    abstract fun getMethods(): List<String>
+    abstract fun getMethods(): kotlin.Array<String>
 
     abstract fun dispatch(method: String, params: JSONObject)
 

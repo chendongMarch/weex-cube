@@ -1,10 +1,7 @@
 package com.march.wxcube
 
-import android.content.Context
 import com.alibaba.android.bindingx.plugin.weex.BindingX
-import com.facebook.stetho.DumperPluginsProvider
 import com.facebook.stetho.Stetho
-import com.facebook.stetho.dumpapp.DumperPlugin
 import com.march.common.Common
 import com.march.common.model.WeakContext
 import com.march.common.utils.FileUtils
@@ -22,7 +19,6 @@ import com.taobao.weex.InitConfig
 import com.taobao.weex.WXEnvironment
 import com.taobao.weex.WXSDKEngine
 import com.taobao.weex.common.WXException
-import com.taobao.weex.common.WXModule
 import java.io.File
 
 /**
@@ -38,8 +34,8 @@ class Weex private constructor() {
     val mWeexRouter by lazy { WeexRouter() } // 路由页面管理
     val mWeexUpdater by lazy { WeexUpdater(mWeexConfig.configUrl) } // weex 页面更新
 
+    var mWeexInjector: WeexInjector = WeexInjector.EMPTY // 外部注入支持
     lateinit var mWeexConfig: WeexConfig
-    lateinit var mWeexInjector: WeexInjector // 外部注入支持
 
     fun init(config: WeexConfig, injector: WeexInjector) {
         mWeexConfig = config.prepare()

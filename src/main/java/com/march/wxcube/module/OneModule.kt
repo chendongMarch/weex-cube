@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import com.alibaba.fastjson.JSONObject
+import com.march.wxcube.Weex
 import com.march.wxcube.common.getDef
 import com.march.wxcube.module.dispatcher.*
 import com.taobao.weex.annotation.JSMethod
@@ -29,10 +30,10 @@ class OneModule : WXModule() {
                 EventDispatcher(this),
                 ToolsDispatcher(),
                 StatusBarDispatcher(),
-                PageDispatcher(this)
+                PageDispatcher(this),
+                *Weex.getInst().mWeexInjector.getModuleDispatchers()
         )
     }
-
 
     /**
      * 优点：

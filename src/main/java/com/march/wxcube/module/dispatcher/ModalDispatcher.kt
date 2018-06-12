@@ -20,8 +20,8 @@ class ModalDispatcher : BaseDispatcher() {
         const val prompt = "prompt"
     }
 
-    override fun getMethods(): List<String> {
-        return listOf(toast, loading)
+    override fun getMethods(): Array<String> {
+        return arrayOf(toast, loading)
     }
 
     override fun dispatch(method: String, params: JSONObject) {

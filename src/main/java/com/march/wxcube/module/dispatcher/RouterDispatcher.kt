@@ -27,8 +27,8 @@ class RouterDispatcher : BaseDispatcher() {
         const val putExtraData = "putExtraData"
     }
 
-    override fun getMethods(): List<String> {
-        return listOf(
+    override fun getMethods(): Array<String> {
+        return arrayOf(
                 openUrl,
                 openWeb,
                 openDialog,

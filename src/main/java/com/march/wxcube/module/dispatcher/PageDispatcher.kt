@@ -43,8 +43,8 @@ class PageDispatcher(val module: OneModule) : BaseDispatcher() {
         }
     }
 
-    override fun getMethods(): List<String> {
-        return listOf(initPage, loadTabs, showTab)
+    override fun getMethods(): Array<String> {
+        return arrayOf(initPage, loadTabs, showTab)
     }
 
     /**

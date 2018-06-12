@@ -19,8 +19,8 @@ class StatusBarDispatcher : BaseDispatcher() {
     }
 
 
-    override fun getMethods(): List<String> {
-        return listOf(translucentStatusBar, setStatusBarDark, setStatusBarLight)
+    override fun getMethods(): Array<String> {
+        return arrayOf(translucentStatusBar, setStatusBarDark, setStatusBarLight)
     }
 
     override fun dispatch(method: String, params: JSONObject) {

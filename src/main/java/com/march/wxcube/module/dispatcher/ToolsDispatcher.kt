@@ -9,8 +9,8 @@ import com.alibaba.fastjson.JSONObject
  * @author chendong
  */
 class ToolsDispatcher : BaseDispatcher() {
-    override fun getMethods(): List<String> {
-        return listOf()
+    override fun getMethods(): Array<String> {
+        return arrayOf()
     }
 
     override fun dispatch(method: String, params: JSONObject) {

@@ -27,8 +27,8 @@ class EventDispatcher(val module: OneModule) : BaseDispatcher() {
         }
     }
 
-    override fun getMethods(): List<String> {
-        return listOf(registerEvent, postEvent, unRegisterEvent)
+    override fun getMethods(): Array<String> {
+        return arrayOf(registerEvent, postEvent, unRegisterEvent)
     }
 
     /**

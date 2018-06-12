@@ -19,8 +19,8 @@ class DebugDispatcher : BaseDispatcher() {
         const val debugLog = "debugL"
     }
 
-    override fun getMethods(): List<String> {
-        return listOf(debugToast, debugLog)
+    override fun getMethods(): Array<String> {
+        return arrayOf(debugToast, debugLog)
     }
 
     override fun dispatch(method: String, params: JSONObject) {
