@@ -7,6 +7,7 @@ import com.march.wxcube.Weex
 import com.march.wxcube.common.toObjEx
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
+import com.march.wxcube.module.JsCallbackWrap
 
 /**
  * CreateAt : 2018/6/6
@@ -39,7 +40,7 @@ class RouterDispatcher : BaseDispatcher() {
         )
     }
 
-    override fun dispatch(method: String, params: JSONObject) {
+    override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
         val act = findAct()
         when (method) {
             openUrl      -> openUrl(act, params)

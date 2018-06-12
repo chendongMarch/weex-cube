@@ -3,6 +3,7 @@ package com.march.wxcube.module.dispatcher
 import android.app.Activity
 import com.alibaba.fastjson.JSONObject
 import com.march.common.utils.immersion.ImmersionStatusBarUtils
+import com.march.wxcube.module.JsCallbackWrap
 
 /**
  * CreateAt : 2018/6/7
@@ -23,7 +24,7 @@ class StatusBarDispatcher : BaseDispatcher() {
         return arrayOf(translucentStatusBar, setStatusBarDark, setStatusBarLight)
     }
 
-    override fun dispatch(method: String, params: JSONObject) {
+    override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
         val act = findAct()
         when (method) {
             translucentStatusBar -> translucentStatusBar(act)

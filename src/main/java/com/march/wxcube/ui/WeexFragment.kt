@@ -37,8 +37,8 @@ class WeexFragment : Fragment() {
         mDelegate.onCreate()
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater?.inflate(R.layout.weex_container, container, false) as ViewGroup
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.weex_container, container, false) as ViewGroup
         mDelegate.initContainerView(view)
         mDelegate.render()
         return view

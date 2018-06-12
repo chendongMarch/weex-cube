@@ -2,6 +2,7 @@ package com.march.wxcube.module.dispatcher
 
 import android.support.v7.app.AppCompatActivity
 import com.alibaba.fastjson.JSONObject
+import com.march.wxcube.module.JsCallbackWrap
 import com.taobao.weex.bridge.JSCallback
 import java.sql.Array
 
@@ -35,7 +36,7 @@ abstract class BaseDispatcher {
 
     abstract fun getMethods(): kotlin.Array<String>
 
-    abstract fun dispatch(method: String, params: JSONObject)
+    abstract fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap)
 
     fun findAct(): AppCompatActivity {
         return mProvider.provideActivity() ?: throw RuntimeException("ModuleDispatcher#act error")

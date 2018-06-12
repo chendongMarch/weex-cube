@@ -2,6 +2,7 @@ package com.march.wxcube.module.dispatcher
 
 import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.manager.ManagerRegistry
+import com.march.wxcube.module.JsCallbackWrap
 import com.march.wxcube.module.OneModule
 import com.march.wxcube.module.mInstId
 
@@ -19,7 +20,7 @@ class EventDispatcher(val module: OneModule) : BaseDispatcher() {
         const val unRegisterEvent = "unRegisterEvent"
     }
 
-    override fun dispatch(method: String, params: JSONObject) {
+    override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
         when (method) {
             registerEvent   -> registerEvent(params)
             postEvent       -> postEvent(params)

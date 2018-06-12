@@ -56,16 +56,11 @@ class OneModule : WXModule() {
     @JSMethod(uiThread = true)
     fun call(method: String, params: JSONObject, callback: JSCallback) {
         try {
-            mDispatcherRegistry.dispatch(method, params)
-            callback.invoke(mapOf(
-                    BaseDispatcher.KEY_SUCCESS to true,
-                    BaseDispatcher.KEY_MSG to "finish method$method with $params"
-            ))
+            mDispatcherRegistry.dispatch(method, params,JsCallbackWrap(callback))
+            mDispatcherRegistry.postJsResult(callback, true to "$method($params) finish ")
         } catch (e: Exception) {
             e.printStackTrace()
-            callback.invoke(mapOf(
-                    BaseDispatcher.KEY_SUCCESS to false,
-                    BaseDispatcher.KEY_MSG to e.message))
+            mDispatcherRegistry.postJsResult(callback, false to "$method($params) error ${e.message}")
         }
     }
 

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject
 import com.march.common.utils.LogUtils
 import com.march.common.utils.ToastUtils
 import com.march.wxcube.common.getDef
+import com.march.wxcube.module.JsCallbackWrap
 
 /**
  * CreateAt : 2018/6/6
@@ -16,14 +17,14 @@ class DebugDispatcher : BaseDispatcher() {
     companion object {
 
         const val debugToast = "debugToast"
-        const val debugLog = "debugL"
+        const val debugLog = "debugLog"
     }
 
     override fun getMethods(): Array<String> {
         return arrayOf(debugToast, debugLog)
     }
 
-    override fun dispatch(method: String, params: JSONObject) {
+    override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
         when (method) {
             debugToast -> toast(params)
             debugLog   -> log(params)

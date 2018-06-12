@@ -1,6 +1,7 @@
 package com.march.wxcube.module.dispatcher
 
 import com.alibaba.fastjson.JSONObject
+import com.march.wxcube.module.JsCallbackWrap
 
 /**
  * CreateAt : 2018/6/9
@@ -18,7 +19,7 @@ class DispatcherRegistry(provider: BaseDispatcher.Provider, vararg dispatchers: 
 
     init {
         for (dispatcher in dispatchers) {
-            registerDispatcher(RouterDispatcher(), provider)
+            registerDispatcher(dispatcher, provider)
         }
     }
 
@@ -29,8 +30,8 @@ class DispatcherRegistry(provider: BaseDispatcher.Provider, vararg dispatchers: 
         }
     }
 
-    override fun dispatch(method: String, params: JSONObject) {
+    override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
         val dispatcher = mMethodDispatcher[method] ?: throw RuntimeException("method $method not match")
-        dispatcher.dispatch(method, params)
+        dispatcher.dispatch(method, params,jsCallbackWrap)
     }
 }
