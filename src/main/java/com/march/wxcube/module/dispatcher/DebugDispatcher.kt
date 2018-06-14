@@ -1,7 +1,7 @@
 package com.march.wxcube.module.dispatcher
 
 import com.alibaba.fastjson.JSONObject
-import com.march.common.utils.LogUtils
+import com.march.common.utils.LgUtils
 import com.march.common.utils.ToastUtils
 import com.march.wxcube.common.getDef
 import com.march.wxcube.module.JsCallbackWrap
@@ -44,6 +44,6 @@ class DebugDispatcher : BaseDispatcher() {
     private fun log(params: JSONObject) {
         val tag = params.getDef(KEY_TAG, "weex-debug")
         val msg = params.getDef(KEY_MSG, "no msg")
-        LogUtils.e(tag, msg)
+        LgUtils.e(tag, msg)
     }
 }

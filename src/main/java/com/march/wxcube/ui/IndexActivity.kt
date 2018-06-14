@@ -38,7 +38,7 @@ class IndexActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         Weex.getInst().mWeexInjector.onPageCreated(this, Weex.PAGE_INDEX)
         Weex.getInst().mWeexInjector.getLoading().setIndexContent(this)
-        checkPermissionAndLaunch();
+        checkPermissionAndLaunch()
     }
 
     private fun checkPermissionAndLaunch() {

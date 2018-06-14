@@ -6,7 +6,7 @@ import android.net.Uri
 import android.support.v4.app.Fragment
 import android.view.View
 import android.view.ViewGroup
-import com.march.common.utils.LogUtils
+import com.march.common.utils.LgUtils
 import com.march.wxcube.Weex
 import com.march.wxcube.common.report
 import com.march.wxcube.debug.WeexDebugger
@@ -131,7 +131,7 @@ class WeexDelegate : WeexLifeCycle {
 
     inner class RenderListener : IWXRenderListener {
         override fun onRenderSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
-            LogUtils.e("onRenderSuccess")
+            LgUtils.e("onRenderSuccess")
             mIsRenderSuccess = true
             mLoadingHandler.finishWeexLoading(mContainerView)
         }
@@ -237,7 +237,7 @@ class WeexDelegate : WeexLifeCycle {
 
     override fun onViewCreated(view: View?) {
         super.onViewCreated(view)
-        LogUtils.e("onViewCreated")
+        LgUtils.e("onViewCreated")
         mWeexView = view as ViewGroup
         mContainerView.removeAllViews()
         mContainerView.addView(view, 0)

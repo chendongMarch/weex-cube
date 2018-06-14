@@ -3,7 +3,7 @@ package com.march.wxcube.common
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import com.alibaba.fastjson.TypeReference
-import com.march.common.adapter.JsonParseAdapter
+import com.march.common.adapter.JsonParser
 
 /**
  * CreateAt : 2018/4/3
@@ -11,7 +11,7 @@ import com.march.common.adapter.JsonParseAdapter
  *
  * @author chendong
  */
-class JsonParseAdapterImpl : JsonParseAdapter {
+class JsonParserImpl : JsonParser {
 
     override fun <T : Any?> toObj(json: String?, cls: Class<T>?): T {
         return JSONObject.parseObject(json, cls)

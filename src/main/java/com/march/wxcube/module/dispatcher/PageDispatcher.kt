@@ -1,6 +1,5 @@
 package com.march.wxcube.module.dispatcher
 
-import android.app.Activity
 import android.graphics.Color
 import android.support.v4.app.Fragment
 import android.text.TextUtils
@@ -37,7 +36,7 @@ class PageDispatcher(val module: OneModule) : BaseDispatcher() {
     override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
         val weexAct = module.mWeexAct ?: throw RuntimeException("Page#loadTabs mWeexAct is null")
         when (method) {
-            initPage   -> initPage(weexAct, params)
+            initPage   -> initPage(params)
             loadTabs   -> loadTabs(weexAct, params)
             showTab    -> showTab(weexAct, params)
             reloadPage -> reloadPage()
@@ -51,7 +50,7 @@ class PageDispatcher(val module: OneModule) : BaseDispatcher() {
     /**
      * 初始化页面
      */
-    private fun initPage(act: Activity, params: JSONObject) {
+    private fun initPage(params: JSONObject) {
         val color = try {
             Color.parseColor(params.getString("bgColor") ?: "#ffffff")
         } catch (e: Exception) {

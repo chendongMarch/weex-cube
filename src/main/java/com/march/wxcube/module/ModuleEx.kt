@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
-import com.march.common.utils.LogUtils
+import com.march.common.utils.LgUtils
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.ui.WeexActivity
 import com.march.wxcube.ui.WeexDelegate
@@ -76,13 +76,13 @@ fun WXModule.findView(f: (View) -> Boolean): View? {
 
 private fun WXModule.findView(viewGroup: ViewGroup, f: (View) -> Boolean): View? {
     var view: View? = null
-//        LogUtils.e("开始遍历一个 ViewGroup 共有 ${viewGroup.childCount} 个孩子")
+//        LgUtils.e("开始遍历一个 ViewGroup 共有 ${viewGroup.childCount} 个孩子")
     for (i in (0 until viewGroup.childCount)) {
         view = viewGroup.getChildAt(i)
-//            LogUtils.e("第${i}个孩子$view  ${view.tag}")
+//            LgUtils.e("第${i}个孩子$view  ${view.tag}")
         val result = f.invoke(view)
         if (result) {
-            LogUtils.e("监测到，返回数据")
+            LgUtils.e("监测到，返回数据")
             return view
         } else if (view is ViewGroup) {
             view = findView(view, f)

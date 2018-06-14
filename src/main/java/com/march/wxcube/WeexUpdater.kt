@@ -2,7 +2,8 @@ package com.march.wxcube
 
 import android.content.Context
 import com.alibaba.fastjson.JSON
-import com.march.common.utils.LogUtils
+import com.march.common.Common
+import com.march.common.utils.LgUtils
 import com.march.common.utils.StreamUtils
 import com.march.wxcube.common.DiskLruCache
 import com.march.wxcube.common.report
@@ -95,7 +96,7 @@ class WeexUpdater(private var url: String) {
             }
             val simplifyPages = simplifyPages(validPages)
             for (page in simplifyPages) {
-                LogUtils.e("chendong",page.pageName)
+                LgUtils.e("chendong", page.pageName)
             }
             mUpdateHandlers.forEach { it.onUpdateConfig(context, simplifyPages) }
         } catch (e: Exception) {
@@ -106,8 +107,8 @@ class WeexUpdater(private var url: String) {
 
     // 1. 相同页面只保留 jsVersion 较高的一个
     // 2. 页面数据支持的 appVersion 小于等于当前 app
-    fun simplifyPages(pages: List<WeexPage>): List<WeexPage> {
-        val curVersionCodes = getVersionCodes(Weex.getInst().mWeexInjector.getBuildConfig().versionName)
+    private fun simplifyPages(pages: List<WeexPage>): List<WeexPage> {
+        val curVersionCodes = getVersionCodes(Common.BuildConfig.VERSION_NAME)
         if (curVersionCodes.size != 3) {
             return pages
         }
@@ -154,7 +155,7 @@ class WeexUpdater(private var url: String) {
 
     private fun getVersionCodes(version: String?): List<Int> {
         if (version == null) {
-            return arrayOf()
+            return listOf()
         }
         val vs = version.split(".")
         return vs.map { it.toInt() }

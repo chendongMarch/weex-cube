@@ -2,7 +2,7 @@ package com.march.wxcube
 
 import android.app.Activity
 import android.view.WindowManager
-import com.march.common.utils.LogUtils
+import com.march.common.utils.LgUtils
 import com.march.common.utils.immersion.ImmersionStatusBarUtils
 import com.march.wxcube.loading.Loading
 import com.march.wxcube.loading.SimpleLoading
@@ -24,14 +24,14 @@ interface WeexInjector {
      * 错误打印
      */
     fun onErrorReport(throwable: Throwable?, errorMsg: String) {
-        LogUtils.e("wx-error", errorMsg)
-        throwable?.let { LogUtils.e("wx-error", it) }
+        LgUtils.e("wx-error", errorMsg)
+        throwable?.let { LgUtils.e("wx-error", it) }
     }
 
     /**
      * log 打印
      */
-    fun onLog(tag: String, msg: String) = LogUtils.e(tag, msg)
+    fun onLog(tag: String, msg: String) = LgUtils.e(tag, msg)
 
     /**
      * 初始化 WxSdkEngine
@@ -73,7 +73,7 @@ interface WeexInjector {
     /**
      * 获取构建配置
      */
-    fun getBuildConfig(): WxBuildConfig = WxBuildConfig(0, "0.0.0", false)
+    fun getConfigClass(): Class<*> = BuildConfig::class.java
 
     /**
      * 获取要注入的 dispatcher

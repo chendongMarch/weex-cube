@@ -3,10 +3,12 @@ package com.march.wxcube
 import com.alibaba.android.bindingx.plugin.weex.BindingX
 import com.facebook.stetho.Stetho
 import com.march.common.Common
+import com.march.common.CommonInjector
+import com.march.common.adapter.JsonParser
 import com.march.common.model.WeakContext
 import com.march.common.utils.FileUtils
 import com.march.webkit.WebKit
-import com.march.wxcube.common.JsonParseAdapterImpl
+import com.march.wxcube.common.JsonParserImpl
 import com.march.wxcube.common.sdFile
 import com.march.wxcube.manager.*
 import com.march.wxcube.module.OneModule
@@ -37,7 +39,7 @@ class Weex private constructor() {
     var mWeexInjector: WeexInjector = WeexInjector.EMPTY // 外部注入支持
     lateinit var mWeexConfig: WeexConfig
 
-    fun init(config: WeexConfig, injector: WeexInjector) {
+    private fun init(config: WeexConfig, injector: WeexInjector) {
         mWeexConfig = config.prepare()
         mWeexInjector = injector
         val ctx = config.ctx
@@ -83,7 +85,15 @@ class Weex private constructor() {
         ManagerRegistry.HOST.mJsResHost = config.jsResHost
         ManagerRegistry.HOST.mApiHost = config.apiHost
 
-        Common.init(ctx, JsonParseAdapterImpl())
+        Common.init(ctx, object : CommonInjector {
+            override fun getConfigClass(): Class<*> {
+                return mWeexInjector.getConfigClass()
+            }
+
+            override fun getJsonParser(): JsonParser {
+                return JsonParserImpl()
+            }
+        })
         WebKit.init(ctx, WebKit.CORE_SYS, null)
 
         mWeexUpdater.registerUpdateHandler(mWeexRouter)
@@ -149,6 +159,10 @@ class Weex private constructor() {
         private val instance: Weex by lazy { Weex() }
 
         fun getInst() = instance
+
+        fun init(config: WeexConfig, injector: WeexInjector) {
+            getInst().init(config, injector)
+        }
     }
 }
 

@@ -57,7 +57,7 @@ dependencies {
     releaseImplementation libs.leakCanaryRelease
 
     // 模块支持
-    api project(':common')
+    implementation libs.common
     implementation project(':webkit')
     // implementation project(':socialsdk')
 }

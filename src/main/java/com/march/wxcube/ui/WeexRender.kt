@@ -1,7 +1,7 @@
 package com.march.wxcube.ui
 
 import android.app.Activity
-import com.march.common.utils.LogUtils
+import com.march.common.utils.LgUtils
 import com.march.wxcube.Weex
 import com.march.wxcube.common.report
 import com.march.wxcube.model.WeexPage
@@ -37,7 +37,7 @@ class WeexRender(activity: Activity,
             return
         }
         Weex.getInst().mWeexJsLoader.getTemplateAsync(mWxInst.context, page) {
-            LogUtils.e("render thread = ${Thread.currentThread().name}")
+            LgUtils.e("render thread = ${Thread.currentThread().name}")
             if (!it.isNullOrBlank()) {
                 consumer?.invoke(it)
                 mWxInst.render(page.pageName, it, opts, null, WXRenderStrategy.APPEND_ASYNC)
