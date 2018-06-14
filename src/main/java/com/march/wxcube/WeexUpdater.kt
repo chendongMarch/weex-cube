@@ -154,7 +154,7 @@ class WeexUpdater(private var url: String) {
 
     private fun getVersionCodes(version: String?): List<Int> {
         if (version == null) {
-            return arrayOf()
+            return listOf()
         }
         val vs = version.split(".")
         return vs.map { it.toInt() }
