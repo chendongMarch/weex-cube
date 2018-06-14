@@ -1,6 +1,7 @@
 package com.march.wxcube.module.dispatcher
 
 import android.content.Context
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.Weex
@@ -20,6 +21,7 @@ class RouterDispatcher : BaseDispatcher() {
     companion object {
         // method
         const val openUrl = "openUrl"
+        const val openNative = "openNative"
         const val openWeb = "openWeb"
         const val openDialog = "openDialog"
         const val openBrowser = "openBrowser"
@@ -36,7 +38,8 @@ class RouterDispatcher : BaseDispatcher() {
                 openBrowser,
                 openApp,
                 closePage,
-                putExtraData
+                putExtraData,
+                openNative
         )
     }
 
@@ -50,7 +53,15 @@ class RouterDispatcher : BaseDispatcher() {
             openApp      -> openApp(act, params)
             closePage    -> closePage(params)
             putExtraData -> putExtraData(params)
+            openNative   -> openNative(params)
         }
+    }
+
+    private fun openNative(params: JSONObject) {
+        val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openNative url is null")
+        val clazz = Class.forName(webUrl)
+        val activity = mProvider.provideActivity()
+        activity?.startActivity(Intent(activity, clazz))
     }
 
     private fun closePage(params: JSONObject) {

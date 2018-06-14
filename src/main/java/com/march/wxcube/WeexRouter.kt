@@ -41,7 +41,8 @@ class WeexRouter : WeexUpdater.UpdateHandler {
         val page = findPage(url) ?: return false to "WeexRouter#openUrl can not find page"
         val intent = Intent()
         intent.putExtra(WeexPage.KEY_PAGE, page)
-        intent.data = Uri.parse("app://weex.cube/weex")
+
+        intent.data = Uri.parse("cube://${ctx.packageName}.weex/weex")
         return start(ctx, intent)
     }
 
