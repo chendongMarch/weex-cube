@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
+import com.march.common.Common
 import com.march.webkit.WebKit
 import com.march.wxcube.common.report
 import com.march.wxcube.manager.ManagerRegistry
@@ -38,11 +39,20 @@ class WeexRouter : WeexUpdater.UpdateHandler {
      * 打开一个 web url
      */
     fun openUrl(ctx: Context, url: String): Pair<Boolean, String> {
-        val page = findPage(url) ?: return false to "WeexRouter#openUrl can not find page"
+        val page = findPage(url) ?: return openWeb(ctx, url)
         val intent = Intent()
         intent.putExtra(WeexPage.KEY_PAGE, page)
+        intent.data = Uri.parse("cube://${Common.BuildConfig.APPLICATION_ID}.weex/weex")
+        return start(ctx, intent)
+    }
 
-        intent.data = Uri.parse("cube://${ctx.packageName}.weex/weex")
+    /**
+     * 打开 weex 页面
+     */
+    fun openWeexPage(ctx: Context, page: WeexPage): Pair<Boolean, String> {
+        val intent = Intent()
+        intent.putExtra(WeexPage.KEY_PAGE, page)
+        intent.data = Uri.parse("cube://${Common.BuildConfig.APPLICATION_ID}.weex/weex")
         return start(ctx, intent)
     }
 
