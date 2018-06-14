@@ -1,7 +1,6 @@
 package com.march.wxcube
 
 import com.alibaba.android.bindingx.plugin.weex.BindingX
-import com.facebook.stetho.Stetho
 import com.march.common.Common
 import com.march.common.CommonInjector
 import com.march.common.adapter.JsonParser
@@ -44,9 +43,6 @@ class Weex private constructor() {
         mWeexInjector = injector
         val ctx = config.ctx
 
-        Stetho.initialize(Stetho.newInitializerBuilder(ctx)
-                .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(ctx))
-                .build())
         WXEnvironment.setOpenDebugLog(config.debug)
         WXEnvironment.setApkDebugable(config.debug)
         WXSDKEngine.addCustomOptions("container", "weex-cube")

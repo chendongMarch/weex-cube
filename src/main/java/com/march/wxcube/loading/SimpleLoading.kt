@@ -61,8 +61,10 @@ open class SimpleLoading : Loading {
     }
 
     override fun setIndexContent(activity: IndexActivity) {
-        activity.setContentView(R.layout.index_page)
-        activity.findViewById<TextView>(R.id.titleTv)?.text = activity.getString(R.string.app_name)
+        try{
+            activity.setContentView(R.layout.index_page)
+            activity.findViewById<TextView>(R.id.title_tv)?.text = activity.getString(R.string.app_name)
+        }catch (e:Exception){}
     }
 
     override fun makeLoadingIndicator(activity: Activity): View {

@@ -1,7 +1,6 @@
 package com.march.wxcube.manager
 
 import android.content.Context
-import com.facebook.stetho.okhttp3.StethoInterceptor
 import com.march.common.disklru.DiskLruCache
 import com.march.common.utils.NetUtils
 import com.march.common.utils.StreamUtils
@@ -17,7 +16,6 @@ import okhttp3.*
 import okhttp3.internal.Util
 import java.io.File
 import java.io.IOException
-import java.net.Proxy
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -70,8 +68,6 @@ class RequestManager : IManager {
         // 进行日志打印，扩展自 HttpLoggingInterceptor
         builder.addInterceptor(LogInterceptor())
 
-        // face book 调试框架
-        builder.addNetworkInterceptor(StethoInterceptor())
         // token校验，返回 403 时
         // builder.authenticator(new TokenAuthenticator());
         Weex.getInst().mWeexInjector.onInitOkHttpClient(builder)

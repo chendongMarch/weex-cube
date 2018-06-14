@@ -43,21 +43,13 @@ dependencies {
     implementation 'com.alibaba.android:bindingx_weex_plugin:1.0.1'
     implementation 'com.taobao.android:weex_inspector:0.13.4'
     debugImplementation 'com.taobao.android:weex_analyzer:0.1.0.5'
-    implementation 'com.alibaba:fastjson:1.2.8'
+    implementation libs.fastjson
 
-    // 扩展支持
     // http
     implementation 'com.squareup.okhttp:okhttp-ws:2.3.0'
-    implementation 'com.facebook.stetho:stetho:1.5.0'
-    implementation 'com.facebook.stetho:stetho-okhttp3:1.5.0'
-    api 'com.squareup.okhttp3:okhttp:3.9.0'
-
-    // leak
-    debugImplementation libs.leakCanaryDebug
-    releaseImplementation libs.leakCanaryRelease
+    implementation libs.okhttp3
 
     // 模块支持
     implementation libs.common
     implementation project(':webkit')
-    // implementation project(':socialsdk')
 }
