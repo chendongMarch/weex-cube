@@ -14,6 +14,7 @@ import com.march.common.adapter.JsonParser
 class JsonParserImpl : JsonParser {
 
     override fun <T : Any?> toObj(json: String?, cls: Class<T>?): T {
+
         return JSONObject.parseObject(json, cls)
     }
 
