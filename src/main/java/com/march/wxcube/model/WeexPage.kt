@@ -14,21 +14,22 @@ import android.text.TextUtils
 class WeexPage() : Parcelable {
 
 
-    var _comment: String? = null // 对该页面的注释，生产环境不返回
-
     var pageName: String? = null // 页面名称
 
     var jsVersion: String? = null // weex 构建版本
-
-    var remoteJs: String? = null // 远程 js
 
     var appVersion: String? = null // app 最小支持版本
 
     var webUrl: String? = null  // 降级 web，也是页面的唯一标记
 
-    var indexPage: Boolean = false // 该页面上是否被标记为首页
+    var remoteJs: String? = null // 远程 js
 
     var md5: String? = null // 远端生成 md5 用来校验下载文件完整性
+
+    var _comment: String? = null // 对该页面的注释，生产环境不返回
+
+    var indexPage: Boolean = false // 该页面上是否被标记为首页
+
 
     /*********************⬆️以上是数据结构字段⬇️下面是临时生成字段************************/
 
