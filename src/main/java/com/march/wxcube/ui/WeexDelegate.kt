@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment
 import android.view.View
 import android.view.ViewGroup
 import com.march.common.utils.LgUtils
+import com.march.common.utils.ToastUtils
 import com.march.wxcube.Weex
 import com.march.wxcube.common.report
 import com.march.wxcube.debug.WeexDebugger
@@ -145,6 +146,7 @@ class WeexDelegate : WeexLifeCycle {
             mWeexDebugger?.mErrorMsg = "code = $errCode, msg = $msg"
             if (mWeexDebugger != null && mWeexDebugger?.isRefreshing != null && mWeexDebugger?.isRefreshing!!) {
                 report("调试模式js出错，改正后会重新渲染")
+                ToastUtils.showLong(mWeexDebugger?.mErrorMsg)
                 return
             }
             if (mIsRenderSuccess) {

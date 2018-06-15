@@ -4,7 +4,7 @@
 // 读取 instantId
 readInstanceId(callback:Function)
 // 用于大体积数据传输
-putExtraData(url:String,params:Object)
+putExtraData(httpUrl:String,params:Object)
 // 关闭页面/弹窗
 close()
 

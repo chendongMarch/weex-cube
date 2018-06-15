@@ -9,6 +9,7 @@ import com.march.common.utils.FileUtils
 import com.march.webkit.WebKit
 import com.march.wxcube.common.JsonParserImpl
 import com.march.wxcube.common.sdFile
+import com.march.wxcube.debug.WxDebugActivityLifeCycle
 import com.march.wxcube.manager.*
 import com.march.wxcube.module.OneModule
 import com.march.wxcube.widget.Container
@@ -43,6 +44,7 @@ class Weex private constructor() {
         mWeexInjector = injector
         val ctx = config.ctx
 
+        ctx.registerActivityLifecycleCallbacks(WxDebugActivityLifeCycle())
         WXEnvironment.setOpenDebugLog(config.debug)
         WXEnvironment.setApkDebugable(config.debug)
         WXSDKEngine.addCustomOptions("container", "weex-cube")

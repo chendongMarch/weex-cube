@@ -29,6 +29,7 @@ dependencies {
 
     // appcompat
     implementation libs.appcompat_v7
+    implementation libs.design
     // 新版本需要 RecyclerView 支持
     implementation libs.recyclerView_v7
 
@@ -50,6 +51,7 @@ dependencies {
     implementation libs.okhttp3
 
     // 模块支持
-    implementation libs.common
+//    implementation libs.common
+    implementation project(path: ':common')
     implementation project(':webkit')
 }

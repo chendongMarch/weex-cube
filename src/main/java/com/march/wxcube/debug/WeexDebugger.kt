@@ -52,7 +52,7 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
         if (mDebugBtn == null) {
             mDebugBtn = DragButton(container.context)
             mDebugBtn?.textSize = 12f
-            mDebugBtn?.text = "debug"
+            mDebugBtn?.text = "wxdebug"
             mDebugBtn.click {
                 mDebugDialog.show()
             }
@@ -81,6 +81,7 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
                 it?.let {
                     if (mLastTemplate == null || !mLastTemplate.equals(it)) {
                         mActivity.runOnUiThread {
+                            ToastUtils.show("已为您刷新～")
                             renderJs(it)
                             mLastTemplate = it
                         }
