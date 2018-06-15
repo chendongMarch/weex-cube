@@ -1,22 +1,25 @@
 package com.march.wxcube.module.dispatcher
 
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.support.v4.app.Fragment
 import android.text.TextUtils
 import android.view.ViewGroup
 import com.alibaba.fastjson.JSONObject
+import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.transition.Transition
+import com.march.common.utils.DimensUtils
 import com.march.wxcube.Weex
+import com.march.wxcube.common.Utils
 import com.march.wxcube.common.getDef
 import com.march.wxcube.common.toListEx
 import com.march.wxcube.model.FragmentConfig
-import com.march.wxcube.module.OneModule
-import com.march.wxcube.module.findView
-import com.march.wxcube.module.mWeexAct
-import com.march.wxcube.module.mWeexDelegate
+import com.march.wxcube.module.*
 import com.march.wxcube.performer.FragmentPerformer
 import com.march.wxcube.ui.WeexActivity
 import com.march.wxcube.ui.WeexFragment
-import com.march.wxcube.module.JsCallbackWrap
+import com.march.wxcube.wxadapter.GlideApp
 
 /**
  * CreateAt : 2018/6/7
@@ -43,6 +46,10 @@ class PageDispatcher(val module: OneModule) : BaseDispatcher() {
         }
     }
 
+    override fun getAsyncMethods(): Array<String> {
+        return arrayOf(initPage)
+    }
+
     override fun getMethods(): Array<String> {
         return arrayOf(initPage, loadTabs, showTab)
     }
@@ -51,12 +58,40 @@ class PageDispatcher(val module: OneModule) : BaseDispatcher() {
      * 初始化页面
      */
     private fun initPage(params: JSONObject) {
-        val color = try {
-            Color.parseColor(params.getString("bgColor") ?: "#ffffff")
-        } catch (e: Exception) {
-            Color.WHITE
+        val activity = mProvider.provideActivity()
+        val background = params.getJSONObject("background")
+        val containerView = module.mWeexDelegate?.mContainerView ?: throw RuntimeException("Page#initPage containerView is null")
+        if (background != null) {
+            val color = params.getString("color")
+            if (color != null) {
+                containerView.setBackgroundColor(
+                        try {
+                            Color.parseColor(params.getString("bgColor") ?: "#ffffff")
+                        } catch (e: Exception) {
+                            Color.WHITE
+                        })
+            } else {
+                val image = background.getString("image")
+                val repeat = background.getDef("repeat", false)
+                val widthScale = background.getDef("widthScale", 1f)
+                val aspectRatio = background.getDef("aspectRatio", 1f)
+                if (image != null) {
+                    val bgFunc: (resource: Bitmap) -> Unit = {
+                        containerView.background = if (repeat) {
+                            Utils.createRepeatDrawable(activity, it, DimensUtils.WIDTH, widthScale, aspectRatio)
+                        } else {
+                            BitmapDrawable(activity.resources, it)
+                        }
+                    }
+                    GlideApp.with(activity).asBitmap().load(image)
+                            .into(object : SimpleTarget<Bitmap>() {
+                                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                                    bgFunc(resource)
+                                }
+                            })
+                }
+            }
         }
-        module.mWeexDelegate?.mContainerView?.setBackgroundColor(color)
         val back = params.getDef("back", false)
         if(back) {
             module.mWeexDelegate?.mHandleBackPressed = true

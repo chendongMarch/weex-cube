@@ -4,7 +4,6 @@ import android.support.v7.app.AppCompatActivity
 import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.module.JsCallbackWrap
 import com.taobao.weex.bridge.JSCallback
-import java.sql.Array
 
 /**
  * CreateAt : 2018/6/6
@@ -15,7 +14,7 @@ import java.sql.Array
 abstract class BaseDispatcher {
 
     interface Provider {
-        fun provideActivity(): AppCompatActivity?
+        fun provideActivity(): AppCompatActivity
         fun doBySelf(method: String, params: JSONObject)
     }
 
@@ -34,12 +33,14 @@ abstract class BaseDispatcher {
 
     }
 
+    open fun getAsyncMethods() = arrayOf<String>()
+
     abstract fun getMethods(): kotlin.Array<String>
 
     abstract fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap)
 
     fun findAct(): AppCompatActivity {
-        return mProvider.provideActivity() ?: throw RuntimeException("ModuleDispatcher#act error")
+        return mProvider.provideActivity()
     }
 
     fun postJsResult(jsCallback: JSCallback, result: Pair<Boolean, String>) {

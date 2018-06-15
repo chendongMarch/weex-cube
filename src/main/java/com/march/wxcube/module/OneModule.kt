@@ -57,7 +57,7 @@ class OneModule : WXModule() {
     fun call(method: String, params: JSONObject, callback: JSCallback) {
         try {
             mDispatcherRegistry.dispatch(method, params,JsCallbackWrap(callback))
-            mDispatcherRegistry.postJsResult(callback, true to "$method($params) finish ")
+            // mDispatcherRegistry.postJsResult(callback, true to "$method($params) finish ")
         } catch (e: Exception) {
             e.printStackTrace()
             mDispatcherRegistry.postJsResult(callback, false to "$method($params) error ${e.message}")
@@ -68,8 +68,8 @@ class OneModule : WXModule() {
 
         val module = this@OneModule
 
-        override fun provideActivity(): AppCompatActivity? {
-            return module.mAct
+        override fun provideActivity(): AppCompatActivity {
+            return module.mAct?:throw RuntimeException("activity find error")
         }
 
         override fun doBySelf(method: String, params: JSONObject) {
