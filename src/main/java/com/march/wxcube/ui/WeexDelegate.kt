@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment
 import android.view.View
 import android.view.ViewGroup
 import com.march.common.utils.LgUtils
-import com.march.common.utils.ToastUtils
 import com.march.wxcube.Weex
 import com.march.wxcube.common.report
 import com.march.wxcube.debug.WeexDebugger
@@ -29,26 +28,28 @@ class WeexDelegate : WeexLifeCycle {
 
     companion object {
         const val EXTRA = "extra"
+        const val INSTANCE_ID = "instanceId"
     }
 
+    // 渲染状态
+    private var mRenderStatus = RenderStatus.RENDER_NONE
     // weex 实例
     private lateinit var mWeexInst: WXSDKInstance
     // 渲染
     private lateinit var mWeexRender: WeexRender
     // 宿主
-    private lateinit var mActivity: Activity
+    internal lateinit var mActivity: Activity
     private val mHost: Any
-    // 负责加载多个 fragment
-    var mWeexDebugger: WeexDebugger? = null
     // 容器
-    lateinit var mContainerView: ViewGroup // 容器 View
-    private var mWeexView: ViewGroup? = null // weex root view
-    // 页面数据
-    private lateinit var mWeexPage: WeexPage
+    internal lateinit var mContainerView: ViewGroup // 容器 View
     // loading
     private val mLoadingHandler by lazy { Weex.getInst().mWeexInjector.getLoading() }
-    private var mIsRenderSuccess = false
+    // 当前加载的页面
     private var mCurPage: WeexPage? = null
+    // 当前承载的页面
+    internal lateinit var mWeexPage: WeexPage
+    private var mWeexDebugger: WeexDebugger? = null
+    // 附加数据和操作
     private val mPerformers by lazy { mutableMapOf<String, IPerformer>() }
     private val mLifeCallbacks by lazy { mutableListOf<WeexLifeCycle>() }
 
@@ -80,9 +81,22 @@ class WeexDelegate : WeexLifeCycle {
         createWxInst()
     }
 
+    fun initContainerView(view: ViewGroup) {
+        mContainerView = view
+        mLoadingHandler.startWeexLoading(mContainerView)
+    }
+
     fun addPerformer(performer: IPerformer) {
         mPerformers[performer.javaClass.simpleName] = performer
         mLifeCallbacks.add(performer)
+    }
+
+    fun addLifeCallbacks(callback: WeexLifeCycle) {
+        mLifeCallbacks.add(callback)
+    }
+
+    fun setDebugger(weexDebugger: WeexDebugger) {
+        mWeexDebugger = weexDebugger
     }
 
     fun <T> getPerformer(clazz: Class<T>): T? {
@@ -115,13 +129,6 @@ class WeexDelegate : WeexLifeCycle {
     }
 
 
-    fun initContainerView(view: ViewGroup) {
-        mContainerView = view
-        mLoadingHandler.startWeexLoading(mContainerView)
-        mWeexDebugger = WeexDebugger(this, mActivity, mWeexPage)
-    }
-
-
     fun close() {
         when (mHost) {
             is WeexActivity -> mHost.finish()
@@ -133,8 +140,9 @@ class WeexDelegate : WeexLifeCycle {
     inner class RenderListener : IWXRenderListener {
         override fun onRenderSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
             LgUtils.e("onRenderSuccess")
-            mIsRenderSuccess = true
+            mRenderStatus = RenderStatus.RENDER_SUCCESS
             mLoadingHandler.finishWeexLoading(mContainerView)
+            mWeexDebugger?.onRenderSuccess(instance, width, height)
         }
 
         override fun onViewCreated(instance: WXSDKInstance?, view: View?) {
@@ -143,13 +151,13 @@ class WeexDelegate : WeexLifeCycle {
 
         override fun onException(instance: WXSDKInstance?, errCode: String?, msg: String?) {
             report("code = $errCode, msg = $msg")
-            mWeexDebugger?.mErrorMsg = "code = $errCode, msg = $msg"
-            if (mWeexDebugger != null && mWeexDebugger?.isRefreshing != null && mWeexDebugger?.isRefreshing!!) {
-                report("调试模式js出错，改正后会重新渲染")
-                ToastUtils.showLong(mWeexDebugger?.mErrorMsg)
+            mWeexDebugger?.onException(instance, errCode, msg)
+            // 正在 js 刷新时直接跳过后续异常处理
+            if (mWeexDebugger != null) {
                 return
             }
-            if (mIsRenderSuccess) {
+            // 如果已经成功过，则此时不会走失败页面，只会没有反应
+            if (mRenderStatus == RenderStatus.RENDER_SUCCESS) {
                 return
             }
             if (mCurPage == null || mCurPage?.equals(mWeexPage) == true) {
@@ -163,7 +171,6 @@ class WeexDelegate : WeexLifeCycle {
 
     //************************渲染页面*********************//
 
-
     /**
      * 准备渲染的参数
      */
@@ -172,7 +179,7 @@ class WeexDelegate : WeexLifeCycle {
         // parse url
         val uri = Uri.parse(mWeexPage.webUrl)
         uri.queryParameterNames.forEach { opts[it] = uri.getQueryParameter(it) }
-        opts["instanceId"] = mWeexInst.instanceId
+        opts[INSTANCE_ID] = mWeexInst.instanceId
         mWeexPage.webUrl?.let {
             val data = ManagerRegistry.DATA.getData(it)
             if (data != null) {
@@ -186,7 +193,7 @@ class WeexDelegate : WeexLifeCycle {
      * 渲染之前处理
      */
     private fun preRender() {
-        if (mIsRenderSuccess) {
+        if (mRenderStatus == RenderStatus.RENDER_SUCCESS) {
             destroyWxInst()
             createWxInst()
             onCreate()
@@ -200,6 +207,7 @@ class WeexDelegate : WeexLifeCycle {
         preRender()
         mCurPage = page
         mWeexRender.render(page, parseRenderOptions())
+        mRenderStatus = RenderStatus.RENDER_DOING
     }
 
     /**
@@ -234,22 +242,22 @@ class WeexDelegate : WeexLifeCycle {
 
     override fun onDestroy() {
         destroyWxInst()
+        mLifeCallbacks.forEach { it.onDestroy() }
         mWeexDebugger?.onDestroy()
     }
 
     override fun onViewCreated(view: View?) {
         super.onViewCreated(view)
         LgUtils.e("onViewCreated")
-        mWeexView = view as ViewGroup
         mContainerView.removeAllViews()
         mContainerView.addView(view, 0)
-        mWeexDebugger?.addDebugBtn(mContainerView)
         mLifeCallbacks.forEach { it.onViewCreated(view) }
     }
 
     override fun onCreate() {
         mWeexInst.onActivityCreate()
         mLifeCallbacks.forEach { it.onCreate() }
+        mWeexDebugger?.onReady(this)
     }
 
     override fun onStart() {
@@ -284,7 +292,16 @@ class WeexDelegate : WeexLifeCycle {
     }
 
     var mHandleBackPressed = false
+
     fun onBackPressed() {
         fireEvent("onBackPressed")
     }
+}
+
+
+enum class RenderStatus(val value: Int) {
+    RENDER_NONE(1),
+    RENDER_DOING(2),
+    RENDER_SUCCESS(3),
+    RENDER_FAILURE(4),
 }

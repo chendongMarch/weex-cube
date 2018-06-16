@@ -2,7 +2,7 @@ package com.march.wxcube.debug
 
 import android.app.Activity
 import android.content.Context
-import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -11,19 +11,24 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.Switch
 import android.widget.TextView
+import com.march.common.utils.DimensUtils
+import com.march.common.utils.RegexUtils
 import com.march.common.utils.ToastUtils
+import com.march.common.view.DragLayout
 import com.march.wxcube.JsCacheStrategy
 import com.march.wxcube.JsLoadStrategy
 import com.march.wxcube.R
 import com.march.wxcube.Weex
 import com.march.wxcube.common.click
 import com.march.wxcube.common.newLine
-import com.march.wxcube.lifecycle.WeexLifeCycle
 import com.march.wxcube.model.WeexPage
 import com.march.wxcube.ui.WeexDelegate
+import com.taobao.weex.IWXRenderListener
+import com.taobao.weex.WXSDKInstance
 
 /**
  * CreateAt : 2018/5/3
@@ -31,45 +36,55 @@ import com.march.wxcube.ui.WeexDelegate
  *
  * @author chendong
  */
-class WeexDebugger(private val mWeexDelegate: WeexDelegate,
-                   private val mActivity: Activity,
-                   private val mWeexPage: WeexPage?) : WeexLifeCycle {
+class DebugMsg {
+    var lastTemplate = ""
+    var errorMsg = ""
+    var refreshing = false
 
-    private var mLastTemplate: String? = null
+    fun toShowString(): String {
+        return StringBuilder()
+                .append("error = ").append(errorMsg).newLine()
+                .append(if (refreshing) "刷新中" else "没有刷新").newLine()
+                .toString()
+    }
+}
 
-    private val mHandler by lazy { Handler(Looper.getMainLooper()) { startRefresh() } }
+class WeexDebugger : IWXRenderListener {
 
-    var isRefreshing = false
-
-    private var mDebugBtn: TextView? = null
-
+    private val mDebugMsg by lazy { DebugMsg() }
+    private val mHandler by lazy { Handler(Looper.getMainLooper()) { startRefresh(false) } }
     private val mDebugDialog by lazy { DebugDialog(mActivity) }
-
     private val mDebugConfig by lazy { DebugConfig(false, false, false) }
-    var mErrorMsg = ""
 
-    fun addDebugBtn(container: ViewGroup) {
-        if (mDebugBtn == null) {
-            mDebugBtn = DragButton(container.context)
-            mDebugBtn?.textSize = 12f
-            mDebugBtn?.text = "wxdebug"
-            mDebugBtn.click {
-                mDebugDialog.show()
-            }
+    private lateinit var mActivity: Activity
+    private lateinit var mDelegate: WeexDelegate
+    private lateinit var mWeexPage: WeexPage
+
+    private var mView: View? = null
+
+    fun addDebugBtn(activity: Activity) {
+        mActivity = activity
+        val dragLayout = activity.layoutInflater.inflate(R.layout.wx_debug_view, null) as DragLayout
+        dragLayout.layoutParams = FrameLayout.LayoutParams(DimensUtils.dp2px(50f), DimensUtils.dp2px(50f))
+        val params = FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        params.gravity = Gravity.END or Gravity.BOTTOM
+        params.rightMargin = 100
+        params.bottomMargin = 300
+        dragLayout.setOnClickListener {
+            mDebugDialog.show()
         }
-        val params = FrameLayout.LayoutParams(200, ViewGroup.LayoutParams.WRAP_CONTENT)
-        params.gravity = Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
-        params.leftMargin = 200
-        mDebugBtn?.gravity = Gravity.CENTER
-        mDebugBtn?.setPadding(20, 5, 20, 5)
-        mDebugBtn?.setBackgroundColor(Color.parseColor("#60e5df"))
-        mDebugBtn?.setTextColor(Color.BLACK)
-        container.addView(mDebugBtn, params)
+        dragLayout.setOnLongClickListener {
+            stopRefresh()
+            startRefresh(false)
+            true
+        }
+        mView = dragLayout
+        (activity.window.decorView as ViewGroup).addView(dragLayout, params)
     }
 
-    private fun startRefresh(): Boolean {
-        return with(mWeexDelegate) {
-            isRefreshing = true
+    private fun startRefresh(once: Boolean): Boolean {
+        return with(mDelegate) {
+            mDebugMsg.refreshing = true
             var cacheStrategy = JsCacheStrategy.NO_CACHE
             if(mDebugConfig.debugJsInCache) {
                 cacheStrategy = JsCacheStrategy.CACHE_MEMORY_ONLY
@@ -79,31 +94,70 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
             Weex.getInst().mWeexJsLoader.getTemplateAsync(mActivity,
                     JsLoadStrategy.NET_FIRST,cacheStrategy, mWeexPage) {
                 it?.let {
-                    if (mLastTemplate == null || !mLastTemplate.equals(it)) {
+                    if (mDebugMsg.lastTemplate != it) {
                         mActivity.runOnUiThread {
                             ToastUtils.show("已为您刷新～")
                             renderJs(it)
-                            mLastTemplate = it
+                            mDebugMsg.lastTemplate = it
                         }
                     } else {
                         Weex.getInst().mWeexInjector.onLog("startRefresh", "获取到但是没有改变，不作渲染")
                     }
                 }
-                mHandler.sendEmptyMessageDelayed(0, 2000)
+                mHandler.post { mView?.animate()?.rotationYBy(360f)?.setDuration(5_00)?.start() }
+                if(!once) {
+                    mHandler.sendEmptyMessageDelayed(0, 2000)
+                }
             }
             true
         }
     }
 
     private fun stopRefresh() {
-        mLastTemplate = null
+        mDebugMsg.lastTemplate = ""
+        mDebugMsg.refreshing = false
         mHandler.removeCallbacksAndMessages(null)
-        isRefreshing = false
     }
 
-    override fun onDestroy() {
+    fun onReady(delegate: WeexDelegate) {
+        mDelegate = delegate
+        mActivity = delegate.mActivity
+        mWeexPage = mDelegate.mWeexPage
+    }
+
+    fun onDestroy() {
         stopRefresh()
     }
+
+    override fun onRefreshSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
+
+    }
+
+    override fun onViewCreated(instance: WXSDKInstance?, view: View?) {
+    }
+
+    override fun onRenderSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
+        if (mDebugMsg.refreshing) {
+            return
+        }
+        try {
+            val js = mWeexPage.remoteJs ?: return
+            val uri = Uri.parse(js)
+            if (RegexUtils.isIp(uri.host)) {
+                ToastUtils.show("检测到调试地址，2s 后开始自动刷新")
+                mHandler.sendEmptyMessageDelayed(0, 2000)
+                mDebugMsg.refreshing = true
+                mDebugConfig.isDebugLocalJs = true
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override fun onException(instance: WXSDKInstance?, errCode: String?, msg: String?) {
+        mDebugMsg.errorMsg = "code = $errCode msg = $msg"
+    }
+
 
     data class DebugConfig(var isDebugLocalJs: Boolean, var debugJsInCache: Boolean, var debugJsInDisk: Boolean)
 
@@ -114,6 +168,10 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
             setContentView(R.layout.debug_dialog)
         }
 
+        private val hideBtn by lazy { findViewById<Button>(R.id.hide_btn) }
+        private val descTv by lazy { findViewById<TextView>(R.id.desc_tv) }
+        private val refreshJsSw by lazy { findViewById<Switch>(R.id.debug_local_js_sw) }
+
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             try {
@@ -121,11 +179,28 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-            val msg = StringBuilder().append("页面：").append(mWeexPage?.pageName).newLine()
-                    .append("错误信息：").newLine()
-                    .append(mErrorMsg)
+            hideBtn.click {
+                if (descTv?.visibility == View.GONE) {
+                    descTv?.visibility = View.VISIBLE
+                    hideBtn?.text = "显示信息"
+                } else {
+                    descTv?.visibility = View.GONE
+                    hideBtn?.text = "隐藏信息"
+                }
+            }
+            val msg = StringBuilder()
+                    .append("页面：").newLine()
+                    .append(mWeexPage.toShowString()).newLine()
+                    .append("信息：").newLine()
+                    .append(mDebugMsg.toShowString()).newLine()
                     .toString()
-            findViewById<TextView>(R.id.desc_tv)?.text = msg
+            descTv?.text = msg
+            findViewById<View>(R.id.info_btn).click {
+                ToastUtils.showLong("""
+                    1. 长按可以触发强制刷新
+                    2. 当在实时刷新时，图标会保持旋转作为提示
+                """.trimIndent())
+            }
             findViewById<View>(R.id.req_config_btn).click { Weex.getInst().mWeexUpdater.update(context) }
             // 关闭
             findViewById<View>(R.id.close_btn).click { dismiss() }
@@ -143,13 +218,12 @@ class WeexDebugger(private val mWeexDelegate: WeexDelegate,
             jsInDiskSw?.setOnCheckedChangeListener { _, isChecked ->
                 mDebugConfig.debugJsInDisk = isChecked
             }
-            val debugJsSw = findViewById<Switch>(R.id.debug_local_js_sw)
-            debugJsSw?.isChecked = mDebugConfig.isDebugLocalJs
-            debugJsSw?.setOnCheckedChangeListener { _, isChecked ->
+            refreshJsSw?.isChecked = mDebugConfig.isDebugLocalJs
+            refreshJsSw?.setOnCheckedChangeListener { _, isChecked ->
                 mDebugConfig.isDebugLocalJs = isChecked
                 if(mDebugConfig.isDebugLocalJs) {
                     stopRefresh()
-                    startRefresh()
+                    startRefresh(false)
                     ToastUtils.show("开始调试远程js")
                 } else {
                     stopRefresh()

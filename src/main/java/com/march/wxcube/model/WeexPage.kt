@@ -3,6 +3,7 @@ package com.march.wxcube.model
 import android.os.Parcel
 import android.os.Parcelable
 import android.text.TextUtils
+import com.march.wxcube.common.newLine
 
 
 /**
@@ -58,17 +59,6 @@ class WeexPage() : Parcelable {
         return page
     }
 
-    override fun toString(): String {
-        return "WeexPage{" +
-                "pageName='" + pageName + '\'' +
-                ", remoteJs='" + remoteJs + '\'' +
-                ", localJs='" + localJs + '\'' +
-                ", assetsJs='" + assetsJs + '\'' +
-                ", appVersion='" + appVersion + '\'' +
-                ", jsVersion='" + jsVersion + '\'' +
-                ", webUrl='" + webUrl + '\'' +
-                '}'
-    }
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeString(this.pageName)
@@ -87,6 +77,27 @@ class WeexPage() : Parcelable {
     }
 
     override fun describeContents() = 0
+
+    override fun toString(): String {
+        return "WeexPage(pageName=$pageName, " +
+                "jsVersion=$jsVersion, " +
+                "appVersion=$appVersion, " +
+                "webUrl=$webUrl, " +
+                "remoteJs=$remoteJs, " +
+                "md5=$md5, " +
+                "_comment=$_comment, " +
+                "indexPage=$indexPage)"
+    }
+
+
+    fun toShowString(): String {
+        return StringBuilder()
+                .append("pageName=").append(pageName).newLine()
+                .append("remoteJs=").append(remoteJs).newLine()
+                .append("appVersion=").append(appVersion).newLine()
+                .append("jsVersion=").append(jsVersion).newLine()
+                .append("webUrl=").append(webUrl).newLine().toString()
+    }
 
 
     companion object {
