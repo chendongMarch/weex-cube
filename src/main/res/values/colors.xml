@@ -4,4 +4,7 @@
     <color name="colorPrimaryDark">#02B6C0</color>
     <color name="colorAccent">#02B6C0</color>
     <color name="containerBg">#fff</color>
+    <color name="black">#1a1210</color>
+    <color name="global_debug_bg">#e6f2f2</color>
+    <color name="page_debug_bg">#f4eee4</color>
 </resources>

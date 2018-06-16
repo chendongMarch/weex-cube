@@ -60,6 +60,7 @@ class WeexDebugger : IWXRenderListener {
     private lateinit var mDelegate: WeexDelegate
     private lateinit var mWeexPage: WeexPage
 
+    private var mIsDestroy = false
     private var mView: View? = null
 
     fun addDebugBtn(activity: Activity) {
@@ -83,6 +84,9 @@ class WeexDebugger : IWXRenderListener {
     }
 
     private fun startRefresh(once: Boolean): Boolean {
+        if (mIsDestroy) {
+            return false
+        }
         return with(mDelegate) {
             mDebugMsg.refreshing = true
             var cacheStrategy = JsCacheStrategy.NO_CACHE
@@ -105,7 +109,7 @@ class WeexDebugger : IWXRenderListener {
                     }
                 }
                 mHandler.post { mView?.animate()?.rotationYBy(360f)?.setDuration(5_00)?.start() }
-                if(!once) {
+                if (!once && mDebugMsg.refreshing) {
                     mHandler.sendEmptyMessageDelayed(0, 2000)
                 }
             }
@@ -127,6 +131,7 @@ class WeexDebugger : IWXRenderListener {
 
     fun onDestroy() {
         stopRefresh()
+        mIsDestroy = true
     }
 
     override fun onRefreshSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
@@ -137,7 +142,7 @@ class WeexDebugger : IWXRenderListener {
     }
 
     override fun onRenderSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
-        if (mDebugMsg.refreshing) {
+        if (mDebugMsg.refreshing || mIsDestroy) {
             return
         }
         try {
@@ -188,13 +193,7 @@ class WeexDebugger : IWXRenderListener {
                     hideBtn?.text = "隐藏信息"
                 }
             }
-            val msg = StringBuilder()
-                    .append("页面：").newLine()
-                    .append(mWeexPage.toShowString()).newLine()
-                    .append("信息：").newLine()
-                    .append(mDebugMsg.toShowString()).newLine()
-                    .toString()
-            descTv?.text = msg
+            updateMsg()
             findViewById<View>(R.id.info_btn).click {
                 ToastUtils.showLong("""
                     1. 长按可以触发强制刷新
@@ -232,6 +231,20 @@ class WeexDebugger : IWXRenderListener {
             }
         }
 
+        private fun updateMsg() {
+            val msg = StringBuilder()
+                    .append("页面：").newLine()
+                    .append(mWeexPage.toShowString()).newLine()
+                    .append("信息：").newLine()
+                    .append(mDebugMsg.toShowString()).newLine()
+                    .toString()
+            descTv?.text = msg
+        }
+
+        override fun show() {
+            super.show()
+            updateMsg()
+        }
         /* 全部参数设置属性 */
         private fun setDialogAttributes(width: Int, height: Int, alpha: Float, dim: Float, gravity: Int) {
             setCancelable(true)
