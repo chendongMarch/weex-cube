@@ -13,9 +13,9 @@ open class DiskLruCache(dir: File, maxSize: Long) {
 
     private val diskCache by lazy { DiskLruCache.open(dir, 1, 1, maxSize) }
 
-    fun read(key: String): String? {
+    fun read(key: String): String {
         return try {
-            diskCache.get(key)?.getString(0)
+            diskCache.get(key)?.getString(0)?:""
         } catch (e: Exception) {
             e.printStackTrace()
             report("read disk error key = $key")
