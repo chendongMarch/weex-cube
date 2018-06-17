@@ -12,6 +12,7 @@ import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.WeexPage
 import com.march.wxcube.ui.WebActivity
 import com.march.wxcube.ui.WeexDialogFragment
+import com.march.wxcube.update.WeexUpdater
 
 /**
  * CreateAt : 2018/3/27

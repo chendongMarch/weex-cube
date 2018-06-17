@@ -4,11 +4,11 @@ import android.content.Context
 import android.os.Build
 import android.util.LruCache
 import com.march.wxcube.common.DiskLruCache
-import com.march.wxcube.common.md5
 import com.march.wxcube.common.memory
 import com.march.wxcube.common.report
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.WeexPage
+import com.march.wxcube.update.WeexUpdater
 import com.taobao.weex.utils.WXFileUtils
 import java.io.File
 import java.util.concurrent.ExecutorService

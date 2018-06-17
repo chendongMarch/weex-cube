@@ -12,6 +12,7 @@ import com.march.wxcube.common.sdFile
 import com.march.wxcube.debug.WxDebugActivityLifeCycle
 import com.march.wxcube.manager.*
 import com.march.wxcube.module.OneModule
+import com.march.wxcube.update.WeexUpdater
 import com.march.wxcube.widget.Container
 import com.march.wxcube.wxadapter.ImgAdapter
 import com.march.wxcube.wxadapter.JsErrorAdapter
@@ -32,9 +33,9 @@ import java.io.File
 class Weex private constructor() {
 
     private val mWeakCtx by lazy { WeakContext(mWeexConfig.ctx) } // 上下文虚引用
-    val mWeexJsLoader by lazy { WeexJsLoader(mWeexConfig.ctx, mWeexConfig.jsLoadStrategy, mWeexConfig.jsCacheStrategy, mWeexConfig.jsPrepareStrategy) } // 加载 js
-    val mWeexRouter by lazy { WeexRouter() } // 路由页面管理
-    val mWeexUpdater by lazy { WeexUpdater(mWeexConfig.configUrl) } // weex 页面更新
+    internal val mWeexJsLoader by lazy { WeexJsLoader(mWeexConfig.ctx, mWeexConfig.jsLoadStrategy, mWeexConfig.jsCacheStrategy, mWeexConfig.jsPrepareStrategy) } // 加载 js
+    internal val mWeexRouter by lazy { WeexRouter() } // 路由页面管理
+    internal val mWeexUpdater by lazy { WeexUpdater(mWeexConfig.configUrl) } // weex 页面更新
 
     var mWeexInjector: WeexInjector = WeexInjector.EMPTY // 外部注入支持
     lateinit var mWeexConfig: WeexConfig
