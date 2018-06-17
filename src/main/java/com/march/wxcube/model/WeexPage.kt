@@ -21,13 +21,13 @@ class WeexPage() : Parcelable {
 
     var appVersion: String? = null // app 最小支持版本
 
-    var webUrl: String? = null  // 降级 web，也是页面的唯一标记
+    var webUrl: String = ""  // 降级 web，也是页面的唯一标记
 
     var remoteJs: String? = null // 远程 js
 
     var md5: String? = null // 远端生成 md5 用来校验下载文件完整性
 
-    var _comment: String? = null // 对该页面的注释，生产环境不返回
+    var comment: String? = null // 对该页面的注释，生产环境不返回
 
     var indexPage: Boolean = false // 该页面上是否被标记为首页
 
@@ -85,7 +85,7 @@ class WeexPage() : Parcelable {
                 "webUrl=$webUrl, " +
                 "remoteJs=$remoteJs, " +
                 "md5=$md5, " +
-                "_comment=$_comment, " +
+                "comment=$comment, " +
                 "indexPage=$indexPage)"
     }
 

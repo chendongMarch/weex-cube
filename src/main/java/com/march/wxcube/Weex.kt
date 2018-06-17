@@ -1,5 +1,6 @@
 package com.march.wxcube
 
+import android.content.Context
 import com.alibaba.android.bindingx.plugin.weex.BindingX
 import com.march.common.Common
 import com.march.common.CommonInjector
@@ -11,7 +12,9 @@ import com.march.wxcube.common.JsonParserImpl
 import com.march.wxcube.common.sdFile
 import com.march.wxcube.debug.WxDebugActivityLifeCycle
 import com.march.wxcube.manager.*
+import com.march.wxcube.model.WeexPage
 import com.march.wxcube.module.OneModule
+import com.march.wxcube.router.WeexRouter
 import com.march.wxcube.update.WeexUpdater
 import com.march.wxcube.widget.Container
 import com.march.wxcube.wxadapter.ImgAdapter
@@ -31,6 +34,21 @@ import java.io.File
  * @author chendong
  */
 class Weex private constructor() {
+
+
+    companion object {
+        const val CACHE_DIR = "weex-cache"
+        const val PAGE_WEB = 1
+        const val PAGE_WEEX = 2
+        const val PAGE_INDEX = 3
+        private val instance: Weex by lazy { Weex() }
+
+        fun getInst() = instance
+
+        fun init(config: WeexConfig, injector: WeexInjector) {
+            getInst().init(config, injector)
+        }
+    }
 
     private val mWeakCtx by lazy { WeakContext(mWeexConfig.ctx) } // 上下文虚引用
     internal val mWeexJsLoader by lazy { WeexJsLoader(mWeexConfig.ctx, mWeexConfig.jsLoadStrategy, mWeexConfig.jsCacheStrategy, mWeexConfig.jsPrepareStrategy) } // 加载 js
@@ -94,9 +112,6 @@ class Weex private constructor() {
             }
         })
         WebKit.init(ctx, WebKit.CORE_SYS, null)
-
-        mWeexUpdater.registerUpdateHandler(mWeexRouter)
-        mWeexUpdater.registerUpdateHandler(mWeexJsLoader)
     }
 
     private fun registerBindingX() {
@@ -150,18 +165,9 @@ class Weex private constructor() {
         }
     }
 
-    companion object {
-        const val CACHE_DIR = "weex-cache"
-        const val PAGE_WEB = 1
-        const val PAGE_WEEX = 2
-        const val PAGE_INDEX = 3
-        private val instance: Weex by lazy { Weex() }
-
-        fun getInst() = instance
-
-        fun init(config: WeexConfig, injector: WeexInjector) {
-            getInst().init(config, injector)
-        }
+    fun onWeexConfigUpdate(context: Context, pages: List<WeexPage>?) {
+        mWeexRouter.onUpdateConfig(context, pages)
+        mWeexJsLoader.onUpdateConfig(context, pages)
     }
 }
 

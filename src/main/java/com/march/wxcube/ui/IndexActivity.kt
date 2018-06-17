@@ -29,6 +29,7 @@ class IndexActivity : BaseActivity() {
             finish()
         } else {
             Weex.getInst().mWeexRouter.mRouterReadyCallback = {
+                Weex.getInst().mWeexRouter.openIndexPage(mCtx)
                 finish()
             }
         }

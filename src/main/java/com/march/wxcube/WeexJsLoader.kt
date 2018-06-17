@@ -8,7 +8,7 @@ import com.march.wxcube.common.memory
 import com.march.wxcube.common.report
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.WeexPage
-import com.march.wxcube.update.WeexUpdater
+import com.march.wxcube.update.OnWeexUpdateListener
 import com.taobao.weex.utils.WXFileUtils
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -20,7 +20,7 @@ import java.util.concurrent.Executors
  *
  * @author chendong
  */
-class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, jsPrepareStrategy: Int) : WeexUpdater.UpdateHandler {
+class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, jsPrepareStrategy: Int) : OnWeexUpdateListener {
 
     companion object {
         private val TAG = WeexJsLoader::class.java.simpleName!!
@@ -43,7 +43,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, 
     // 文件缓存
     private val mJsFileCache = JsFileCache(Weex.getInst().makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
 
-    override fun onUpdateConfig(context: Context, weexPages: List<WeexPage>?) {
+    override fun onWeexCfgUpdate(context: Context, weexPages: List<WeexPage>?) {
         if (mJsPrepareStrategy == JsPrepareStrategy.PREPARE_ALL) {
             weexPages?.forEach { getTemplateAsync(context, it) {} }
         }

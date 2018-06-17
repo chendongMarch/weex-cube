@@ -1,4 +1,4 @@
-package com.march.wxcube
+package com.march.wxcube.router
 
 import android.content.Context
 import android.content.Intent
@@ -6,13 +6,14 @@ import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import com.march.common.Common
 import com.march.webkit.WebKit
+import com.march.wxcube.Weex
 import com.march.wxcube.common.report
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.WeexPage
 import com.march.wxcube.ui.WebActivity
 import com.march.wxcube.ui.WeexDialogFragment
-import com.march.wxcube.update.WeexUpdater
+import com.march.wxcube.update.OnWeexUpdateListener
 
 /**
  * CreateAt : 2018/3/27
@@ -20,11 +21,17 @@ import com.march.wxcube.update.WeexUpdater
  *
  * @author chendong
  */
-class WeexRouter : WeexUpdater.UpdateHandler {
+class WeexRouter : OnWeexUpdateListener {
+
 
     // url-page 的 map，url 需要是不带有协议头的、没有参数的 url
     private var mWeexPageMap = mutableMapOf<UrlKey, WeexPage>()
+    private var mInterceptor: ((String) -> WeexPage)? = null
+    var mRouterReadyCallback: (() -> Unit)? = null
 
+    /**
+     * 开启页面
+     */
     private fun start(ctx: Context?, intent: Intent?): Pair<Boolean, String> {
         if (ctx == null || intent == null) {
             return false to "WeexRouter#start ctx == null || intent == null"
@@ -36,6 +43,7 @@ class WeexRouter : WeexUpdater.UpdateHandler {
             false to "WeexRouter#start error ${intent.dataString} ${e.message}"
         }
     }
+
     /**
      * 打开一个 web url
      */
@@ -94,7 +102,7 @@ class WeexRouter : WeexUpdater.UpdateHandler {
      */
     fun findPage(url: String): WeexPage? {
         val validUrl = ManagerRegistry.HOST.makeWebUrl(url)
-        val weexPage = mWeexPageMap[UrlKey.fromUrl(validUrl)]
+        val weexPage = mInterceptor?.invoke(validUrl) ?: mWeexPageMap[UrlKey.fromUrl(validUrl)]
         if (weexPage == null) {
             report("open Url, can not find page, url => $url")
             return null
@@ -102,62 +110,24 @@ class WeexRouter : WeexUpdater.UpdateHandler {
         return weexPage.make(url)
     }
 
-    override fun onUpdateConfig(context: Context, weexPages: List<WeexPage>?) {
+    override fun onWeexCfgUpdate(context: Context, weexPages: List<WeexPage>?) {
         mWeexPageMap.isNotEmpty().let { mWeexPageMap.clear() }
         weexPages?.forEach {
-            mWeexPageMap[UrlKey.fromUrl(it.webUrl!!)] = it
+            mWeexPageMap[UrlKey.fromUrl(it.webUrl)] = it
         }
         mRouterReadyCallback?.invoke()
     }
 
-    var mRouterReadyCallback: (() -> Unit)? = null
 
     fun openIndexPage(context: Context): Boolean {
         if (mWeexPageMap.isEmpty()) {
             return false
         }
-        var page: WeexPage? = null
-        for (mutableEntry in mWeexPageMap) {
-            if (mutableEntry.value.indexPage) {
-                page = mutableEntry.value
-                break
-            }
-        }
-        if (page != null && !page.webUrl.isNullOrBlank()) {
-            return Weex.getInst().mWeexRouter.openUrl(context, page.webUrl!!).first
+        val page = mWeexPageMap.values.firstOrNull { it.indexPage }
+        if (page?.isValid == true) {
+            return Weex.getInst().mWeexRouter.openUrl(context, page.webUrl).first
         }
         return false
     }
 
-}
-
-private class UrlKey {
-
-    private var url: String? = ""
-    private var host: String? = ""
-    private var port: String? = ""
-    private var path: String? = ""
-
-    override fun equals(other: Any?): Boolean {
-        if (other == null || other !is UrlKey) {
-            return false
-        }
-        return host == other.host && port == other.port && path == other.path
-    }
-
-    override fun hashCode(): Int {
-        return 43
-    }
-
-    companion object {
-        internal fun fromUrl(url: String): UrlKey {
-            val urlKey = UrlKey()
-            val uri = Uri.parse(url)
-            urlKey.url = url
-            urlKey.host = uri.host
-            urlKey.port = uri.port.toString()
-            urlKey.path = uri.path
-            return urlKey
-        }
-    }
 }
