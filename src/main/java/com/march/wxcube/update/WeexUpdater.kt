@@ -42,16 +42,10 @@ internal class WeexUpdater(private var url: String) {
         mExecutorService.execute {
             // 磁盘缓存读取
             var configJson = mDiskLruCache.read(CONFIG_KEY)
-            if (configJson.isNullOrBlank()) {
-                // assets 读取
+            if (configJson.isBlank()) { // assets 读取
                 configJson = readAssets(context, "config/config.json")
             }
-            // 更新配置
-            val json = configJson ?: {
-                report("本地和assets都无法读取 config")
-                ""
-            }()
-            parseJsonAndUpdate(context, json)
+            parseJsonAndUpdate(context, configJson)
             // 发起网络，并存文件
             val request = ManagerRegistry.REQ.makeWxRequest(url = url, from = "request-wx-config")
             ManagerRegistry.REQ.request(request, object : HttpListener {

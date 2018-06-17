@@ -54,16 +54,18 @@ internal object WeexGlobalDebugger {
     private var mDebugEnable = false
 
     internal fun init() {
-        mDebugEnable = DiskKVManager.getInst().get(DEBUG_ENABLE, false)
-        mDebugHost = DiskKVManager.getInst().get(DEBUG_HOST, "")
-        if (!mDebugEnable || mDebugHost.isBlank()) {
-            report("未开启调试 $mDebugHost $mDebugEnable")
+        if (!checkDebug()) {
             return
         }
         mExecutorService.execute {
             updateFromDisk()
-            updateFromNet(mDiskLruCache.read(DEBUG_CONFIG_URL))
+            updateFromNet()
         }
+    }
+
+    fun makeDebugConfigUrl(): String {
+        mDebugHost = DiskKVManager.getInst().get(DEBUG_HOST, "")
+        return "http://$mDebugHost:3000/debug-config.json"
     }
 
     // 设置调试状态
@@ -80,10 +82,11 @@ internal object WeexGlobalDebugger {
     }
 
     // 从网络初始化
-    internal fun updateFromNet(url: String) {
-        if (url.isBlank()) {
+    internal fun updateFromNet() {
+        if (!checkDebug()) {
             return
         }
+        val url = makeDebugConfigUrl()
         // 发起网络，并存文件
         val request = ManagerRegistry.REQ.makeWxRequest(url = url, from = "request-wx-debug-config")
         ManagerRegistry.REQ.request(request, object : HttpListener {
@@ -101,13 +104,7 @@ internal object WeexGlobalDebugger {
 
     // 解析配置文件，并通知出去
     private fun parseDebugJsonAndUpdate(json: String) {
-        mDebugEnable = DiskKVManager.getInst().get(DEBUG_ENABLE, false)
-        mDebugHost = DiskKVManager.getInst().get(DEBUG_HOST, "")
-        if (!mDebugEnable || mDebugHost.isBlank()) {
-            report("未开启调试 $mDebugHost $mDebugEnable")
-            return
-        }
-        if (json.isBlank()) {
+        if (!checkDebug() || json.isBlank()) {
             return
         }
         try {
@@ -192,5 +189,16 @@ internal object WeexGlobalDebugger {
         mDebugWeexPagesResp?.autoJumpPage?.let {
             Weex.mWeexRouter.openUrl(context, it)
         }
+    }
+
+
+    private fun checkDebug(): Boolean {
+        mDebugEnable = DiskKVManager.getInst().get(DEBUG_ENABLE, false)
+        mDebugHost = DiskKVManager.getInst().get(DEBUG_HOST, "")
+        if (!mDebugEnable || mDebugHost.isBlank()) {
+            report("未开启调试 $mDebugHost $mDebugEnable")
+            return false
+        }
+        return true
     }
 }

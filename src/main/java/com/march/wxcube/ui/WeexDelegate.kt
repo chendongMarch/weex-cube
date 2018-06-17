@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import com.march.common.utils.LgUtils
 import com.march.wxcube.Weex
 import com.march.wxcube.common.report
-import com.march.wxcube.debug.WeexDebugger
+import com.march.wxcube.debug.WeexPageDebugger
 import com.march.wxcube.lifecycle.WeexLifeCycle
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.WeexPage
@@ -48,7 +48,7 @@ class WeexDelegate : WeexLifeCycle {
     private var mCurPage: WeexPage? = null
     // 当前承载的页面
     internal lateinit var mWeexPage: WeexPage
-    private var mWeexDebugger: WeexDebugger? = null
+    private var mWeexDebugger: WeexPageDebugger? = null
     // 附加数据和操作
     private val mPerformers by lazy { mutableMapOf<String, IPerformer>() }
     private val mLifeCallbacks by lazy { mutableListOf<WeexLifeCycle>() }
@@ -95,7 +95,7 @@ class WeexDelegate : WeexLifeCycle {
         mLifeCallbacks.add(callback)
     }
 
-    fun setDebugger(weexDebugger: WeexDebugger) {
+    fun setDebugger(weexDebugger: WeexPageDebugger) {
         mWeexDebugger = weexDebugger
     }
 

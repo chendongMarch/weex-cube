@@ -61,7 +61,7 @@ class RouterDispatcher : BaseDispatcher() {
         val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openNative url is null")
         val clazz = Class.forName(webUrl)
         val activity = mProvider.provideActivity()
-        activity?.startActivity(Intent(activity, clazz))
+        activity.startActivity(Intent(activity, clazz))
     }
 
     private fun closePage(params: JSONObject) {
