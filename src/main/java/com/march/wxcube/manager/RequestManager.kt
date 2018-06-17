@@ -70,7 +70,7 @@ class RequestManager : IManager {
 
         // token校验，返回 403 时
         // builder.authenticator(new TokenAuthenticator());
-        Weex.getInst().mWeexInjector.onInitOkHttpClient(builder)
+        Weex.mWeexInjector.onInitOkHttpClient(builder)
         return builder.build()
     }
 
@@ -208,7 +208,7 @@ class RequestManager : IManager {
 
     // 检测网络状态，停止请求
     private fun checkNetWork(listener: IWXHttpAdapter.OnHttpListener?): WXResponse? {
-        if (!NetUtils.isNetworkConnected(Weex.getInst().getContext())) {
+        if (!NetUtils.isNetworkConnected(Weex.getContext())) {
             val wxResp = WXResponse()
             wxResp.errorCode = ERROR_CODE_FAILURE
             wxResp.statusCode = STATUS_CODE_FAILURE

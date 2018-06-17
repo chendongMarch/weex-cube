@@ -24,8 +24,8 @@ import java.security.MessageDigest
 
 // 提交错误
 fun Any.report(msg: String, throwable: Throwable? = null) {
-    if (Weex.getInst().mWeexConfig.debug) {
-        Weex.getInst().mWeexInjector.onErrorReport(throwable, msg)
+    if (Weex.mWeexConfig.debug) {
+        Weex.mWeexInjector.onErrorReport(throwable, msg)
     }
 }
 

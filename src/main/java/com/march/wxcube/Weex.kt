@@ -33,22 +33,12 @@ import java.io.File
  *
  * @author chendong
  */
-class Weex private constructor() {
+object Weex {
 
-
-    companion object {
-        const val CACHE_DIR = "weex-cache"
-        const val PAGE_WEB = 1
-        const val PAGE_WEEX = 2
-        const val PAGE_INDEX = 3
-        private val instance: Weex by lazy { Weex() }
-
-        fun getInst() = instance
-
-        fun init(config: WeexConfig, injector: WeexInjector) {
-            getInst().init(config, injector)
-        }
-    }
+    const val CACHE_DIR = "weex-cache"
+    const val PAGE_WEB = 1
+    const val PAGE_WEEX = 2
+    const val PAGE_INDEX = 3
 
     private val mWeakCtx by lazy { WeakContext(mWeexConfig.ctx) } // 上下文虚引用
     internal val mWeexJsLoader by lazy { WeexJsLoader(mWeexConfig.ctx, mWeexConfig.jsLoadStrategy, mWeexConfig.jsCacheStrategy, mWeexConfig.jsPrepareStrategy) } // 加载 js
@@ -58,7 +48,7 @@ class Weex private constructor() {
     var mWeexInjector: WeexInjector = WeexInjector.EMPTY // 外部注入支持
     lateinit var mWeexConfig: WeexConfig
 
-    private fun init(config: WeexConfig, injector: WeexInjector) {
+    fun init(config: WeexConfig, injector: WeexInjector) {
         mWeexConfig = config.prepare()
         mWeexInjector = injector
         val ctx = config.ctx
@@ -143,7 +133,7 @@ class Weex private constructor() {
     fun makeCacheDir(key: String): File {
         val sdFile = sdFile()
         var rootFile = getContext()?.cacheDir ?: sdFile
-        if (Weex.getInst().mWeexConfig.debug) {
+        if (Weex.mWeexConfig.debug) {
             rootFile = sdFile
         }
         val cacheFile = File(rootFile, CACHE_DIR)
@@ -156,7 +146,7 @@ class Weex private constructor() {
     fun clearDiskCache(){
         val sdFile = sdFile()
         var rootFile = getContext()?.cacheDir ?: sdFile
-        if (Weex.getInst().mWeexConfig.debug) {
+        if (Weex.mWeexConfig.debug) {
             rootFile = sdFile
         }
         val cacheFile = File(rootFile, CACHE_DIR)
@@ -166,8 +156,8 @@ class Weex private constructor() {
     }
 
     fun onWeexConfigUpdate(context: Context, pages: List<WeexPage>?) {
-        mWeexRouter.onUpdateConfig(context, pages)
-        mWeexJsLoader.onUpdateConfig(context, pages)
+        mWeexRouter.onWeexCfgUpdate(context, pages)
+        mWeexJsLoader.onWeexCfgUpdate(context, pages)
     }
 }
 

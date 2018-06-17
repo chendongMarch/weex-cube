@@ -25,11 +25,11 @@ class IndexActivity : BaseActivity() {
 
     private val mIndexRunnable = Runnable {
         // 先打开一次，无法打开的话注册一个未来打开的 callback
-        if (Weex.getInst().mWeexRouter.openIndexPage(mCtx)) {
+        if (Weex.mWeexRouter.openIndexPage(mCtx)) {
             finish()
         } else {
-            Weex.getInst().mWeexRouter.mRouterReadyCallback = {
-                Weex.getInst().mWeexRouter.openIndexPage(mCtx)
+            Weex.mWeexRouter.mRouterReadyCallback = {
+                Weex.mWeexRouter.openIndexPage(mCtx)
                 finish()
             }
         }
@@ -37,8 +37,8 @@ class IndexActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Weex.getInst().mWeexInjector.onPageCreated(this, Weex.PAGE_INDEX)
-        Weex.getInst().mWeexInjector.getLoading().setIndexContent(this)
+        Weex.mWeexInjector.onPageCreated(this, Weex.PAGE_INDEX)
+        Weex.mWeexInjector.getLoading().setIndexContent(this)
         checkPermissionAndLaunch()
     }
 
@@ -47,7 +47,7 @@ class IndexActivity : BaseActivity() {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE))
         if (result) {
             // 1.5s 后启动
-            Weex.getInst().mWeexUpdater.update(this)
+            Weex.mWeexUpdater.update(this)
             Handler().postDelayed(mIndexRunnable, TIME_START)
         } else {
             ToastUtils.show("请授予达人店存储权限～")
@@ -61,7 +61,7 @@ class IndexActivity : BaseActivity() {
 
     override fun startActivity(intent: Intent?) {
         super.startActivity(intent)
-        Weex.getInst().mWeexRouter.mRouterReadyCallback = null
+        Weex.mWeexRouter.mRouterReadyCallback = null
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

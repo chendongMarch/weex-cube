@@ -119,7 +119,7 @@ class PageDispatcher(val module: OneModule) : BaseDispatcher() {
             override fun makeFragment(tag: String): Fragment? {
                 val config = configs.firstOrNull { it.tag.equals(tag) }
                 if (config != null && !TextUtils.isEmpty(config.url)) {
-                    val page = Weex.getInst().mWeexRouter.findPage(config.url!!) ?: return null
+                    val page = Weex.mWeexRouter.findPage(config.url!!) ?: return null
                     return WeexFragment.newInstance(page)
                 }
                 return null

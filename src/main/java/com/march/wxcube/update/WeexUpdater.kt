@@ -22,7 +22,7 @@ import java.util.concurrent.Executors
 internal class WeexUpdater(private var url: String) {
 
     private val mDiskLruCache by lazy {
-        DiskLruCache(Weex.getInst().makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
+        DiskLruCache(Weex.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
     }
     private val mExecutorService by lazy { Executors.newCachedThreadPool() }
 
@@ -86,7 +86,7 @@ internal class WeexUpdater(private var url: String) {
                         it.indexPage = true
                     }
                 }
-                Weex.getInst().onWeexConfigUpdate(context, pages)
+                Weex.onWeexConfigUpdate(context, pages)
             }
 
         } catch (e: Exception) {

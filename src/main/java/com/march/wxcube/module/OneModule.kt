@@ -31,7 +31,7 @@ class OneModule : WXModule() {
                 ToolsDispatcher(),
                 StatusBarDispatcher(),
                 PageDispatcher(this),
-                *Weex.getInst().mWeexInjector.getModuleDispatchers()
+                *Weex.mWeexInjector.getModuleDispatchers()
         )
     }
 

@@ -36,14 +36,14 @@ class HostManager : IManager {
     private fun addSchema(url: String): String {
         var mutableUrl = url
         if (mutableUrl.startsWith("//")) {
-            val scheme = if (Weex.getInst().mWeexConfig.https) "https" else "http"
+            val scheme = if (Weex.mWeexConfig.https) "https" else "http"
             mutableUrl = "$scheme:$mutableUrl"
         } else if (mutableUrl.startsWith("https")) {
-            if (!Weex.getInst().mWeexConfig.https) {
+            if (!Weex.mWeexConfig.https) {
                 mutableUrl = mutableUrl.replace("https", "http")
             }
         } else if (mutableUrl.startsWith("http")) {
-            if (Weex.getInst().mWeexConfig.https) {
+            if (Weex.mWeexConfig.https) {
                 mutableUrl = mutableUrl.replace("http", "https")
             }
         }

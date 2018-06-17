@@ -90,7 +90,7 @@ class WeexRouter : OnWeexUpdateListener {
      */
     fun openDialog(activity: AppCompatActivity, url: String, config: DialogConfig?): Pair<Boolean, String> {
         val nonNullConfig = config ?: DialogConfig()
-        val page = Weex.getInst().mWeexRouter.findPage(url)
+        val page = Weex.mWeexRouter.findPage(url)
                 ?: return false to "WeexRouter#openDialog can not find page"
         val fragment = WeexDialogFragment.newInstance(page, nonNullConfig)
         fragment.show(activity.supportFragmentManager, "dialog")
@@ -125,7 +125,7 @@ class WeexRouter : OnWeexUpdateListener {
         }
         val page = mWeexPageMap.values.firstOrNull { it.indexPage }
         if (page?.isValid == true) {
-            return Weex.getInst().mWeexRouter.openUrl(context, page.webUrl).first
+            return Weex.mWeexRouter.openUrl(context, page.webUrl).first
         }
         return false
     }

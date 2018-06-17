@@ -41,7 +41,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, 
     // 内存缓存
     private val mJsMemoryCache = JsMemoryCache(context.memory(.3f))
     // 文件缓存
-    private val mJsFileCache = JsFileCache(Weex.getInst().makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
+    private val mJsFileCache = JsFileCache(Weex.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
 
     override fun onWeexCfgUpdate(context: Context, weexPages: List<WeexPage>?) {
         if (mJsPrepareStrategy == JsPrepareStrategy.PREPARE_ALL) {
@@ -99,7 +99,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, 
         }
         mService.execute {
             val template = runnable.invoke()
-            Weex.getInst().mWeexInjector.onLog(TAG, "JS加载${page.pageName} cache[${mJsMemoryCache.size()}] $fromWhere")
+            Weex.mWeexInjector.onLog(TAG, "JS加载${page.pageName} cache[${mJsMemoryCache.size()}] $fromWhere")
             publishFunc(template)
         }
     }

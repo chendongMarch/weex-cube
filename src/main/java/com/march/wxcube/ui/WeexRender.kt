@@ -36,7 +36,7 @@ class WeexRender(activity: Activity,
             listener.onException(mWxInst, "100", "页面数据有问题")
             return
         }
-        Weex.getInst().mWeexJsLoader.getTemplateAsync(mWxInst.context, page) {
+        Weex.mWeexJsLoader.getTemplateAsync(mWxInst.context, page) {
             LgUtils.e("render thread = ${Thread.currentThread().name}")
             if (!it.isNullOrBlank()) {
                 consumer?.invoke(it)

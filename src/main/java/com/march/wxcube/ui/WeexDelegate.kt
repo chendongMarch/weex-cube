@@ -43,7 +43,7 @@ class WeexDelegate : WeexLifeCycle {
     // 容器
     internal lateinit var mContainerView: ViewGroup // 容器 View
     // loading
-    private val mLoadingHandler by lazy { Weex.getInst().mWeexInjector.getLoading() }
+    private val mLoadingHandler by lazy { Weex.mWeexInjector.getLoading() }
     // 当前加载的页面
     private var mCurPage: WeexPage? = null
     // 当前承载的页面
@@ -230,7 +230,7 @@ class WeexDelegate : WeexLifeCycle {
      * 渲染 not found 页面
      */
     fun renderNotFound() {
-        val errPage = Weex.getInst().mWeexRouter.findPage("/status/not-found-weex") ?: return
+        val errPage = Weex.mWeexRouter.findPage("/status/not-found-weex") ?: return
         render(errPage)
     }
 

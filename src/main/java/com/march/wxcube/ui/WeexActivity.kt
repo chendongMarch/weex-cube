@@ -14,12 +14,12 @@ import com.march.wxcube.Weex
  */
 class WeexActivity : BaseActivity() {
 
-    val mProgressBar by lazy { Weex.getInst().mWeexInjector.getLoading().makeLoadingIndicator(this) }
+    val mProgressBar by lazy { Weex.mWeexInjector.getLoading().makeLoadingIndicator(this) }
     val mDelegate: WeexDelegate by lazy { WeexDelegate(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Weex.getInst().mWeexInjector.onPageCreated(this, Weex.PAGE_WEEX)
+        Weex.mWeexInjector.onPageCreated(this, Weex.PAGE_WEEX)
 //        setContentView(R.layout.weex_container)
         mDelegate.onCreate()
         mDelegate.render()
