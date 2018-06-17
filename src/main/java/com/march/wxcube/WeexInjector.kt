@@ -6,6 +6,7 @@ import com.march.common.utils.LgUtils
 import com.march.common.utils.immersion.ImmersionStatusBarUtils
 import com.march.wxcube.loading.Loading
 import com.march.wxcube.loading.SimpleLoading
+import com.march.wxcube.model.WeexPage
 import com.march.wxcube.module.dispatcher.BaseDispatcher
 import com.taobao.weex.InitConfig
 import okhttp3.OkHttpClient
@@ -17,8 +18,6 @@ import okhttp3.OkHttpClient
  * @author chendong
  */
 interface WeexInjector {
-
-    data class WxBuildConfig(val versionCode: Int, val versionName: String, val debug: Boolean)
 
     /**
      * 错误打印
@@ -79,6 +78,11 @@ interface WeexInjector {
      * 获取要注入的 dispatcher
      */
     fun getModuleDispatchers(): Array<BaseDispatcher> = arrayOf()
+
+    /**
+     * 完善调试配置
+     */
+    fun completeDebugWeexPage(page: WeexPage, host: String): WeexPage = page
 
     companion object {
         val EMPTY = object : WeexInjector {

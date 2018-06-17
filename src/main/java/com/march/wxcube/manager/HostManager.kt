@@ -34,6 +34,9 @@ class HostManager : IManager {
 
     // 检测添加 schema
     private fun addSchema(url: String): String {
+        if (url.isBlank()) {
+            return url
+        }
         var mutableUrl = url
         if (mutableUrl.startsWith("//")) {
             val scheme = if (Weex.mWeexConfig.https) "https" else "http"
@@ -54,6 +57,9 @@ class HostManager : IManager {
     // 相对的请求 url 需要以 / 开头
     // 检测完善一个请求的url
     fun makeRequestUrl(url: String): String {
+        if (url.isBlank()) {
+            return url
+        }
         var mutableUrl = url
         // add host
         if (mutableUrl.startsWith("/")) {
@@ -64,6 +70,9 @@ class HostManager : IManager {
 
     // webUrl | openUrl() 使用时需要 / 开头
     fun makeWebUrl(url: String): String {
+        if (url.isBlank()) {
+            return url
+        }
         var mutableUrl = url
         // add host
         if (mutableUrl.startsWith("/")) {
@@ -75,6 +84,9 @@ class HostManager : IManager {
 
     // webUrl | openUrl() 使用时需要 / 开头
     fun makeJsResUrl(url: String): String {
+        if (url.isBlank()) {
+            return url
+        }
         var mutableUrl = url
         // add host
         if (mutableUrl.startsWith("/")) {

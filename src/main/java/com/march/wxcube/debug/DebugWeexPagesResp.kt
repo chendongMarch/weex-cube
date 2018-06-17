@@ -10,5 +10,6 @@ import com.march.wxcube.model.WeexPage
  */
 internal class DebugWeexPagesResp {
     var global = false // 全局调试
+    var autoJumpPage: String = ""
     var datas: List<WeexPage> = listOf()
 }

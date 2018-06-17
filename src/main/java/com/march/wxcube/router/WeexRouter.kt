@@ -18,16 +18,16 @@ import com.march.wxcube.update.OnWeexUpdateListener
 /**
  * CreateAt : 2018/3/27
  * Describe : weex 路由管理
- *
+ * url 必须有一级路径，也就是必须有 /
  * @author chendong
  */
 class WeexRouter : OnWeexUpdateListener {
 
 
     // url-page 的 map，url 需要是不带有协议头的、没有参数的 url
-    private var mWeexPageMap = mutableMapOf<UrlKey, WeexPage>()
-    private var mInterceptor: ((String) -> WeexPage)? = null
-    var mRouterReadyCallback: (() -> Unit)? = null
+    internal var mWeexPageMap = mutableMapOf<UrlKey, WeexPage>()
+    internal var mInterceptor: ((String) -> WeexPage?)? = null
+    internal var mRouterReadyCallback: (() -> Unit)? = null
 
     /**
      * 开启页面
@@ -101,19 +101,34 @@ class WeexRouter : OnWeexUpdateListener {
      * 根据 web url 查找指定页面
      */
     fun findPage(url: String): WeexPage? {
-        val validUrl = ManagerRegistry.HOST.makeWebUrl(url)
-        val weexPage = mInterceptor?.invoke(validUrl) ?: mWeexPageMap[UrlKey.fromUrl(validUrl)]
-        if (weexPage == null) {
+        if (url.isBlank()) {
+            return null
+        }
+        val result = if (url.indexOf("/") == -1) {
+            // 通过 pageName 查找
+            mInterceptor?.invoke(url) ?: mWeexPageMap.values.firstOrNull {
+                it.pageName == url
+            }
+        } else {
+            // 通过 url 查找
+            val validUrl = ManagerRegistry.HOST.makeWebUrl(url)
+            mInterceptor?.invoke(validUrl) ?: mWeexPageMap[UrlKey.fromUrl(validUrl)]
+
+        }
+        if (result == null) {
             report("open Url, can not find page, url => $url")
             return null
         }
-        return weexPage.make(url)
+        return result.make(url)
     }
+
 
     override fun onWeexCfgUpdate(context: Context, weexPages: List<WeexPage>?) {
         mWeexPageMap.isNotEmpty().let { mWeexPageMap.clear() }
         weexPages?.forEach {
-            mWeexPageMap[UrlKey.fromUrl(it.webUrl)] = it
+            it.webUrl?.let { url ->
+                mWeexPageMap[UrlKey.fromUrl(url)] = it
+            }
         }
         mRouterReadyCallback?.invoke()
     }
@@ -125,7 +140,7 @@ class WeexRouter : OnWeexUpdateListener {
         }
         val page = mWeexPageMap.values.firstOrNull { it.indexPage }
         if (page?.isValid == true) {
-            return Weex.mWeexRouter.openUrl(context, page.webUrl).first
+            return Weex.mWeexRouter.openUrl(context, page.webUrl ?: "").first
         }
         return false
     }

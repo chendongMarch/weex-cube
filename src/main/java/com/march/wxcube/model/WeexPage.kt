@@ -21,7 +21,7 @@ class WeexPage() : Parcelable {
 
     var appVersion: String? = null // app 最小支持版本
 
-    var webUrl: String = ""  // 降级 web，也是页面的唯一标记
+    var webUrl: String? = null  // 降级 web，也是页面的唯一标记
 
     var remoteJs: String? = null // 远程 js
 

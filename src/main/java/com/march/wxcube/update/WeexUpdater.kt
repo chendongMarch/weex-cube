@@ -81,7 +81,7 @@ internal class WeexUpdater(private var url: String) {
                 val pages = simplifyPages(it) { it.isValid }
                 // 完善数据
                 pages.forEach {
-                    it.webUrl = ManagerRegistry.HOST.makeWebUrl(it.webUrl)
+                    it.webUrl = ManagerRegistry.HOST.makeWebUrl(it.webUrl?:"")
                     if (weexPagesResp.indexPage == it.pageName) {
                         it.indexPage = true
                     }

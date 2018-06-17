@@ -42,7 +42,7 @@ object Weex {
 
     private val mWeakCtx by lazy { WeakContext(mWeexConfig.ctx) } // 上下文虚引用
     internal val mWeexJsLoader by lazy { WeexJsLoader(mWeexConfig.ctx, mWeexConfig.jsLoadStrategy, mWeexConfig.jsCacheStrategy, mWeexConfig.jsPrepareStrategy) } // 加载 js
-    internal val mWeexRouter by lazy { WeexRouter() } // 路由页面管理
+    val mWeexRouter by lazy { WeexRouter() } // 路由页面管理
     internal val mWeexUpdater by lazy { WeexUpdater(mWeexConfig.configUrl) } // weex 页面更新
 
     var mWeexInjector: WeexInjector = WeexInjector.EMPTY // 外部注入支持

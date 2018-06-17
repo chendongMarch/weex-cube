@@ -1,6 +1,8 @@
 package com.march.wxcube.debug
 
+import android.content.Context
 import com.alibaba.fastjson.JSON
+import com.march.common.pool.DiskKVManager
 import com.march.common.utils.ToastUtils
 import com.march.wxcube.Weex
 import com.march.wxcube.common.DiskLruCache
@@ -9,6 +11,7 @@ import com.march.wxcube.http.HttpListener
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.manager.RequestManager
 import com.march.wxcube.model.WeexPage
+import com.march.wxcube.router.UrlKey
 import com.taobao.weex.common.WXResponse
 import java.util.concurrent.Executors
 
@@ -33,18 +36,40 @@ internal object WeexGlobalDebugger {
     private const val CACHE_DIR = "debug-config-cache"
     private const val DEBUG_CONFIG_URL = "debug-config-url"
     private const val DISK_MAX_SIZE = Int.MAX_VALUE.toLong()
+    private const val MAX_VERSION = "100.100.100"
+    private const val MIN_VERSION = "0.0.0"
+    private const val DEBUG_ENABLE = "DEBUG_ENABLE"
+    private const val DEBUG_HOST = "DEBUG_HOST"
 
     private val mDiskLruCache by lazy {
         DiskLruCache(Weex.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
     }
 
     private val mExecutorService by lazy { Executors.newCachedThreadPool() }
+    private var mDebugWeexPagesResp: DebugWeexPagesResp? = null
+    internal var mWeexPageMap = mutableMapOf<UrlKey, WeexPage>()
+
+
+    private var mDebugHost = ""
+    private var mDebugEnable = false
 
     internal fun init() {
+        mDebugEnable = DiskKVManager.getInst().get(DEBUG_ENABLE, false)
+        mDebugHost = DiskKVManager.getInst().get(DEBUG_HOST, "")
+        if (!mDebugEnable || mDebugHost.isBlank()) {
+            report("未开启调试 $mDebugHost $mDebugEnable")
+            return
+        }
         mExecutorService.execute {
             updateFromDisk()
             updateFromNet(mDiskLruCache.read(DEBUG_CONFIG_URL))
         }
+    }
+
+    // 设置调试状态
+    fun setDebugStatus(host: String = "", debug: Boolean = false) {
+        DiskKVManager.getInst().put(DEBUG_ENABLE, debug)
+        DiskKVManager.getInst().put(DEBUG_HOST, host)
     }
 
     // 从磁盘初始化
@@ -74,16 +99,30 @@ internal object WeexGlobalDebugger {
         }, false)
     }
 
-
     // 解析配置文件，并通知出去
     private fun parseDebugJsonAndUpdate(json: String) {
+        mDebugEnable = DiskKVManager.getInst().get(DEBUG_ENABLE, false)
+        mDebugHost = DiskKVManager.getInst().get(DEBUG_HOST, "")
+        if (!mDebugEnable || mDebugHost.isBlank()) {
+            report("未开启调试 $mDebugHost $mDebugEnable")
+            return
+        }
         if (json.isBlank()) {
             return
         }
         try {
             val weexPagesResp = JSON.parseObject(json, DebugWeexPagesResp::class.java)
-            val weexPages = weexPagesResp?.datas ?: return report("调试文件 datas = null")
+            mDebugWeexPagesResp = weexPagesResp
+            val originPages = weexPagesResp?.datas ?: return report("调试文件 datas = null")
             // 不管新老页面 pageName 是唯一标识
+            val pages = mutableListOf<WeexPage>()
+            originPages.forEach {
+                if (!it.pageName.isNullOrBlank()) {
+                    val p = prepareOldPage(it) ?: prepareNewPage(it)
+                    p?.let { pages.add(p) }
+                }
+            }
+            updateWeexPageMap(pages)
         } catch (e: Exception) {
             e.printStackTrace()
             report(e.message ?: "", e)
@@ -91,10 +130,67 @@ internal object WeexGlobalDebugger {
         }
     }
 
-    // 表示如果是老页面将会根据线上配置完善相关数据
-    // 否则返回空
+    // 如果是老页面将会根据线上配置完善相关数据
+    private fun prepareOldPage(p: WeexPage): WeexPage? {
+        var page = p
+        val validOldPage = Weex.mWeexRouter.mWeexPageMap.values.firstOrNull {
+            it.pageName == page.pageName
+        }
+        return if (validOldPage != null) {
+            page.pageName = validOldPage.pageName
+            page.jsVersion = MAX_VERSION
+            page.appVersion = MIN_VERSION
+            page.webUrl = page.webUrl ?: validOldPage.webUrl
+            // page.remoteJs = page.remoteJs ?: debugWeexPageMaker(page, mHost)
+            page.md5 = ""
+            page = Weex.mWeexInjector.completeDebugWeexPage(page, mDebugHost)
+            if (page.webUrl.isNullOrBlank() || page.remoteJs.isNullOrBlank()) {
+                report("老页面自动完善错误 $page ")
+                null
+            } else page
+        } else {
+            null
+        }
+    }
 
-    private fun prepareOldPage(page: WeexPage) {
-        Weex
+    // 新页面，webUrl,pageName 都是必须的
+    private fun prepareNewPage(p: WeexPage): WeexPage? {
+        var page = p
+        page.jsVersion = MAX_VERSION
+        page.appVersion = MIN_VERSION
+        // page.webUrl = page.webUrl ?: validOldPage.webUrl
+        // page.remoteJs = page.remoteJs ?: debugWeexPageMaker(page, mHost)
+        page.md5 = ""
+        page = Weex.mWeexInjector.completeDebugWeexPage(page, mDebugHost)
+        return if (page.webUrl.isNullOrBlank() || page.remoteJs.isNullOrBlank()) {
+            report("新页面自动完善错误 $page ")
+            null
+        } else page
+    }
+
+    private fun updateWeexPageMap(pages: List<WeexPage>) {
+        mWeexPageMap.isNotEmpty().let { mWeexPageMap.clear() }
+        pages.forEach {
+            it.webUrl?.let { url ->
+                mWeexPageMap[UrlKey.fromUrl(url)] = it
+            }
+        }
+        Weex.mWeexRouter.mInterceptor = { url ->
+            if (url.indexOf("/") == -1) {
+                // 通过 pageName 查找
+                mWeexPageMap.values.firstOrNull {
+                    it.pageName == url
+                }
+            } else {
+                // 通过 url 查找
+                mWeexPageMap[UrlKey.fromUrl(url)]
+            }
+        }
+    }
+
+    internal fun autoJump(context: Context) {
+        mDebugWeexPagesResp?.autoJumpPage?.let {
+            Weex.mWeexRouter.openUrl(context, it)
+        }
     }
 }
