@@ -1,6 +1,7 @@
 package com.march.wxcube.debug
 
 import com.alibaba.fastjson.JSON
+import com.march.common.utils.ToastUtils
 import com.march.wxcube.Weex
 import com.march.wxcube.common.DiskLruCache
 import com.march.wxcube.common.report
@@ -26,34 +27,38 @@ import java.util.concurrent.Executors
  *
  * @author chendong
  */
-internal class WeexGlobalDebugger {
+internal object WeexGlobalDebugger {
+
+    private const val CONFIG_KEY = "weex-debug-config"
+    private const val CACHE_DIR = "debug-config-cache"
+    private const val DEBUG_CONFIG_URL = "debug-config-url"
+    private const val DISK_MAX_SIZE = Int.MAX_VALUE.toLong()
 
     private val mDiskLruCache by lazy {
-        DiskLruCache(Weex.getInst().makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
+        DiskLruCache(Weex.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
     }
 
     private val mExecutorService by lazy { Executors.newCachedThreadPool() }
 
-    companion object {
-        private const val CONFIG_KEY = "weex-debug-config"
-        private const val CACHE_DIR = "debug-config-cache"
-        private const val DISK_MAX_SIZE = Int.MAX_VALUE.toLong()
-    }
-
-    class WeexDebugPagesResp {
-        var total: Int? = 0
-        var datas: List<WeexPage>? = null
+    internal fun init() {
+        mExecutorService.execute {
+            updateFromDisk()
+            updateFromNet(mDiskLruCache.read(DEBUG_CONFIG_URL))
+        }
     }
 
     // 从磁盘初始化
-    fun updateFromDisk() {
+    private fun updateFromDisk() {
         // 磁盘缓存读取以前的配置
-        val configJson = mDiskLruCache.read(CONFIG_KEY) ?: ""
+        val configJson = mDiskLruCache.read(CONFIG_KEY)
         parseDebugJsonAndUpdate(configJson)
     }
 
     // 从网络初始化
-    fun updateFromNet(url: String) {
+    internal fun updateFromNet(url: String) {
+        if (url.isBlank()) {
+            return
+        }
         // 发起网络，并存文件
         val request = ManagerRegistry.REQ.makeWxRequest(url = url, from = "request-wx-debug-config")
         ManagerRegistry.REQ.request(request, object : HttpListener {
@@ -72,18 +77,24 @@ internal class WeexGlobalDebugger {
 
     // 解析配置文件，并通知出去
     private fun parseDebugJsonAndUpdate(json: String) {
-        if (json.isBlank()) return
+        if (json.isBlank()) {
+            return
+        }
         try {
-            val weexPagesResp = JSON.parseObject(json, WeexPagesResp::class.java)
-            val weexPages = weexPagesResp?.datas
-            val pages = weexPages ?: return
-            val validPages = pages.filter { it.isValid }
-            validPages.forEach {
-                it.webUrl = ManagerRegistry.HOST.makeWebUrl(it.webUrl!!)
-            }
-
+            val weexPagesResp = JSON.parseObject(json, DebugWeexPagesResp::class.java)
+            val weexPages = weexPagesResp?.datas ?: return report("调试文件 datas = null")
+            // 不管新老页面 pageName 是唯一标识
         } catch (e: Exception) {
             e.printStackTrace()
+            report(e.message ?: "", e)
+            ToastUtils.show("调试配置文件解析失败 ${e.message}")
         }
+    }
+
+    // 表示如果是老页面将会根据线上配置完善相关数据
+    // 否则返回空
+
+    private fun prepareOldPage(page: WeexPage) {
+        Weex
     }
 }

@@ -46,6 +46,7 @@ class DebugMsg {
                 .append("error = ").append(errorMsg).newLine()
                 .append(if (refreshing) "刷新中" else "没有刷新").newLine()
                 .toString()
+
     }
 }
 
@@ -95,7 +96,7 @@ class WeexDebugger : IWXRenderListener {
             } else if(mDebugConfig.debugJsInDisk){
                 cacheStrategy = JsCacheStrategy.CACHE_MEMORY_DISK_BOTH
             }
-            Weex.getInst().mWeexJsLoader.getTemplateAsync(mActivity,
+            Weex.mWeexJsLoader.getTemplateAsync(mActivity,
                     JsLoadStrategy.NET_FIRST,cacheStrategy, mWeexPage) {
                 it?.let {
                     if (mDebugMsg.lastTemplate != it) {
@@ -105,7 +106,7 @@ class WeexDebugger : IWXRenderListener {
                             mDebugMsg.lastTemplate = it
                         }
                     } else {
-                        Weex.getInst().mWeexInjector.onLog("startRefresh", "获取到但是没有改变，不作渲染")
+                        Weex.mWeexInjector.onLog("startRefresh", "获取到但是没有改变，不作渲染")
                     }
                 }
                 mHandler.post { mView?.animate()?.rotationYBy(360f)?.setDuration(5_00)?.start() }
@@ -200,13 +201,13 @@ class WeexDebugger : IWXRenderListener {
                     2. 当在实时刷新时，图标会保持旋转作为提示
                 """.trimIndent())
             }
-            findViewById<View>(R.id.req_config_btn).click { Weex.getInst().mWeexUpdater.update(context) }
+            findViewById<View>(R.id.req_config_btn).click { Weex.mWeexUpdater.update(context) }
             // 关闭
             findViewById<View>(R.id.close_btn).click { dismiss() }
             // 清理缓存的js
-            findViewById<View>(R.id.clear_cache_btn).click { Weex.getInst().mWeexJsLoader.clearCache() }
+            findViewById<View>(R.id.clear_cache_btn).click { Weex.mWeexJsLoader.clearCache() }
             // 清理磁盘js`
-            findViewById<View>(R.id.clear_disk_btn).click { Weex.getInst().clearDiskCache() }
+            findViewById<View>(R.id.clear_disk_btn).click { Weex.clearDiskCache() }
             val jsInCacheSw = findViewById<Switch>(R.id.js_in_cache_sw)
             jsInCacheSw?.isChecked = mDebugConfig.debugJsInCache
             jsInCacheSw?.setOnCheckedChangeListener { _, isChecked ->
