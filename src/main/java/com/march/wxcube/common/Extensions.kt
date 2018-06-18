@@ -2,12 +2,13 @@ package com.march.wxcube.common
 
 import android.app.ActivityManager
 import android.content.Context
+import android.graphics.Bitmap
 import android.os.Environment
 import android.view.View
-import com.alibaba.fastjson.JSON
-import com.alibaba.fastjson.JSONArray
-import com.alibaba.fastjson.JSONObject
+import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.transition.Transition
 import com.march.wxcube.Weex
+import com.march.wxcube.wxadapter.GlideApp
 import java.io.File
 import java.lang.Exception
 import java.math.BigInteger
@@ -54,4 +55,13 @@ fun View?.click(f: (View) -> Unit) {
 
 fun StringBuilder.newLine(): StringBuilder {
     return this.append("\n")
+}
+
+fun Context.downloadImage(path: String, resolver: (Bitmap) -> Unit) {
+    GlideApp.with(this).asBitmap().load(path)
+            .into(object : SimpleTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    resolver(resource)
+                }
+            })
 }

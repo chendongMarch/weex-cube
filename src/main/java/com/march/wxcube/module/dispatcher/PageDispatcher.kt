@@ -1,17 +1,16 @@
 package com.march.wxcube.module.dispatcher
 
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.support.v4.app.Fragment
 import android.text.TextUtils
 import android.view.ViewGroup
 import com.alibaba.fastjson.JSONObject
-import com.bumptech.glide.request.target.SimpleTarget
-import com.bumptech.glide.request.transition.Transition
+import com.march.common.utils.ColorUtils
 import com.march.common.utils.DimensUtils
+import com.march.common.utils.DrawableUtils
 import com.march.wxcube.Weex
-import com.march.wxcube.common.Utils
+import com.march.wxcube.common.downloadImage
 import com.march.wxcube.common.getDef
 import com.march.wxcube.common.toListEx
 import com.march.wxcube.model.FragmentConfig
@@ -19,7 +18,6 @@ import com.march.wxcube.module.*
 import com.march.wxcube.performer.FragmentPerformer
 import com.march.wxcube.ui.WeexActivity
 import com.march.wxcube.ui.WeexFragment
-import com.march.wxcube.wxadapter.GlideApp
 
 /**
  * CreateAt : 2018/6/7
@@ -62,34 +60,21 @@ class PageDispatcher(val module: OneModule) : BaseDispatcher() {
         val background = params.getJSONObject("background")
         val containerView = module.mWeexDelegate?.mContainerView ?: throw RuntimeException("Page#initPage containerView is null")
         if (background != null) {
-            val color = params.getString("color")
-            if (color != null) {
-                containerView.setBackgroundColor(
-                        try {
-                            Color.parseColor(params.getString("bgColor") ?: "#ffffff")
-                        } catch (e: Exception) {
-                            Color.WHITE
-                        })
-            } else {
-                val image = background.getString("image")
+            val image = background.getString("image")
+            if (image != null) {
                 val repeat = background.getDef("repeat", false)
                 val widthScale = background.getDef("widthScale", 1f)
                 val aspectRatio = background.getDef("aspectRatio", 1f)
-                if (image != null) {
-                    val bgFunc: (resource: Bitmap) -> Unit = {
-                        containerView.background = if (repeat) {
-                            Utils.createRepeatDrawable(activity, it, DimensUtils.WIDTH, widthScale, aspectRatio)
-                        } else {
-                            BitmapDrawable(activity.resources, it)
-                        }
+                activity.downloadImage(image) {
+                    containerView.background = if (repeat) {
+                        DrawableUtils.newRepeatXYDrawable(activity, it, DimensUtils.WIDTH, widthScale, aspectRatio)
+                    } else {
+                        BitmapDrawable(activity.resources, it)
                     }
-                    GlideApp.with(activity).asBitmap().load(image)
-                            .into(object : SimpleTarget<Bitmap>() {
-                                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                                    bgFunc(resource)
-                                }
-                            })
                 }
+            } else {
+                val color = background.getString("color")
+                containerView.setBackgroundColor(ColorUtils.parseColor(color, Color.WHITE))
             }
         }
         val back = params.getDef("back", false)

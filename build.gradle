@@ -51,7 +51,6 @@ dependencies {
     implementation libs.okhttp3
 
     // 模块支持
-//    implementation libs.common
-    implementation project(path: ':common')
+    implementation project(':common')
     implementation project(':webkit')
 }

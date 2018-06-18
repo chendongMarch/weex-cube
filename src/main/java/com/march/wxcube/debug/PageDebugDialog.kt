@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Switch
 import android.widget.TextView
 import com.march.common.utils.JsonUtils
@@ -36,6 +37,8 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WeexPageD
     private val cfgTv by lazy { findViewById<TextView>(R.id.config_tv) }
     private val hideCfgBtn by lazy { findViewById<TextView>(R.id.mp_hide_cfg) }
     private val refreshJsSw by lazy { findViewById<Switch>(R.id.debug_local_js_sw) }
+    private val mpEnableSw by lazy { findViewById<Switch>(R.id.mp_enable) }
+    private val mpIpEt by lazy { findViewById<EditText>(R.id.mp_ip) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,7 +109,7 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WeexPageD
         findViewById<View>(R.id.req_debug_cfg_btn).click { WeexGlobalDebugger.updateFromNet() }
         // 清理缓存的js
         findViewById<View>(R.id.clear_cache_btn).click { Weex.mWeexJsLoader.clearCache() }
-        // 清理磁盘js`
+        // 清理磁盘js
         findViewById<View>(R.id.clear_disk_btn).click { Weex.clearDiskCache() }
     }
 
@@ -122,12 +125,11 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WeexPageD
         cfgTv.click {
             cfgTv?.visibility = View.GONE
         }
-        findViewById<View>(R.id.mp_active).click {
-            WeexGlobalDebugger.updateFromNet()
-        }
+        // 自动跳转
         findViewById<View>(R.id.mp_auto_jump).click {
             WeexGlobalDebugger.autoJump(context)
         }
+        // 查看调试配置
         findViewById<View>(R.id.mp_look_debug_cfg).click {
             val text = try {
                 JSONArray(JsonUtils.toJson(WeexGlobalDebugger.mWeexPageMap.values)).toString(2)
@@ -137,6 +139,7 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WeexPageD
             cfgTv?.text = text
             cfgTv?.visibility = View.VISIBLE
         }
+        // 查看线上配置
         findViewById<View>(R.id.mp_look_online_cfg).click {
             val text = try {
                 JSONArray(JsonUtils.toJson(Weex.mWeexRouter.mWeexPageMap.values)).toString(2)
@@ -145,6 +148,14 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WeexPageD
             }
             cfgTv?.text = text
             cfgTv?.visibility = View.VISIBLE
+        }
+        mpIpEt?.setText(WeexGlobalDebugger.getDebugHost())
+        mpEnableSw?.isChecked = WeexGlobalDebugger.getDebugEnable()
+        // 生效
+        findViewById<View>(R.id.mp_active).click {
+            WeexGlobalDebugger.setDebugEnable(mpEnableSw?.isChecked ?: false)
+            WeexGlobalDebugger.setDebugHost(mpIpEt?.text.toString())
+            WeexGlobalDebugger.updateFromNet()
         }
     }
 

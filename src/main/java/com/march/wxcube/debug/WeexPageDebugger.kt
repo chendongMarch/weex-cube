@@ -16,6 +16,7 @@ import com.march.wxcube.JsCacheStrategy
 import com.march.wxcube.JsLoadStrategy
 import com.march.wxcube.R
 import com.march.wxcube.Weex
+import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.WeexPage
 import com.march.wxcube.ui.WeexDelegate
 import com.taobao.weex.IWXRenderListener
@@ -125,7 +126,8 @@ class WeexPageDebugger : IWXRenderListener {
             return
         }
         try {
-            val js = mWeexPage.remoteJs ?: return
+            val jsUrl = mWeexPage.remoteJs ?: return
+            val js = ManagerRegistry.HOST.makeJsResUrl(jsUrl)
             val uri = Uri.parse(js)
             if (RegexUtils.isIp(uri.host)) {
                 ToastUtils.show("检测到调试地址，2s 后开始自动刷新")

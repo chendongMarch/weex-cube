@@ -34,7 +34,6 @@ internal object WeexGlobalDebugger {
 
     private const val CONFIG_KEY = "weex-debug-config"
     private const val CACHE_DIR = "debug-config-cache"
-    private const val DEBUG_CONFIG_URL = "debug-config-url"
     private const val DISK_MAX_SIZE = Int.MAX_VALUE.toLong()
     private const val MAX_VERSION = "100.100.100"
     private const val MIN_VERSION = "0.0.0"
@@ -65,14 +64,32 @@ internal object WeexGlobalDebugger {
 
     fun makeDebugConfigUrl(): String {
         mDebugHost = DiskKVManager.getInst().get(DEBUG_HOST, "")
-        return "http://$mDebugHost:3000/debug-config.json"
+        return "http://$mDebugHost:8081/debug-config.json"
     }
 
     // 设置调试状态
-    fun setDebugStatus(host: String = "", debug: Boolean = false) {
-        DiskKVManager.getInst().put(DEBUG_ENABLE, debug)
+    fun setDebugHost(host: String = "") {
         DiskKVManager.getInst().put(DEBUG_HOST, host)
     }
+
+    // 设置调试状态
+    fun setDebugEnable(debug: Boolean = false) {
+        DiskKVManager.getInst().put(DEBUG_ENABLE, debug)
+    }
+
+    // 设置调试状态
+    fun getDebugHost(): String {
+        return DiskKVManager.getInst().get(DEBUG_HOST, "")
+    }
+
+    // 设置调试状态
+    fun getDebugEnable(): Boolean {
+        return DiskKVManager.getInst().get(DEBUG_ENABLE, false)
+    }
+
+
+
+
 
     // 从磁盘初始化
     private fun updateFromDisk() {
@@ -116,7 +133,10 @@ internal object WeexGlobalDebugger {
             originPages.forEach {
                 if (!it.pageName.isNullOrBlank()) {
                     val p = prepareOldPage(it) ?: prepareNewPage(it)
-                    p?.let { pages.add(p) }
+                    p?.let {
+                        it.webUrl = ManagerRegistry.HOST.makeWebUrl(it.webUrl ?: "")
+                        pages.add(it)
+                    }
                 }
             }
             updateWeexPageMap(pages)

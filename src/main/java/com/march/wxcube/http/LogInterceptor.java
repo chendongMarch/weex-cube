@@ -152,7 +152,7 @@ public final class LogInterceptor implements Interceptor {
                             respStr = respStr.substring(0, 490) + "...";
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                       // e.printStackTrace();
                     }
                     sb.append(respStr);
                 }
