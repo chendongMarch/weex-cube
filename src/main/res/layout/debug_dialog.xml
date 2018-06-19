@@ -162,7 +162,10 @@
                     android:id="@+id/content_et"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"/>
+                    android:layout_weight="1"
+                    android:hint="页面名字/url"
+                    android:inputType="text"
+                    android:textSize="14sp"/>
 
                 <Button
                     android:id="@+id/jump_weex_btn"
