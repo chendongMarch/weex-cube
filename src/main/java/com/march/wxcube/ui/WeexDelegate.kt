@@ -104,6 +104,7 @@ class WeexDelegate : WeexLifeCycle {
         return if (performer == null) {
             null
         } else {
+            @Suppress("UNCHECKED_CAST")
             performer as? T
         }
     }

@@ -153,6 +153,29 @@
                 android:textColor="#0b9993"
                 android:textSize="15sp"/>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/content_et"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+
+                <Button
+                    android:id="@+id/jump_weex_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Weex"/>
+
+                <Button
+                    android:id="@+id/jump_web_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Web"/>
+            </LinearLayout>
             <!--清理-->
             <LinearLayout
                 android:id="@+id/clear_btn_ll"

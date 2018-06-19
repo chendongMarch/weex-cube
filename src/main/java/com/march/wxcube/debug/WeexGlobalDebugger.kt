@@ -155,6 +155,7 @@ internal object WeexGlobalDebugger {
         }
         return if (validOldPage != null) {
             page.pageName = validOldPage.pageName
+            page.comment = validOldPage.comment
             page.jsVersion = MAX_VERSION
             page.appVersion = MIN_VERSION
             page.webUrl = page.webUrl ?: validOldPage.webUrl

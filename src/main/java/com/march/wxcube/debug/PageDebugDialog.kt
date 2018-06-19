@@ -17,7 +17,6 @@ import com.march.wxcube.R
 import com.march.wxcube.Weex
 import com.march.wxcube.common.click
 import com.march.wxcube.common.newLine
-import org.json.JSONArray
 
 /**
  * CreateAt : 2018/6/17
@@ -39,6 +38,7 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WeexPageD
     private val refreshJsSw by lazy { findViewById<Switch>(R.id.debug_local_js_sw) }
     private val mpEnableSw by lazy { findViewById<Switch>(R.id.mp_enable) }
     private val mpIpEt by lazy { findViewById<EditText>(R.id.mp_ip) }
+    private val contentEt by lazy { findViewById<EditText>(R.id.content_et) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,6 +111,18 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WeexPageD
         findViewById<View>(R.id.clear_cache_btn).click { Weex.mWeexJsLoader.clearCache() }
         // 清理磁盘js
         findViewById<View>(R.id.clear_disk_btn).click { Weex.clearDiskCache() }
+        findViewById<View>(R.id.jump_weex_btn).click {
+            val text = contentEt?.text.toString()
+            if (!text.isBlank()) {
+                Weex.mWeexRouter.openUrl(context, text)
+            }
+        }
+        findViewById<View>(R.id.jump_web_btn).click {
+            val text = contentEt?.text.toString()
+            if (!text.isBlank()) {
+                Weex.mWeexRouter.openWeb(context, text)
+            }
+        }
     }
 
     // 多页面调试
@@ -131,21 +143,13 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WeexPageD
         }
         // 查看调试配置
         findViewById<View>(R.id.mp_look_debug_cfg).click {
-            val text = try {
-                JSONArray(JsonUtils.toJson(WeexGlobalDebugger.mWeexPageMap.values)).toString(2)
-            } catch (e: Exception) {
-                "解析错误"
-            }
+            val text = JsonUtils.toJsonString(JsonUtils.toJson(WeexGlobalDebugger.mWeexPageMap.values), "解析失败")
             cfgTv?.text = text
             cfgTv?.visibility = View.VISIBLE
         }
         // 查看线上配置
         findViewById<View>(R.id.mp_look_online_cfg).click {
-            val text = try {
-                JSONArray(JsonUtils.toJson(Weex.mWeexRouter.mWeexPageMap.values)).toString(2)
-            } catch (e: Exception) {
-                "解析错误"
-            }
+            val text = JsonUtils.toJsonString(JsonUtils.toJson(Weex.mWeexRouter.mWeexPageMap.values), "解析失败")
             cfgTv?.text = text
             cfgTv?.visibility = View.VISIBLE
         }
