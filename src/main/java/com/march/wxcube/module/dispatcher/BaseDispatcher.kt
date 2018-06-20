@@ -26,6 +26,7 @@ abstract class BaseDispatcher {
         const val KEY_CANCEL = "cancel"
         const val KEY_MSG = "msg"
         const val KEY_URL = "url"
+        const val KEY_LIST = "list"
         const val KEY_TAG = "tag"
         const val KEY_EVENT = "event"
         const val KEY_DATA = "data"

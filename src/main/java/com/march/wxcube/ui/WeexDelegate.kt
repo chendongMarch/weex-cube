@@ -6,7 +6,9 @@ import android.net.Uri
 import android.support.v4.app.Fragment
 import android.view.View
 import android.view.ViewGroup
+import com.march.common.pool.MemoryKVManager
 import com.march.common.utils.LgUtils
+import com.march.common.utils.immersion.StatusBarUtils
 import com.march.wxcube.Weex
 import com.march.wxcube.common.report
 import com.march.wxcube.debug.WeexPageDebugger
@@ -29,6 +31,8 @@ class WeexDelegate : WeexLifeCycle {
     companion object {
         const val EXTRA = "extra"
         const val INSTANCE_ID = "instanceId"
+        const val TOP_SAFEAREA_HEIGHT = "topSafeAreaHeight"
+        const val BOTTOM_SAFEAREA_HEIGHT = "bottomSafeAreaHeight"
     }
 
     // 渲染状态
@@ -181,6 +185,8 @@ class WeexDelegate : WeexLifeCycle {
         val uri = Uri.parse(mWeexPage.webUrl)
         uri.queryParameterNames.forEach { opts[it] = uri.getQueryParameter(it) }
         opts[INSTANCE_ID] = mWeexInst.instanceId
+        opts[TOP_SAFEAREA_HEIGHT] = StatusBarUtils.getStatusBarHeight(mActivity)
+        opts[BOTTOM_SAFEAREA_HEIGHT] = 0
         mWeexPage.webUrl?.let {
             val data = ManagerRegistry.DATA.getData(it)
             if (data != null) {

@@ -53,6 +53,10 @@ class HostManager : IManager {
         return mutableUrl
     }
 
+    fun makeImgUrl(url: String): String {
+        return makeRequestUrl(url)
+    }
+
 
     // 相对的请求 url 需要以 / 开头
     // 检测完善一个请求的url

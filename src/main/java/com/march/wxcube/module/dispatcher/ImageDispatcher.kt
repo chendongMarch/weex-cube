@@ -1,6 +1,7 @@
 package com.march.wxcube.module.dispatcher
 
 import com.alibaba.fastjson.JSONObject
+import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.module.JsCallbackWrap
 import com.march.wxcube.wxadapter.GlideApp
 
@@ -37,8 +38,13 @@ class ImageDispatcher : BaseDispatcher() {
     }
 
     private fun preloadImage(params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
-        val url = params.getString(KEY_URL) ?: throw RuntimeException("Image#preload url is null")
-        GlideApp.with(mProvider.activity()).load(url).preload()
+        val jsonArray = params.getJSONArray(KEY_LIST) ?: throw RuntimeException("Image#preload list is null")
+        for (obj in jsonArray) {
+            if (obj is String) {
+                val url = ManagerRegistry.HOST.makeImgUrl(obj)
+                GlideApp.with(mProvider.activity()).load(url).preload()
+            }
+        }
     }
 
     private fun previewImage(params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
