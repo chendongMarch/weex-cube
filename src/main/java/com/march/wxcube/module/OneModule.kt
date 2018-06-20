@@ -31,6 +31,7 @@ class OneModule : WXModule() {
                 ToolsDispatcher(),
                 StatusBarDispatcher(),
                 PageDispatcher(this),
+                ImageDispatcher(),
                 *Weex.mWeexInjector.getModuleDispatchers()
         )
     }
@@ -57,10 +58,9 @@ class OneModule : WXModule() {
     fun call(method: String, params: JSONObject, callback: JSCallback) {
         try {
             mDispatcherRegistry.dispatch(method, params,JsCallbackWrap(callback))
-            // mDispatcherRegistry.postJsResult(callback, true to "$method($params) finish ")
         } catch (e: Exception) {
             e.printStackTrace()
-            mDispatcherRegistry.postJsResult(callback, false to "$method($params) error ${e.message}")
+            mDispatcherRegistry.postJsResult(JsCallbackWrap(callback), false to "$method($params) error ${e.message}")
         }
     }
 
@@ -68,9 +68,7 @@ class OneModule : WXModule() {
 
         val module = this@OneModule
 
-        override fun provideActivity(): AppCompatActivity {
-            return module.mAct?:throw RuntimeException("activity find error")
-        }
+        override fun activity(): AppCompatActivity = module.mAct ?: throw RuntimeException("activity find error")
 
         override fun doBySelf(method: String, params: JSONObject) {
             when (method) {

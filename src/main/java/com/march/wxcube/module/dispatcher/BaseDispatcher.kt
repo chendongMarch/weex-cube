@@ -3,7 +3,6 @@ package com.march.wxcube.module.dispatcher
 import android.support.v7.app.AppCompatActivity
 import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.module.JsCallbackWrap
-import com.taobao.weex.bridge.JSCallback
 
 /**
  * CreateAt : 2018/6/6
@@ -14,7 +13,7 @@ import com.taobao.weex.bridge.JSCallback
 abstract class BaseDispatcher {
 
     interface Provider {
-        fun provideActivity(): AppCompatActivity
+        fun activity(): AppCompatActivity
         fun doBySelf(method: String, params: JSONObject)
     }
 
@@ -23,6 +22,8 @@ abstract class BaseDispatcher {
     companion object {
         // key
         const val KEY_SUCCESS = "success"
+        const val KEY_FAIL = "fail"
+        const val KEY_CANCEL = "cancel"
         const val KEY_MSG = "msg"
         const val KEY_URL = "url"
         const val KEY_TAG = "tag"
@@ -30,6 +31,8 @@ abstract class BaseDispatcher {
         const val KEY_DATA = "data"
         const val KEY_DURATION = "duration"
         const val KEY_CONFIG = "config"
+        const val KEY_RESULT = "result"
+        const val KEY_CODE = "code"
 
     }
 
@@ -40,10 +43,10 @@ abstract class BaseDispatcher {
     abstract fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap)
 
     fun findAct(): AppCompatActivity {
-        return mProvider.provideActivity()
+        return mProvider.activity()
     }
 
-    fun postJsResult(jsCallback: JSCallback, result: Pair<Boolean, String>) {
+    fun postJsResult(jsCallback: JsCallbackWrap, result: Pair<Boolean, String>) {
         jsCallback.invoke(mapOf(
                 BaseDispatcher.KEY_SUCCESS to result.first,
                 BaseDispatcher.KEY_MSG to result.second))

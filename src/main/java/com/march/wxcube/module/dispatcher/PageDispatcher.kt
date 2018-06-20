@@ -56,7 +56,7 @@ class PageDispatcher(val module: OneModule) : BaseDispatcher() {
      * 初始化页面
      */
     private fun initPage(params: JSONObject) {
-        val activity = mProvider.provideActivity()
+        val activity = mProvider.activity()
         val background = params.getJSONObject("background")
         val containerView = module.mWeexDelegate?.mContainerView ?: throw RuntimeException("Page#initPage containerView is null")
         if (background != null) {

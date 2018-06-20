@@ -16,7 +16,7 @@ class DispatcherRegistry(provider: BaseDispatcher.Provider, vararg dispatchers: 
     }
 
     private val mMethodDispatcher by lazy { mutableMapOf<String, BaseDispatcher>() }
-
+    private val mAsyncMethods by lazy { mutableListOf<String>() }
     init {
         for (dispatcher in dispatchers) {
             registerDispatcher(dispatcher, provider)
@@ -24,6 +24,7 @@ class DispatcherRegistry(provider: BaseDispatcher.Provider, vararg dispatchers: 
     }
 
     private fun registerDispatcher(dispatcher: BaseDispatcher, provider: BaseDispatcher.Provider) {
+        mAsyncMethods.addAll(dispatcher.getAsyncMethods())
         for (method in dispatcher.getMethods()) {
             dispatcher.mProvider = provider
             mMethodDispatcher[method] = dispatcher
@@ -33,5 +34,9 @@ class DispatcherRegistry(provider: BaseDispatcher.Provider, vararg dispatchers: 
     override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
         val dispatcher = mMethodDispatcher[method] ?: throw RuntimeException("method $method not match")
         dispatcher.dispatch(method, params,jsCallbackWrap)
+        // 不是异步方法直接返回结束
+        if (!mAsyncMethods.contains(method)) {
+            postJsResult(jsCallbackWrap, true to "$method($params) finish ")
+        }
     }
 }
