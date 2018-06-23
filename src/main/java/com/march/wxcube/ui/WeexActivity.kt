@@ -14,7 +14,7 @@ import com.march.wxcube.Weex
  */
 class WeexActivity : BaseActivity() {
 
-    val mProgressBar by lazy { Weex.mWeexInjector.getLoading().makeLoadingIndicator(this) }
+    val mLoadingIndicator by lazy { Weex.mWeexInjector.getLoading().makeLoadingIndicator(this) }
     val mDelegate: WeexDelegate by lazy { WeexDelegate(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,10 +57,10 @@ class WeexActivity : BaseActivity() {
 
 
     override fun onBackPressed() {
-        if(!mDelegate.mHandleBackPressed){
-            super.onBackPressed()
-        } else {
-            mDelegate.onBackPressed()
+        mDelegate.onBackPressed()
+        if (mDelegate.mInterceptBackPressed) {
+            return
         }
+        super.onBackPressed()
     }
 }

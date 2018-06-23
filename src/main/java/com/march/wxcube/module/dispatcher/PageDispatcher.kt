@@ -77,10 +77,8 @@ class PageDispatcher(val module: OneModule) : BaseDispatcher() {
                 containerView.setBackgroundColor(ColorUtils.parseColor(color, Color.WHITE))
             }
         }
-        val back = params.getDef("back", false)
-        if(back) {
-            module.mWeexDelegate?.mHandleBackPressed = true
-        }
+        val interceptBack = params.getDef("interceptBack", false)
+        module.mWeexDelegate?.mInterceptBackPressed = interceptBack
     }
 
     /**

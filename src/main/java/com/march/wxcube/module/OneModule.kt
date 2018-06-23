@@ -77,20 +77,21 @@ class OneModule : WXModule() {
                     delegate.close()
                 }
                 ModalDispatcher.loading    -> {
-                    // val msg = params.getDef(BaseDispatcher.KEY_MSG, "")
+                    val msg = params.getDef(BaseDispatcher.KEY_MSG, "")
                     val show = params.getDef("show", false)
                     val weexAct = module.mWeexAct ?: throw RuntimeException("ModuleDispatcher#mWeexAct error")
-                    val parentView = weexAct.mDelegate.mContainerView
-                    val progressView = weexAct.mProgressBar
-                    val notLoading = parentView.indexOfChild(progressView) == -1
+                    val container = weexAct.mDelegate.mContainerView
+                    weexAct.mLoadingIndicator.setMsg(msg)
+                    val loadingView = weexAct.mLoadingIndicator.getLoadingView()
+                    val notLoading = container.indexOfChild(loadingView) == -1
                     if (show && notLoading) {
                         val layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
                         layoutParams.gravity = Gravity.CENTER
-                        parentView.addView(progressView, layoutParams)
-                        progressView.visibility = View.VISIBLE
+                        container.addView(loadingView, layoutParams)
+                        loadingView.visibility = View.VISIBLE
                     } else if (!show && !notLoading) {
-                        progressView.visibility = View.GONE
-                        parentView.removeView(progressView)
+                        loadingView.visibility = View.GONE
+                        container.removeView(loadingView)
                     }
                 }
             }

@@ -6,10 +6,10 @@ import android.net.Uri
 import android.support.v4.app.Fragment
 import android.view.View
 import android.view.ViewGroup
-import com.march.common.pool.MemoryKVManager
 import com.march.common.utils.LgUtils
 import com.march.common.utils.immersion.StatusBarUtils
 import com.march.wxcube.Weex
+import com.march.wxcube.common.CubeWxUtils
 import com.march.wxcube.common.report
 import com.march.wxcube.debug.WeexPageDebugger
 import com.march.wxcube.lifecycle.WeexLifeCycle
@@ -176,30 +176,41 @@ class WeexDelegate : WeexLifeCycle {
 
     //************************渲染页面*********************//
 
+
+    internal fun refreshInstance() {
+        val options = parseRenderOptions()
+        options["refresh"] = "yes"
+        mWeexInst.refreshInstance(options)
+    }
+
+    private val mRenderOpts by lazy {  mutableMapOf<String, Any>() }
+
     /**
      * 准备渲染的参数
      */
-    private fun parseRenderOptions(): Map<String, Any> {
-        val opts = HashMap<String, Any>()
-        // parse url
+    private fun parseRenderOptions(): MutableMap<String, Any> {
+        if(mRenderOpts.isNotEmpty()){
+            return mRenderOpts
+        }
         val uri = Uri.parse(mWeexPage.webUrl)
-        uri.queryParameterNames.forEach { opts[it] = uri.getQueryParameter(it) }
-        opts[INSTANCE_ID] = mWeexInst.instanceId
-        opts[TOP_SAFEAREA_HEIGHT] = StatusBarUtils.getStatusBarHeight(mActivity)
-        opts[BOTTOM_SAFEAREA_HEIGHT] = 0
+        uri.queryParameterNames.forEach { mRenderOpts[it] = uri.getQueryParameter(it) }
+        mRenderOpts[INSTANCE_ID] = mWeexInst.instanceId
+        mRenderOpts[TOP_SAFEAREA_HEIGHT] = CubeWxUtils.getWxPxByRealPx(StatusBarUtils.getStatusBarHeight(mActivity))
+        mRenderOpts[BOTTOM_SAFEAREA_HEIGHT] = 0
         mWeexPage.webUrl?.let {
             val data = ManagerRegistry.DATA.getData(it)
             if (data != null) {
-                opts[EXTRA] = data
+                mRenderOpts[EXTRA] = data
             }
         }
-        return opts
+        return mRenderOpts
     }
 
     /**
      * 渲染之前处理
      */
     private fun preRender() {
+
         if (mRenderStatus == RenderStatus.RENDER_SUCCESS) {
             destroyWxInst()
             createWxInst()
@@ -275,7 +286,6 @@ class WeexDelegate : WeexLifeCycle {
     override fun onResume() {
         mWeexInst.onActivityResume()
         mLifeCallbacks.forEach { it.onResume() }
-        fireEvent("resume")
     }
 
     override fun onPause() {
@@ -296,12 +306,14 @@ class WeexDelegate : WeexLifeCycle {
     override fun onPermissionResult(requestCode: Int, resultCode: Int, data: Intent) {
         super.onPermissionResult(requestCode, resultCode, data)
         mLifeCallbacks.forEach { it.onPermissionResult(requestCode, resultCode, data) }
+        // mWeexInst.onRequestPermissionsResult(requestCode,resultCode,data)
     }
 
-    var mHandleBackPressed = false
+    // 是否拦截返回键
+    internal var mInterceptBackPressed = false
 
     fun onBackPressed() {
-        fireEvent("onBackPressed")
+        mWeexInst.onBackPressed()
     }
 }
 

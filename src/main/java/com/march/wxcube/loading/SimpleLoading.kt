@@ -29,8 +29,15 @@ interface Loading {
     // 设置首页的内容，这里需要是原生的
     fun setIndexContent(activity: IndexActivity)
 
-    fun makeLoadingIndicator(activity: Activity): View
+    fun makeLoadingIndicator(activity: Activity): LoadingIndicator
 
+}
+
+interface LoadingIndicator {
+    // fun setDisplay(container: ViewGroup, show: Boolean = true)
+    fun setMsg(msg: String = "")
+
+    fun getLoadingView(): View
 }
 
 open class SimpleLoading : Loading {
@@ -67,16 +74,29 @@ open class SimpleLoading : Loading {
         }catch (e:Exception){}
     }
 
-    override fun makeLoadingIndicator(activity: Activity): View {
-        val frameLayout = FrameLayout(activity)
-        frameLayout.layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
-        val drawable = DrawableUtils.newRoundRectDrawable(Color.parseColor("#66000000"), 5)
-        frameLayout.background = drawable
-        frameLayout.setPadding(50,50,50,50)
-        val progressBar = ProgressBar(activity)
-        progressBar.layoutParams = FrameLayout.LayoutParams(100, 100)
-        val layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
-        frameLayout.addView(progressBar, layoutParams)
-        return frameLayout
+    override fun makeLoadingIndicator(activity: Activity): LoadingIndicator {
+        return object : LoadingIndicator {
+
+            val loadingView by lazy {
+                val frameLayout = FrameLayout(activity)
+                frameLayout.layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
+                val drawable = DrawableUtils.newRoundRectDrawable(Color.parseColor("#66000000"), 5)
+                frameLayout.background = drawable
+                frameLayout.setPadding(50, 50, 50, 50)
+                val progressBar = ProgressBar(activity)
+                progressBar.layoutParams = FrameLayout.LayoutParams(100, 100)
+                val layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
+                frameLayout.addView(progressBar, layoutParams)
+                frameLayout
+            }
+
+            override fun getLoadingView(): View {
+                return loadingView
+            }
+
+            override fun setMsg(msg: String) {
+
+            }
+        }
     }
 }
