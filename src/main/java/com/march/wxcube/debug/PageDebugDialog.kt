@@ -166,7 +166,7 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WeexPageD
     private fun updateMsg() {
         val msg = StringBuilder()
                 .append("页面：").newLine()
-                .append(mWeexPageDebugger.mWeexPage.toShowString()).newLine()
+                .append(mWeexPageDebugger.mWeexPage?.toShowString()).newLine()
                 .append("信息：").newLine()
                 .append(mWeexPageDebugger.mDebugMsg.toShowString()).newLine()
                 .toString()

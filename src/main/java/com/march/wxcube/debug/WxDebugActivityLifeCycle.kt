@@ -13,13 +13,22 @@ import com.march.wxcube.ui.WeexActivity
  */
 class WxDebugActivityLifeCycle : ActivityLifecycleCallback() {
 
-    override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {
-        if (activity !is WeexActivity) {
-            return
-        }
+    override fun onActivityCreated(act: Activity?, savedInstanceState: Bundle?) {
+        try {
+
+
+//        if (act !is WeexActivity) {
+//            return
+//        }
+            val activity = act ?: return
         val debugger = WeexPageDebugger()
         debugger.addDebugBtn(activity)
-        activity.mDelegate.setDebugger(debugger)
+            if (activity is WeexActivity) {
+                activity.mDelegate.setDebugger(debugger)
+            }
+        } catch (e: Exception) {
+
+        }
     }
 
 }

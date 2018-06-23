@@ -1,5 +1,6 @@
 package com.march.wxcube.debug
 
+import android.animation.Animator
 import android.app.Activity
 import android.net.Uri
 import android.os.Handler
@@ -8,6 +9,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import com.march.common.impl.AnimatorListener
 import com.march.common.utils.DimensUtils
 import com.march.common.utils.RegexUtils
 import com.march.common.utils.ToastUtils
@@ -37,8 +39,8 @@ class WeexPageDebugger : IWXRenderListener {
     internal val mDebugConfig by lazy { DebugConfig(false, false, false) }
 
     private lateinit var mActivity: Activity
-    private lateinit var mDelegate: WeexDelegate
-    internal lateinit var mWeexPage: WeexPage
+    private var mDelegate: WeexDelegate? = null
+    internal var mWeexPage: WeexPage? = null
 
     private var mIsDestroy = false
     private var mView: View? = null
@@ -50,7 +52,7 @@ class WeexPageDebugger : IWXRenderListener {
         val params = FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         params.gravity = Gravity.END or Gravity.BOTTOM
         params.rightMargin = 100
-        params.bottomMargin = 300
+        params.bottomMargin = 330
         dragLayout.setOnClickListener {
             mDebugDialog.show()
         }
@@ -67,7 +69,8 @@ class WeexPageDebugger : IWXRenderListener {
         if (mIsDestroy) {
             return false
         }
-        return with(mDelegate) {
+        val delegate = mDelegate ?: return false
+        return with(delegate) {
             mDebugMsg.refreshing = true
             var cacheStrategy = JsCacheStrategy.NO_CACHE
             if(mDebugConfig.debugJsInCache) {
@@ -88,7 +91,18 @@ class WeexPageDebugger : IWXRenderListener {
                         Weex.mWeexInjector.onLog("startRefresh", "获取到但是没有改变，不作渲染")
                     }
                 }
-                mHandler.post { mView?.animate()?.rotationYBy(360f)?.setDuration(5_00)?.start() }
+                mHandler.post {
+                    mView?.animate()
+                            ?.rotationYBy(360f)
+                            ?.setDuration(5_00)
+                            ?.setListener(object : AnimatorListener() {
+                                override fun onAnimationEnd(animation: Animator?) {
+                                    mView?.rotationY = 0f
+                                }
+
+                            })
+                            ?.start()
+                }
                 if (!once && mDebugMsg.refreshing && mDebugConfig.isRefreshRemoteJs) {
                     mHandler.sendEmptyMessageDelayed(0, 2000)
                 }
@@ -106,7 +120,7 @@ class WeexPageDebugger : IWXRenderListener {
     fun onReady(delegate: WeexDelegate) {
         mDelegate = delegate
         mActivity = delegate.mActivity
-        mWeexPage = mDelegate.mWeexPage
+        mWeexPage = delegate.mWeexPage
     }
 
     fun onDestroy() {
@@ -126,7 +140,7 @@ class WeexPageDebugger : IWXRenderListener {
             return
         }
         try {
-            val jsUrl = mWeexPage.remoteJs ?: return
+            val jsUrl = mWeexPage?.remoteJs ?: return
             val js = ManagerRegistry.HOST.makeJsResUrl(jsUrl)
             val uri = Uri.parse(js)
             if (RegexUtils.isIp(uri.host)) {

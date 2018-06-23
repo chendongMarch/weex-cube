@@ -62,11 +62,6 @@ internal object WeexGlobalDebugger {
         }
     }
 
-    fun makeDebugConfigUrl(): String {
-        mDebugHost = DiskKVManager.getInst().get(DEBUG_HOST, "")
-        return "http://$mDebugHost:8081/debug-config.json"
-    }
-
     // 设置调试状态
     fun setDebugHost(host: String = "") {
         DiskKVManager.getInst().put(DEBUG_HOST, host)
@@ -87,10 +82,6 @@ internal object WeexGlobalDebugger {
         return DiskKVManager.getInst().get(DEBUG_ENABLE, false)
     }
 
-
-
-
-
     // 从磁盘初始化
     private fun updateFromDisk() {
         // 磁盘缓存读取以前的配置
@@ -103,7 +94,7 @@ internal object WeexGlobalDebugger {
         if (!checkDebug()) {
             return
         }
-        val url = makeDebugConfigUrl()
+        val url = Weex.mWeexInjector.makeDebugConfigUrl(mDebugHost)
         // 发起网络，并存文件
         val request = ManagerRegistry.REQ.makeWxRequest(url = url, from = "request-wx-debug-config")
         ManagerRegistry.REQ.request(request, object : HttpListener {
