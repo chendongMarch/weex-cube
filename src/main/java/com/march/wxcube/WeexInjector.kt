@@ -84,6 +84,11 @@ interface WeexInjector {
      */
     fun completeDebugWeexPage(page: WeexPage, host: String): WeexPage = page
 
+    /**
+     * 构造调试配置请求文件地址
+     */
+    fun makeDebugConfigUrl(host:String): String  = ""
+
     companion object {
         val EMPTY = object : WeexInjector {
 
