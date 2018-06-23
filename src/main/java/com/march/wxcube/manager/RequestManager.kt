@@ -2,11 +2,12 @@ package com.march.wxcube.manager
 
 import android.content.Context
 import com.march.common.disklru.DiskLruCache
+import com.march.common.pool.ExecutorsPool
 import com.march.common.utils.NetUtils
 import com.march.common.utils.StreamUtils
 import com.march.wxcube.Weex
 import com.march.wxcube.http.HttpListener
-import com.march.wxcube.http.LogInterceptor
+import com.march.wxcube.http.OkHttpMaker
 import com.march.wxcube.model.WeexPage
 import com.taobao.weex.WXSDKInstance
 import com.taobao.weex.adapter.IWXHttpAdapter
@@ -16,8 +17,6 @@ import okhttp3.*
 import okhttp3.internal.Util
 import java.io.File
 import java.io.IOException
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 /**
  * CreateAt : 2018/4/20
@@ -36,8 +35,7 @@ class RequestManager : IManager {
         val instance: RequestManager by lazy { RequestManager() }
     }
 
-    private val mOkHttpClient by lazy { buildOkHttpClient() }
-    private val mExecutorService by lazy { Executors.newCachedThreadPool() }
+    private val mOkHttpClient by lazy { OkHttpMaker.buildOkHttpClient() }
 
     // 结束该页面的请求
     override fun onWxInstRelease(weexPage: WeexPage?, instance: WXSDKInstance?) {
@@ -51,86 +49,6 @@ class RequestManager : IManager {
         mOkHttpClient.dispatcher().runningCalls()
                 .filter(filter)
                 .forEach { it.cancel() }
-    }
-
-    private fun buildOkHttpClient(): OkHttpClient {
-        val builder = OkHttpClient.Builder()
-        // 连接超时
-        builder.connectTimeout(5 * 1000, TimeUnit.MILLISECONDS)
-        // 读超时
-        builder.readTimeout(5 * 1000, TimeUnit.MILLISECONDS)
-        // 写超时
-        builder.writeTimeout(5 * 1000, TimeUnit.MILLISECONDS)
-        // 失败后重试
-        builder.retryOnConnectionFailure(true)
-        // builder.proxy(Proxy.NO_PROXY)
-
-        // 进行日志打印，扩展自 HttpLoggingInterceptor
-        builder.addInterceptor(LogInterceptor())
-
-        // token校验，返回 403 时
-        // builder.authenticator(new TokenAuthenticator());
-        Weex.mWeexInjector.onInitOkHttpClient(builder)
-        return builder.build()
-    }
-
-
-
-    /**
-     * assets 资源请求
-     */
-    fun requestAssets(context: Context, url: String, listener: HttpListener) {
-        listener.onHttpStart()
-        val wxResponse = WXResponse()
-        mExecutorService.execute({
-            try {
-                wxResponse.data = StreamUtils.saveStreamToString(context.assets.open(url))
-                wxResponse.errorCode = ERROR_CODE_SUCCESS
-            } catch (e: Exception) {
-                e.printStackTrace()
-                wxResponse.errorCode = ERROR_CODE_FAILURE
-                wxResponse.data = ""
-            }
-            listener.onHttpFinish(wxResponse)
-        })
-    }
-
-    /**
-     * 文件资源请求
-     */
-    fun requestFile(url: String, listener: HttpListener) {
-        listener.onHttpStart()
-        val wxResponse = WXResponse()
-        mExecutorService.execute({
-            try {
-                wxResponse.data = StreamUtils.saveStreamToString(File(url).inputStream())
-                wxResponse.errorCode = ERROR_CODE_SUCCESS
-            } catch (e: Exception) {
-                e.printStackTrace()
-                wxResponse.errorCode = ERROR_CODE_FAILURE
-                wxResponse.data = ""
-            }
-            listener.onHttpFinish(wxResponse)
-        })
-    }
-
-    /**
-     * 文件资源请求，基于 disklru
-     */
-    fun requestDiskCache(key: String, diskLruCache: DiskLruCache, listener: HttpListener) {
-        listener.onHttpStart()
-        val wxResponse = WXResponse()
-        mExecutorService.execute({
-            try {
-                wxResponse.data = diskLruCache.get(key).getString(0)
-                wxResponse.errorCode = ERROR_CODE_SUCCESS
-            } catch (e: Exception) {
-                e.printStackTrace()
-                wxResponse.errorCode = ERROR_CODE_FAILURE
-                wxResponse.data = ""
-            }
-            listener.onHttpFinish(wxResponse)
-        })
     }
 
     /**
@@ -270,5 +188,65 @@ class RequestManager : IManager {
         map?.set("from", from)
         wxRequest.paramMap = map
         return wxRequest
+    }
+
+
+    // 资源请求
+
+
+    /**
+     * assets 资源请求
+     */
+    fun requestAssets(context: Context, url: String, listener: HttpListener) {
+        val wxResponse = WXResponse()
+        ExecutorsPool.getInst().execute({
+            try {
+                wxResponse.data = StreamUtils.saveStreamToString(context.assets.open(url))
+                wxResponse.errorCode = RequestManager.ERROR_CODE_SUCCESS
+            } catch (e: Exception) {
+                e.printStackTrace()
+                wxResponse.errorCode = RequestManager.ERROR_CODE_FAILURE
+                wxResponse.data = ""
+            }
+            listener.onHttpFinish(wxResponse)
+        })
+    }
+
+    /**
+     * 文件资源请求
+     */
+    fun requestFile(url: String, listener: HttpListener) {
+        listener.onHttpStart()
+        val wxResponse = WXResponse()
+        ExecutorsPool.getInst().execute({
+            try {
+                wxResponse.data = StreamUtils.saveStreamToString(File(url).inputStream())
+                wxResponse.errorCode = RequestManager.ERROR_CODE_SUCCESS
+            } catch (e: Exception) {
+                e.printStackTrace()
+                wxResponse.errorCode = RequestManager.ERROR_CODE_FAILURE
+                wxResponse.data = ""
+            }
+            listener.onHttpFinish(wxResponse)
+        })
+    }
+
+    /**
+     * 文件资源请求，基于 disklru
+     */
+    fun requestDiskCache(key: String, diskLruCache: DiskLruCache, listener: HttpListener) {
+        listener.onHttpStart()
+        val wxResponse = WXResponse()
+        ExecutorsPool.getInst().execute({
+            try {
+                wxResponse.data = diskLruCache.get(key).getString(0)
+                wxResponse.errorCode = RequestManager.ERROR_CODE_SUCCESS
+            } catch (e: Exception) {
+                e.printStackTrace()
+                wxResponse.errorCode = RequestManager.ERROR_CODE_FAILURE
+                wxResponse.data = ""
+            }
+            listener.onHttpFinish(wxResponse)
+        })
     }
 }

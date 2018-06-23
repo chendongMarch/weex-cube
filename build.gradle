@@ -34,7 +34,7 @@ dependencies {
     implementation libs.recyclerView_v7
 
     // image
-    implementation libs.glide4
+    api libs.glide4
     implementation libs.glideOkHttp
     kapt libs.glide4Compiler
 
