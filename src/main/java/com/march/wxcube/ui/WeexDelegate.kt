@@ -210,12 +210,12 @@ class WeexDelegate : WeexLifeCycle {
      * 渲染之前处理
      */
     private fun preRender() {
-
         if (mRenderStatus == RenderStatus.RENDER_SUCCESS) {
             destroyWxInst()
             createWxInst()
             onCreate()
         }
+        System.gc()
     }
 
     /**
@@ -286,11 +286,13 @@ class WeexDelegate : WeexLifeCycle {
     override fun onResume() {
         mWeexInst.onActivityResume()
         mLifeCallbacks.forEach { it.onResume() }
+        mWeexDebugger?.onResume()
     }
 
     override fun onPause() {
         mWeexInst.onActivityPause()
         mLifeCallbacks.forEach { it.onPause() }
+        mWeexDebugger?.onPause()
     }
 
     override fun onStop() {
