@@ -1,7 +1,6 @@
 package com.march.wxcube.manager
 
-import com.alibaba.fastjson.JSONObject
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 import com.taobao.weex.WXSDKInstance
 
 /**
@@ -18,7 +17,7 @@ class DataManager : IManager {
 
     private val mCacheExtraData: MutableMap<String, Any> = mutableMapOf()
 
-    override fun onWxInstRelease(weexPage: WeexPage?, instance: WXSDKInstance?) {
+    override fun onWxInstRelease(weexPage: WxPage?, instance: WXSDKInstance?) {
         mCacheExtraData.remove(weexPage?.webUrl)
     }
 

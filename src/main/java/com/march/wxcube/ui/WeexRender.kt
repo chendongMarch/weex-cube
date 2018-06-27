@@ -4,7 +4,7 @@ import android.app.Activity
 import com.march.common.utils.LgUtils
 import com.march.wxcube.Weex
 import com.march.wxcube.common.report
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 import com.taobao.weex.IWXRenderListener
 import com.taobao.weex.RenderContainer
 import com.taobao.weex.WXSDKInstance
@@ -27,11 +27,11 @@ class WeexRender(activity: Activity,
         mWxInst.registerRenderListener(listener)
     }
 
-    fun renderJs(page: WeexPage, opts: Map<String, Any>, js: String) {
+    fun renderJs(page: WxPage, opts: Map<String, Any>, js: String) {
         mWxInst.render(page.pageName, js, opts, null, WXRenderStrategy.APPEND_ASYNC)
     }
 
-    fun render(page: WeexPage, opts: Map<String, Any>, consumer: ((String?) -> Unit)? = null) {
+    fun render(page: WxPage, opts: Map<String, Any>, consumer: ((String?) -> Unit)? = null) {
         if (!page.isValid) {
             listener.onException(mWxInst, "100", "页面数据有问题")
             return

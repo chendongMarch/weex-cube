@@ -1,7 +1,7 @@
 package com.march.wxcube.manager
 
 import com.march.wxcube.common.report
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 import com.taobao.weex.WXSDKInstance
 import com.taobao.weex.WXSDKManager
 
@@ -21,7 +21,7 @@ class EventManager : IManager {
     // EventKey -> List<mInstId>
     private val mEventInstanceIdMap by lazy { mutableMapOf<String, MutableSet<String>>() }
 
-    override fun onWxInstRelease(weexPage: WeexPage?, instance: WXSDKInstance?) {
+    override fun onWxInstRelease(weexPage: WxPage?, instance: WXSDKInstance?) {
         val nonNullId = instance?.instanceId ?: return
         for (mutableEntry in mEventInstanceIdMap) {
             if (mutableEntry.value.isNotEmpty()) {

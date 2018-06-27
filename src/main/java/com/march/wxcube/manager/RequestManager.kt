@@ -8,7 +8,7 @@ import com.march.common.utils.StreamUtils
 import com.march.wxcube.Weex
 import com.march.wxcube.http.HttpListener
 import com.march.wxcube.http.OkHttpMaker
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 import com.taobao.weex.WXSDKInstance
 import com.taobao.weex.adapter.IWXHttpAdapter
 import com.taobao.weex.common.WXRequest
@@ -38,7 +38,7 @@ class RequestManager : IManager {
     private val mOkHttpClient by lazy { OkHttpMaker.buildOkHttpClient() }
 
     // 结束该页面的请求
-    override fun onWxInstRelease(weexPage: WeexPage?, instance: WXSDKInstance?) {
+    override fun onWxInstRelease(weexPage: WxPage?, instance: WXSDKInstance?) {
         val tag = instance?.instanceId ?: return
         val filter: (Call?) -> Boolean = {
             it != null && !it.isCanceled && it.request().tag() == tag

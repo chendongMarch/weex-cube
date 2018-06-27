@@ -19,7 +19,7 @@ class WebActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Weex.mWeexInjector.onPageCreated(this, Weex.PAGE_WEB)
+        Weex.mWxPageAdapter.onPageCreated(this, Weex.PAGE_WEB)
         setContentView(R.layout.web_activity)
         supportFragmentManager.beginTransaction()
                 .add(R.id.web_activity_root, mWebFragment)

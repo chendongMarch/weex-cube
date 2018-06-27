@@ -1,6 +1,6 @@
 package com.march.wxcube.debug
 
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 
 /**
  * CreateAt : 2018/6/17
@@ -11,5 +11,5 @@ import com.march.wxcube.model.WeexPage
 internal class DebugWeexPagesResp {
     var global = false // 全局调试
     var autoJumpPage: String = ""
-    var datas: List<WeexPage> = listOf()
+    var datas: List<WxPage> = listOf()
 }

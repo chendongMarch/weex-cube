@@ -14,11 +14,10 @@ import com.march.wxcube.common.report
 import com.march.wxcube.debug.WeexPageDebugger
 import com.march.wxcube.lifecycle.WeexLifeCycle
 import com.march.wxcube.manager.ManagerRegistry
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 import com.march.wxcube.performer.IPerformer
 import com.taobao.weex.IWXRenderListener
 import com.taobao.weex.WXSDKInstance
-import java.util.*
 
 /**
  * CreateAt : 2018/3/27
@@ -47,11 +46,11 @@ class WeexDelegate : WeexLifeCycle {
     // 容器
     internal lateinit var mContainerView: ViewGroup // 容器 View
     // loading
-    private val mLoadingHandler by lazy { Weex.mWeexInjector.getLoading() }
+    private val mLoadingHandler by lazy { Weex.mWxPageAdapter.getLoading() }
     // 当前加载的页面
-    private var mCurPage: WeexPage? = null
+    private var mCurPage: WxPage? = null
     // 当前承载的页面
-    internal lateinit var mWeexPage: WeexPage
+    internal lateinit var mWeexPage: WxPage
     private var mWeexDebugger: WeexPageDebugger? = null
     // 附加数据和操作
     private val mPerformers by lazy { mutableMapOf<String, IPerformer>() }
@@ -62,7 +61,7 @@ class WeexDelegate : WeexLifeCycle {
      */
     constructor(fragment: Fragment) {
         mHost = fragment
-        mWeexPage = fragment.arguments?.getParcelable(WeexPage.KEY_PAGE) ?: return
+        mWeexPage = fragment.arguments?.getParcelable(WxPage.KEY_PAGE) ?: return
         val act = fragment.activity ?: return
         init(act)
     }
@@ -72,7 +71,7 @@ class WeexDelegate : WeexLifeCycle {
      */
     constructor(activity: Activity) {
         mHost = activity
-        mWeexPage = activity.intent.getParcelableExtra(WeexPage.KEY_PAGE)
+        mWeexPage = activity.intent.getParcelableExtra(WxPage.KEY_PAGE)
         init(activity)
         initContainerView(activity.findViewById(android.R.id.content))
     }
@@ -221,7 +220,7 @@ class WeexDelegate : WeexLifeCycle {
     /**
      * 渲染页面
      */
-    private fun render(page: WeexPage) {
+    private fun render(page: WxPage) {
         preRender()
         mCurPage = page
         mWeexRender.render(page, parseRenderOptions())

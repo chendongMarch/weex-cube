@@ -1,6 +1,6 @@
 package com.march.wxcube.update
 
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 
 /**
  * CreateAt : 2018/6/17
@@ -8,10 +8,8 @@ import com.march.wxcube.model.WeexPage
  *
  * @author chendong
  */
-class WeexPagesResp {
-
+class WxPagesResp {
     var total: Int? = 0
     var indexPage: String = ""
-    var datas: List<WeexPage> = listOf()
-
+    var datas: MutableList<WxPage> = mutableListOf()
 }

@@ -1,6 +1,6 @@
 package com.march.wxcube.manager
 
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 import com.march.wxcube.ui.WeexDelegate
 import com.taobao.weex.WXSDKInstance
 
@@ -27,13 +27,13 @@ class ManagerRegistry : IManager {
 
     private val mManagerMap by lazy { mutableMapOf<String, IManager>() }
 
-    override fun onWxInstInit(weexPage: WeexPage?, instance: WXSDKInstance?, weexDelegate: WeexDelegate?) {
+    override fun onWxInstInit(weexPage: WxPage?, instance: WXSDKInstance?, weexDelegate: WeexDelegate?) {
         for (mutableEntry in mManagerMap) {
             mutableEntry.value.onWxInstInit(weexPage, instance, weexDelegate)
         }
     }
 
-    override fun onWxInstRelease(weexPage: WeexPage?, instance: WXSDKInstance?) {
+    override fun onWxInstRelease(weexPage: WxPage?, instance: WXSDKInstance?) {
         for (mutableEntry in mManagerMap) {
             mutableEntry.value.onWxInstRelease(weexPage, instance)
         }

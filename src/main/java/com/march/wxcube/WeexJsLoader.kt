@@ -7,7 +7,7 @@ import com.march.wxcube.common.DiskLruCache
 import com.march.wxcube.common.memory
 import com.march.wxcube.common.report
 import com.march.wxcube.manager.ManagerRegistry
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 import com.march.wxcube.update.OnWeexUpdateListener
 import com.taobao.weex.utils.WXFileUtils
 import java.io.File
@@ -43,7 +43,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, 
     // 文件缓存
     private val mJsFileCache = JsFileCache(Weex.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
 
-    override fun onWeexCfgUpdate(context: Context, weexPages: List<WeexPage>?) {
+    override fun onWeexCfgUpdate(context: Context, weexPages: List<WxPage>?) {
         if (mJsPrepareStrategy == JsPrepareStrategy.PREPARE_ALL) {
             weexPages?.forEach { getTemplateAsync(context, it) {} }
         }
@@ -53,7 +53,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, 
      * 异步获取模板
      * 使用默认的加载和缓存策略
      */
-    fun getTemplateAsync(context: Context, page: WeexPage?, consumer: (String?) -> Unit) {
+    fun getTemplateAsync(context: Context, page: WxPage?, consumer: (String?) -> Unit) {
         getTemplateAsync(context, mJsLoadStrategy, mJsCacheStrategy, page, consumer)
     }
 
@@ -65,7 +65,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, 
      * @param page 页面数据
      * @param consumer 处理结果的函数
      */
-    fun getTemplateAsync(context: Context, loadStrategy: Int, cacheStrategy: Int, page: WeexPage?, consumer: (String?) -> Unit) {
+    fun getTemplateAsync(context: Context, loadStrategy: Int, cacheStrategy: Int, page: WxPage?, consumer: (String?) -> Unit) {
         if (page == null) {
             return
         }
@@ -99,7 +99,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, 
         }
         mService.execute {
             val template = runnable.invoke()
-            Weex.mWeexInjector.onLog(TAG, "JS加载${page.pageName} cache[${mJsMemoryCache.size()}] $fromWhere")
+            Weex.mWxReportAdapter.log(TAG, "JS加载${page.pageName} cache[${mJsMemoryCache.size()}] $fromWhere")
             publishFunc(template)
         }
     }
@@ -110,7 +110,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, 
         }
     }
 
-    private fun downloadJs(page: WeexPage): String? {
+    private fun downloadJs(page: WxPage): String? {
         val url = page.remoteJs ?: return null
         val http = ManagerRegistry.REQ
         val makeJsResUrl = ManagerRegistry.HOST.makeJsResUrl(url)
@@ -124,7 +124,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, 
     }
 
     // 加载函数
-    private fun makeJsLoader(type: Int, context: Context, page: WeexPage): () -> String? {
+    private fun makeJsLoader(type: Int, context: Context, page: WxPage): () -> String? {
         return when (type) {
             JsLoadStrategy.CACHE_FIRST -> {
                 {

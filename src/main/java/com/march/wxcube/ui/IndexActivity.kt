@@ -37,8 +37,8 @@ class IndexActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Weex.mWeexInjector.onPageCreated(this, Weex.PAGE_INDEX)
-        Weex.mWeexInjector.getLoading().setIndexContent(this)
+        Weex.mWxPageAdapter.onPageCreated(this, Weex.PAGE_INDEX)
+        Weex.mWxPageAdapter.getLoading().setIndexContent(this)
         checkPermissionAndLaunch()
     }
 

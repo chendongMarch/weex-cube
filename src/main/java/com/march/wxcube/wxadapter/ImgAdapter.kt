@@ -1,8 +1,13 @@
 package com.march.wxcube.wxadapter
 
+import android.graphics.Bitmap
 import android.widget.ImageView
 import com.bumptech.glide.annotation.GlideModule
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.module.AppGlideModule
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.march.wxcube.manager.ManagerRegistry
 import com.taobao.weex.adapter.IWXImgLoaderAdapter
 import com.taobao.weex.common.WXImageStrategy
@@ -22,16 +27,32 @@ class ImgAdapter : IWXImgLoaderAdapter {
     override fun setImage(url: String?, view: ImageView?, quality: WXImageQuality?, strategy: WXImageStrategy?) {
         if (view != null && url != null) {
             val safeUrl = ManagerRegistry.HOST.makeImgUrl(url)
+            var request = GlideApp.with(view.context)
+                    .asBitmap()
+                    .load(safeUrl)
+                    .listener(RequestListenerImpl(url, view, strategy))
             if (view.measuredWidth > 0 && view.measuredHeight > 0) {
-                GlideApp.with(view.context)
-                        .load(safeUrl)
-                        .override(view.measuredWidth, view.measuredHeight)
-                        .into(view)
-            } else {
-                GlideApp.with(view.context)
-                        .load(safeUrl)
-                        .into(view)
+                request = request.override(view.measuredWidth, view.measuredHeight)
             }
+            request.into(view)
+        } else {
+            strategy?.imageListener?.onImageFinish(url, view, false, null)
+        }
+    }
+
+    class RequestListenerImpl(
+            private val url: String?,
+            private val view: ImageView?,
+            private val strategy: WXImageStrategy?) : RequestListener<Bitmap> {
+        override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Bitmap>?, isFirstResource: Boolean): Boolean {
+            strategy?.imageListener?.onImageFinish(url, view, false, null)
+            return false
+        }
+
+        override fun onResourceReady(resource: Bitmap?, model: Any?, target: Target<Bitmap>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+            view?.setImageBitmap(resource)
+            strategy?.imageListener?.onImageFinish(url, view, true, null)
+            return false
         }
     }
 }

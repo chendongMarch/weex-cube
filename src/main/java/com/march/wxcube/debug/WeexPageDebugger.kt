@@ -10,7 +10,6 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.Toast
 import com.march.common.impl.AnimatorListener
 import com.march.common.utils.DimensUtils
 import com.march.common.utils.RegexUtils
@@ -22,7 +21,7 @@ import com.march.wxcube.R
 import com.march.wxcube.Weex
 import com.march.wxcube.lifecycle.WeexLifeCycle
 import com.march.wxcube.manager.ManagerRegistry
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 import com.march.wxcube.ui.WeexDelegate
 import com.taobao.weex.IWXRenderListener
 import com.taobao.weex.WXSDKInstance
@@ -47,7 +46,7 @@ class WeexPageDebugger : IWXRenderListener, WeexLifeCycle {
 
     private lateinit var mActivity: Activity
     private var mDelegate: WeexDelegate? = null
-    internal var mWeexPage: WeexPage? = null
+    internal var mWeexPage: WxPage? = null
 
     private var mIsDestroy = false
     private var mView: View? = null
@@ -115,7 +114,7 @@ class WeexPageDebugger : IWXRenderListener, WeexLifeCycle {
                         mRefreshCount = 0
                     } else {
                         mRefreshCount++
-                        Weex.mWeexInjector.onLog("startRefresh", "获取到但是没有改变，不作渲染")
+                        Weex.mWxReportAdapter.log("startRefresh", "获取到但是没有改变，不作渲染")
                     }
                 }
                 mHandler.post {
@@ -160,7 +159,7 @@ class WeexPageDebugger : IWXRenderListener, WeexLifeCycle {
         super.onPause()
         if (mDebugConfig.isRefreshRemoteJs) {
             stopRefresh()
-            ToastUtils.show("页面${mWeexPage?.pageName}进入后台，暂停轮询")
+            // ToastUtils.show("页面${mWeexPage?.pageName}进入后台，暂停轮询")
         }
     }
 
@@ -168,7 +167,7 @@ class WeexPageDebugger : IWXRenderListener, WeexLifeCycle {
         super.onResume()
         if (mDebugConfig.isRefreshRemoteJs) {
             startRefresh(false)
-            ToastUtils.show("页面${mWeexPage?.pageName}进入后台，开始轮询")
+            // ToastUtils.show("页面${mWeexPage?.pageName}进入后台，开始轮询")
         }
     }
 

@@ -1,6 +1,6 @@
 package com.march.wxcube.manager
 
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 import com.march.wxcube.ui.WeexDelegate
 import com.taobao.weex.WXSDKInstance
 import java.lang.ref.WeakReference
@@ -19,7 +19,7 @@ class WeexInstManager : IManager {
     private val mWeexDelegateMap by lazy { mutableMapOf<String, WeakReference<WeexDelegate>>() }
     private val mWeexActivityMap by lazy { mutableMapOf<String, WeakReference<WeexDelegate>>() }
 
-    override fun onWxInstInit(weexPage: WeexPage?, instance: WXSDKInstance?, weexDelegate: WeexDelegate?) {
+    override fun onWxInstInit(weexPage: WxPage?, instance: WXSDKInstance?, weexDelegate: WeexDelegate?) {
         super.onWxInstInit(weexPage, instance, weexDelegate)
         if (instance == null && instance?.instanceId == null || weexDelegate == null) {
             return
@@ -27,7 +27,7 @@ class WeexInstManager : IManager {
         mWeexDelegateMap[instance.instanceId] = WeakReference(weexDelegate)
     }
 
-    override fun onWxInstRelease(weexPage: WeexPage?, instance: WXSDKInstance?) {
+    override fun onWxInstRelease(weexPage: WxPage?, instance: WXSDKInstance?) {
         if (instance == null && instance?.instanceId == null) {
             return
         }

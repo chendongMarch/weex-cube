@@ -1,7 +1,7 @@
 package com.march.wxcube.update
 
 import android.content.Context
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 
 /**
  * CreateAt : 2018/6/17
@@ -10,5 +10,5 @@ import com.march.wxcube.model.WeexPage
  * @author chendong
  */
 internal interface OnWeexUpdateListener {
-    fun onWeexCfgUpdate(context: Context, weexPages: List<WeexPage>?)
+    fun onWeexCfgUpdate(context: Context, weexPages: List<WxPage>?)
 }

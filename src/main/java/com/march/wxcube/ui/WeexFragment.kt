@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.march.wxcube.R
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 
 /**
  * CreateAt : 2018/3/19
@@ -20,9 +20,9 @@ class WeexFragment : Fragment() {
 
     companion object {
 
-        fun newInstance(bundle: WeexPage): WeexFragment {
+        fun newInstance(bundle: WxPage): WeexFragment {
             val args = Bundle()
-            args.putParcelable(WeexPage.KEY_PAGE, bundle)
+            args.putParcelable(WxPage.KEY_PAGE, bundle)
             val fragment = WeexFragment()
             fragment.arguments = args
             return fragment

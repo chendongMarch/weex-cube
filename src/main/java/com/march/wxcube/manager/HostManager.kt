@@ -1,7 +1,7 @@
 package com.march.wxcube.manager
 
 import com.march.wxcube.Weex
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 import com.taobao.weex.WXSDKInstance
 
 /**
@@ -28,7 +28,7 @@ class HostManager : IManager {
     var mJsResHost: String = ""
     var mWebHost: String = ""
 
-    override fun onWxInstRelease(weexPage: WeexPage?, instance: WXSDKInstance?) {
+    override fun onWxInstRelease(weexPage: WxPage?, instance: WXSDKInstance?) {
 
     }
 

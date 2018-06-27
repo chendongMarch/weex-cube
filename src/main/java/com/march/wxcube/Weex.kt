@@ -8,11 +8,12 @@ import com.march.common.adapter.JsonParser
 import com.march.common.model.WeakContext
 import com.march.common.utils.FileUtils
 import com.march.webkit.WebKit
+import com.march.wxcube.adapter.*
 import com.march.wxcube.common.JsonParserImpl
 import com.march.wxcube.common.sdFile
 import com.march.wxcube.debug.WxDebugActivityLifeCycle
 import com.march.wxcube.manager.*
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 import com.march.wxcube.module.OneModule
 import com.march.wxcube.router.WeexRouter
 import com.march.wxcube.update.WeexUpdater
@@ -45,12 +46,16 @@ object Weex {
     val mWeexRouter by lazy { WeexRouter() } // 路由页面管理
     internal val mWeexUpdater by lazy { WeexUpdater(mWeexConfig.configUrl) } // weex 页面更新
 
-    var mWeexInjector: WeexInjector = WeexInjector.EMPTY // 外部注入支持
     lateinit var mWeexConfig: WeexConfig
 
-    fun init(config: WeexConfig, injector: WeexInjector) {
+    var mWxModelAdapter: IWxModelAdapter = DefaultWxModelAdapter()
+    var mWxDebugAdapter: IWxDebugAdapter = DefaultWxDebugAdapter()
+    var mWxInitAdapter: IWxInitAdapter = DefaultWxInitAdapter()
+    var mWxPageAdapter: IWxPageAdapter = DefaultWxPageAdapter()
+    var mWxReportAdapter: IWxReportAdapter = DefaultWxReportAdapter()
+
+    fun init(config: WeexConfig) {
         mWeexConfig = config.prepare()
-        mWeexInjector = injector
         val ctx = config.ctx
 
         ctx.registerActivityLifecycleCallbacks(WxDebugActivityLifeCycle())
@@ -75,12 +80,12 @@ object Weex {
                 // .setWebSocketAdapterFactory(WebSocketAdapter.createFactory())
                 // 图片加载
                 .setImgAdapter(ImgAdapter())
-        injector.onWxSdkEngineInit(builder)
+        mWxInitAdapter.onWxSdkEngineInit(builder)
         WXSDKEngine.initialize(ctx, builder.build())
         registerModule()
         registerComponent()
         registerBindingX()
-        injector.onWxModuleCompRegister()
+        mWxInitAdapter.onWxModuleCompRegister()
 
         ManagerRegistry.getInst().register(DataManager.instance)
         ManagerRegistry.getInst().register(EventManager.instance)
@@ -94,7 +99,7 @@ object Weex {
 
         Common.init(ctx, object : CommonInjector {
             override fun getConfigClass(): Class<*> {
-                return mWeexInjector.getConfigClass()
+                return mWxInitAdapter.getConfigClass()
             }
 
             override fun getJsonParser(): JsonParser {
@@ -155,7 +160,7 @@ object Weex {
         }
     }
 
-    fun onWeexConfigUpdate(context: Context, pages: List<WeexPage>?) {
+    fun onWeexConfigUpdate(context: Context, pages: List<WxPage>?) {
         mWeexRouter.onWeexCfgUpdate(context, pages)
         mWeexJsLoader.onWeexCfgUpdate(context, pages)
     }

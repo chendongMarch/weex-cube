@@ -1,7 +1,6 @@
 package com.march.wxcube.update
 
 import android.content.Context
-import com.alibaba.fastjson.JSON
 import com.march.common.Common
 import com.march.common.utils.StreamUtils
 import com.march.wxcube.Weex
@@ -10,7 +9,7 @@ import com.march.wxcube.common.report
 import com.march.wxcube.http.HttpListener
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.manager.RequestManager
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 import com.taobao.weex.common.WXResponse
 import java.util.concurrent.Executors
 
@@ -68,7 +67,7 @@ internal class WeexUpdater(private var url: String) {
         if (json.isBlank())
             return
         try {
-            val weexPagesResp = JSON.parseObject(json, WeexPagesResp::class.java)
+            val weexPagesResp = Weex.mWxModelAdapter.convert(json)
             val weexPages = weexPagesResp?.datas
             weexPages?.let {
                 // 简化和过滤
@@ -91,12 +90,12 @@ internal class WeexUpdater(private var url: String) {
 
     // 1. 相同页面只保留 jsVersion 较高的一个
     // 2. 页面数据支持的 appVersion 小于等于当前 app
-    private fun simplifyPages(pages: List<WeexPage>, predicate: (WeexPage) -> Boolean = { true }): List<WeexPage> {
+    private fun simplifyPages(pages: List<WxPage>, predicate: (WxPage) -> Boolean = { true }): List<WxPage> {
         val curVersionCodes = getVersionCodes(Common.BuildConfig.VERSION_NAME)
         if (curVersionCodes.size != 3) {
             return pages
         }
-        val mutablePages = mutableListOf<WeexPage>()
+        val mutablePages = mutableListOf<WxPage>()
         // 过滤有效的配置，外部传入的规则，版本号为3位，当前版本要>=配置的版本
         pages.filterTo(mutablePages) {
             // 外部传入的过滤
@@ -109,11 +108,11 @@ internal class WeexUpdater(private var url: String) {
                     && curVersionCodes[1] >= appVersionCodes[1]
                     && curVersionCodes[2] >= appVersionCodes[2]
         }
-        val pageNameWeexPageMap = mutableMapOf<String?, WeexPage>()
+        val pageNameWeexPageMap = mutableMapOf<String?, WxPage>()
         // 每个页面只保留一个配置
         for (page in mutablePages) {
             val pageName = page.pageName ?: continue
-            val value: WeexPage? = pageNameWeexPageMap[pageName]
+            val value: WxPage? = pageNameWeexPageMap[pageName]
             if (value == null) {
                 // 新页面
                 pageNameWeexPageMap[pageName] = page

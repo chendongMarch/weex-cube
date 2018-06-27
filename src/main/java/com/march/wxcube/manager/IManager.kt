@@ -1,6 +1,6 @@
 package com.march.wxcube.manager
 
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 import com.march.wxcube.ui.WeexDelegate
 import com.taobao.weex.WXSDKInstance
 
@@ -11,8 +11,8 @@ import com.taobao.weex.WXSDKInstance
  * @author chendong
  */
 interface IManager {
-    fun onWxInstRelease(weexPage: WeexPage?, instance: WXSDKInstance?)
-    fun onWxInstInit(weexPage: WeexPage?, instance: WXSDKInstance?, weexDelegate: WeexDelegate?) {}
+    fun onWxInstRelease(weexPage: WxPage?, instance: WXSDKInstance?)
+    fun onWxInstInit(weexPage: WxPage?, instance: WXSDKInstance?, weexDelegate: WeexDelegate?) {}
 }
 
 

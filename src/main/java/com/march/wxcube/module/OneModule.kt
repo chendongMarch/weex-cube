@@ -32,7 +32,7 @@ class OneModule : WXModule() {
                 StatusBarDispatcher(),
                 PageDispatcher(this),
                 ImageDispatcher(),
-                *Weex.mWeexInjector.getModuleDispatchers()
+                *Weex.mWxInitAdapter.getModuleDispatchers()
         )
     }
 

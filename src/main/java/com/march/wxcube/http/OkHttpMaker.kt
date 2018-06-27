@@ -33,7 +33,7 @@ internal object OkHttpMaker {
         builder.addInterceptor(LogInterceptor())
         // token校验，返回 403 时
         // builder.authenticator(new TokenAuthenticator());
-        Weex.mWeexInjector.onInitOkHttpClient(builder)
+        Weex.mWxInitAdapter.onInitOkHttpClient(builder)
         return builder.build()
     }
 

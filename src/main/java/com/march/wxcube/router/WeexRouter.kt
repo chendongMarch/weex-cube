@@ -10,7 +10,7 @@ import com.march.wxcube.Weex
 import com.march.wxcube.common.report
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
-import com.march.wxcube.model.WeexPage
+import com.march.wxcube.model.WxPage
 import com.march.wxcube.ui.WebActivity
 import com.march.wxcube.ui.WeexDialogFragment
 import com.march.wxcube.update.OnWeexUpdateListener
@@ -25,8 +25,8 @@ class WeexRouter : OnWeexUpdateListener {
 
 
     // url-page 的 map，url 需要是不带有协议头的、没有参数的 url
-    internal var mWeexPageMap = mutableMapOf<UrlKey, WeexPage>()
-    internal var mInterceptor: ((String) -> WeexPage?)? = null
+    internal var mWeexPageMap = mutableMapOf<UrlKey, WxPage>()
+    internal var mInterceptor: ((String) -> WxPage?)? = null
     internal var mRouterReadyCallback: (() -> Unit)? = null
 
     /**
@@ -50,7 +50,7 @@ class WeexRouter : OnWeexUpdateListener {
     fun openUrl(ctx: Context, url: String): Pair<Boolean, String> {
         val page = findPage(url) ?: return openWeb(ctx, url)
         val intent = Intent()
-        intent.putExtra(WeexPage.KEY_PAGE, page)
+        intent.putExtra(WxPage.KEY_PAGE, page)
         intent.data = Uri.parse("cube://${Common.BuildConfig.APPLICATION_ID}.weex/weex")
         return start(ctx, intent)
     }
@@ -58,9 +58,9 @@ class WeexRouter : OnWeexUpdateListener {
     /**
      * 打开 weex 页面
      */
-    fun openWeexPage(ctx: Context, page: WeexPage): Pair<Boolean, String> {
+    fun openWeexPage(ctx: Context, page: WxPage): Pair<Boolean, String> {
         val intent = Intent()
-        intent.putExtra(WeexPage.KEY_PAGE, page)
+        intent.putExtra(WxPage.KEY_PAGE, page)
         intent.data = Uri.parse("cube://${Common.BuildConfig.APPLICATION_ID}.weex/weex")
         return start(ctx, intent)
     }
@@ -100,7 +100,7 @@ class WeexRouter : OnWeexUpdateListener {
     /**
      * 根据 web url 查找指定页面
      */
-    fun findPage(url: String): WeexPage? {
+    fun findPage(url: String): WxPage? {
         if (url.isBlank()) {
             return null
         }
@@ -123,7 +123,7 @@ class WeexRouter : OnWeexUpdateListener {
     }
 
 
-    override fun onWeexCfgUpdate(context: Context, weexPages: List<WeexPage>?) {
+    override fun onWeexCfgUpdate(context: Context, weexPages: List<WxPage>?) {
         mWeexPageMap.isNotEmpty().let { mWeexPageMap.clear() }
         weexPages?.forEach {
             it.webUrl?.let { url ->

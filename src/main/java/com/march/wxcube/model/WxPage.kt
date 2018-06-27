@@ -12,25 +12,23 @@ import com.march.wxcube.common.newLine
  *
  * @author chendong
  */
-class WeexPage() : Parcelable {
-
+class WxPage() : Parcelable {
 
     var pageName: String? = null // 页面名称
 
-    var jsVersion: String? = null // weex 构建版本
-
     var appVersion: String? = null // app 最小支持版本
+
+    var jsVersion: String? = null // weex 构建版本出来的 js 版本 pageName + jsVersion 唯一标记一个资源
 
     var webUrl: String? = null  // 降级 web，也是页面的唯一标记
 
-    var remoteJs: String? = null // 远程 js
+    var remoteJs: String? = null // 远程 js 资源链接
 
     var md5: String? = null // 远端生成 md5 用来校验下载文件完整性
 
     var comment: String? = null // 对该页面的注释，生产环境不返回
 
     var indexPage: Boolean = false // 该页面上是否被标记为首页
-
 
     /*********************⬆️以上是数据结构字段⬇️下面是临时生成字段************************/
 
@@ -49,8 +47,8 @@ class WeexPage() : Parcelable {
                 && !TextUtils.isEmpty(webUrl)
                 && !TextUtils.isEmpty(remoteJs))
 
-    fun make(openUrl: String): WeexPage {
-        val page = WeexPage()
+    fun make(openUrl: String): WxPage {
+        val page = WxPage()
         page.pageName = this.pageName
         page.remoteJs = this.remoteJs
         page.appVersion = this.appVersion
@@ -105,9 +103,9 @@ class WeexPage() : Parcelable {
         const val KEY_PAGE = "KEY_PAGE"
 
         @JvmField
-        val CREATOR: Parcelable.Creator<WeexPage> = object : Parcelable.Creator<WeexPage> {
-            override fun createFromParcel(source: Parcel): WeexPage = WeexPage(source)
-            override fun newArray(size: Int): Array<WeexPage?> = arrayOfNulls(size)
+        val CREATOR: Parcelable.Creator<WxPage> = object : Parcelable.Creator<WxPage> {
+            override fun createFromParcel(source: Parcel): WxPage = WxPage(source)
+            override fun newArray(size: Int): Array<WxPage?> = arrayOfNulls(size)
         }
     }
 }
