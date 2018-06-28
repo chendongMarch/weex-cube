@@ -1,6 +1,6 @@
 package com.march.wxcube.performer
 
-import com.march.wxcube.lifecycle.WeexLifeCycle
+import com.march.wxcube.lifecycle.WxLifeCycle
 
 /**
  * CreateAt : 2018/6/5
@@ -8,6 +8,6 @@ import com.march.wxcube.lifecycle.WeexLifeCycle
  *
  * @author chendong
  */
-interface IPerformer : WeexLifeCycle {
+interface IPerformer : WxLifeCycle {
 
 }

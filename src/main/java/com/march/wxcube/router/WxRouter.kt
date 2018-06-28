@@ -6,14 +6,14 @@ import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import com.march.common.Common
 import com.march.webkit.WebKit
-import com.march.wxcube.Weex
+import com.march.wxcube.CubeWx
 import com.march.wxcube.common.report
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.WxPage
 import com.march.wxcube.ui.WebActivity
-import com.march.wxcube.ui.WeexDialogFragment
-import com.march.wxcube.update.OnWeexUpdateListener
+import com.march.wxcube.ui.WxDialogFragment
+import com.march.wxcube.update.OnWxUpdateListener
 
 /**
  * CreateAt : 2018/3/27
@@ -21,13 +21,16 @@ import com.march.wxcube.update.OnWeexUpdateListener
  * url 必须有一级路径，也就是必须有 /
  * @author chendong
  */
-class WeexRouter : OnWeexUpdateListener {
+typealias Interceptor = (String) -> WxPage?
 
+typealias Callback = () -> Unit
+
+class WxRouter : OnWxUpdateListener {
 
     // url-page 的 map，url 需要是不带有协议头的、没有参数的 url
     internal var mWeexPageMap = mutableMapOf<UrlKey, WxPage>()
-    internal var mInterceptor: ((String) -> WxPage?)? = null
-    internal var mRouterReadyCallback: (() -> Unit)? = null
+    internal var mInterceptor: Interceptor? = null
+    internal var mRouterReadyCallback: Callback? = null
 
     /**
      * 开启页面
@@ -90,9 +93,9 @@ class WeexRouter : OnWeexUpdateListener {
      */
     fun openDialog(activity: AppCompatActivity, url: String, config: DialogConfig?): Pair<Boolean, String> {
         val nonNullConfig = config ?: DialogConfig()
-        val page = Weex.mWeexRouter.findPage(url)
+        val page = CubeWx.mWxRouter.findPage(url)
                 ?: return false to "WeexRouter#openDialog can not find page"
-        val fragment = WeexDialogFragment.newInstance(page, nonNullConfig)
+        val fragment = WxDialogFragment.newInstance(page, nonNullConfig)
         fragment.show(activity.supportFragmentManager, "dialog")
         return true to "WeexRouter#openDialog success"
     }
@@ -104,16 +107,14 @@ class WeexRouter : OnWeexUpdateListener {
         if (url.isBlank()) {
             return null
         }
-        val result = if (url.indexOf("/") == -1) {
-            // 通过 pageName 查找
-            mInterceptor?.invoke(url) ?: mWeexPageMap.values.firstOrNull {
-                it.pageName == url
-            }
+        // 总是 interceptor 优先查找
+        val result = if (!url.contains("/")) {
+            // 如果不包含 /，不是 url 路径，通过 pageName 查找，
+            mInterceptor?.invoke(url) ?: mWeexPageMap.values.firstOrNull { it.pageName == url }
         } else {
             // 通过 url 查找
             val validUrl = ManagerRegistry.HOST.makeWebUrl(url)
             mInterceptor?.invoke(validUrl) ?: mWeexPageMap[UrlKey.fromUrl(validUrl)]
-
         }
         if (result == null) {
             report("open Url, can not find page, url => $url")
@@ -126,7 +127,7 @@ class WeexRouter : OnWeexUpdateListener {
     override fun onWeexCfgUpdate(context: Context, weexPages: List<WxPage>?) {
         mWeexPageMap.isNotEmpty().let { mWeexPageMap.clear() }
         weexPages?.forEach {
-            it.webUrl?.let { url ->
+            it.h5Url?.let { url ->
                 mWeexPageMap[UrlKey.fromUrl(url)] = it
             }
         }
@@ -140,7 +141,7 @@ class WeexRouter : OnWeexUpdateListener {
         }
         val page = mWeexPageMap.values.firstOrNull { it.indexPage }
         if (page?.isValid == true) {
-            return Weex.mWeexRouter.openUrl(context, page.webUrl ?: "").first
+            return CubeWx.mWxRouter.openUrl(context, page.h5Url ?: "").first
         }
         return false
     }

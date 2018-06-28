@@ -8,11 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import com.march.common.utils.LgUtils
 import com.march.common.utils.immersion.StatusBarUtils
-import com.march.wxcube.Weex
-import com.march.wxcube.common.CubeWxUtils
+import com.march.wxcube.CubeWx
+import com.march.wxcube.common.WxUtils
 import com.march.wxcube.common.report
-import com.march.wxcube.debug.WeexPageDebugger
-import com.march.wxcube.lifecycle.WeexLifeCycle
+import com.march.wxcube.debug.WxPageDebugger
+import com.march.wxcube.lifecycle.WxLifeCycle
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.WxPage
 import com.march.wxcube.performer.IPerformer
@@ -25,7 +25,7 @@ import com.taobao.weex.WXSDKInstance
  *
  * @author chendong
  */
-class WeexDelegate : WeexLifeCycle {
+class WxDelegate : WxLifeCycle {
 
     companion object {
         const val EXTRA = "extra"
@@ -39,22 +39,22 @@ class WeexDelegate : WeexLifeCycle {
     // weex 实例
     private lateinit var mWeexInst: WXSDKInstance
     // 渲染
-    private lateinit var mWeexRender: WeexRender
+    private lateinit var mWeexRender: WxRender
     // 宿主
     internal lateinit var mActivity: Activity
     private val mHost: Any
     // 容器
     internal lateinit var mContainerView: ViewGroup // 容器 View
     // loading
-    private val mLoadingHandler by lazy { Weex.mWxPageAdapter.getLoading() }
+    private val mLoadingHandler by lazy { CubeWx.mWxPageAdapter.getLoading() }
     // 当前加载的页面
     private var mCurPage: WxPage? = null
     // 当前承载的页面
     internal lateinit var mWeexPage: WxPage
-    private var mWeexDebugger: WeexPageDebugger? = null
+    private var mWeexDebugger: WxPageDebugger? = null
     // 附加数据和操作
     private val mPerformers by lazy { mutableMapOf<String, IPerformer>() }
-    private val mLifeCallbacks by lazy { mutableListOf<WeexLifeCycle>() }
+    private val mLifeCallbacks by lazy { mutableListOf<WxLifeCycle>() }
 
     /**
      * 为 Fragment 提供构造方法
@@ -94,11 +94,11 @@ class WeexDelegate : WeexLifeCycle {
         mLifeCallbacks.add(performer)
     }
 
-    fun addLifeCallbacks(callback: WeexLifeCycle) {
+    fun addLifeCallbacks(callback: WxLifeCycle) {
         mLifeCallbacks.add(callback)
     }
 
-    fun setDebugger(weexDebugger: WeexPageDebugger) {
+    fun setDebugger(weexDebugger: WxPageDebugger) {
         mWeexDebugger = weexDebugger
     }
 
@@ -128,16 +128,16 @@ class WeexDelegate : WeexLifeCycle {
      */
     private fun createWxInst() {
         mWeexInst = WXSDKInstance(mActivity)
-        mWeexRender = WeexRender(mActivity, mWeexInst, RenderListener())
+        mWeexRender = WxRender(mActivity, mWeexInst, RenderListener())
         ManagerRegistry.getInst().onWxInstInit(mWeexPage, mWeexInst, this)
     }
 
 
     fun close() {
         when (mHost) {
-            is WeexActivity -> mHost.finish()
-            is WeexFragment -> mHost.activity?.finish()
-            is WeexDialogFragment -> mHost.dismiss()
+            is WxActivity       -> mHost.finish()
+            is WxFragment       -> mHost.activity?.finish()
+            is WxDialogFragment -> mHost.dismiss()
         }
     }
 
@@ -150,7 +150,7 @@ class WeexDelegate : WeexLifeCycle {
         }
 
         override fun onViewCreated(instance: WXSDKInstance?, view: View?) {
-            this@WeexDelegate.onViewCreated(view)
+            this@WxDelegate.onViewCreated(view)
         }
 
         override fun onException(instance: WXSDKInstance?, errCode: String?, msg: String?) {
@@ -191,12 +191,12 @@ class WeexDelegate : WeexLifeCycle {
         if(mRenderOpts.isNotEmpty()){
             return mRenderOpts
         }
-        val uri = Uri.parse(mWeexPage.webUrl)
+        val uri = Uri.parse(mWeexPage.h5Url)
         uri.queryParameterNames.forEach { mRenderOpts[it] = uri.getQueryParameter(it) }
         mRenderOpts[INSTANCE_ID] = mWeexInst.instanceId
-        mRenderOpts[TOP_SAFEAREA_HEIGHT] = CubeWxUtils.getWxPxByRealPx(StatusBarUtils.getStatusBarHeight(mActivity))
+        mRenderOpts[TOP_SAFEAREA_HEIGHT] = WxUtils.getWxPxByRealPx(StatusBarUtils.getStatusBarHeight(mActivity))
         mRenderOpts[BOTTOM_SAFEAREA_HEIGHT] = 0
-        mWeexPage.webUrl?.let {
+        mWeexPage.h5Url?.let {
             val data = ManagerRegistry.DATA.getData(it)
             if (data != null) {
                 mRenderOpts[EXTRA] = data
@@ -247,7 +247,7 @@ class WeexDelegate : WeexLifeCycle {
      * 渲染 not found 页面
      */
     fun renderNotFound() {
-        val errPage = Weex.mWeexRouter.findPage("/status/not-found-weex") ?: return
+        val errPage = CubeWx.mWxRouter.findPage("/status/not-found-weex") ?: return
         render(errPage)
     }
 

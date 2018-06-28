@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import com.alibaba.fastjson.JSONObject
-import com.march.wxcube.Weex
+import com.march.wxcube.CubeWx
 import com.march.wxcube.common.toObjEx
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
@@ -80,7 +80,7 @@ class RouterDispatcher : BaseDispatcher() {
 
     private fun openWeb(ctx: Context, params: JSONObject) {
         val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openWeb url is null")
-        val result = Weex.mWeexRouter.openWeb(ctx, webUrl)
+        val result = CubeWx.mWxRouter.openWeb(ctx, webUrl)
         if (!result.first) {
             throw RuntimeException("Router#openWeb Error ${result.second}")
         }
@@ -94,7 +94,7 @@ class RouterDispatcher : BaseDispatcher() {
         } else {
             DialogConfig()
         }
-        val result = Weex.mWeexRouter.openDialog(act, webUrl, config)
+        val result = CubeWx.mWxRouter.openDialog(act, webUrl, config)
         if (!result.first) {
             throw RuntimeException("Router#openDialog Error ${result.second}")
         }
@@ -102,7 +102,7 @@ class RouterDispatcher : BaseDispatcher() {
 
     private fun openBrowser(ctx: Context, params: JSONObject) {
         val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openBrowser url is null")
-        val result = Weex.mWeexRouter.openBrowser(ctx, webUrl)
+        val result = CubeWx.mWxRouter.openBrowser(ctx, webUrl)
         if (!result.first) {
             throw RuntimeException("Router#openBrowser Error ${result.second}")
         }
@@ -110,7 +110,7 @@ class RouterDispatcher : BaseDispatcher() {
 
     private fun openUrl(ctx: Context, params: JSONObject) {
         val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openUrl url is null")
-        val result = Weex.mWeexRouter.openUrl(ctx, webUrl)
+        val result = CubeWx.mWxRouter.openUrl(ctx, webUrl)
         if (!result.first) {
             throw RuntimeException("Router#openUrl Error ${result.second}")
         }

@@ -18,7 +18,7 @@ class DataManager : IManager {
     private val mCacheExtraData: MutableMap<String, Any> = mutableMapOf()
 
     override fun onWxInstRelease(weexPage: WxPage?, instance: WXSDKInstance?) {
-        mCacheExtraData.remove(weexPage?.webUrl)
+        mCacheExtraData.remove(weexPage?.h5Url)
     }
 
     fun putData(url: String, data: Any) {

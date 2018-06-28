@@ -18,11 +18,11 @@ import com.march.common.view.DragLayout
 import com.march.wxcube.JsCacheStrategy
 import com.march.wxcube.JsLoadStrategy
 import com.march.wxcube.R
-import com.march.wxcube.Weex
-import com.march.wxcube.lifecycle.WeexLifeCycle
+import com.march.wxcube.CubeWx
+import com.march.wxcube.lifecycle.WxLifeCycle
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.WxPage
-import com.march.wxcube.ui.WeexDelegate
+import com.march.wxcube.ui.WxDelegate
 import com.taobao.weex.IWXRenderListener
 import com.taobao.weex.WXSDKInstance
 
@@ -32,7 +32,7 @@ import com.taobao.weex.WXSDKInstance
  *
  * @author chendong
  */
-class WeexPageDebugger : IWXRenderListener, WeexLifeCycle {
+class WxPageDebugger : IWXRenderListener, WxLifeCycle {
 
     companion object {
         const val MAX_REFRESH_COUNT = 30
@@ -45,7 +45,7 @@ class WeexPageDebugger : IWXRenderListener, WeexLifeCycle {
     internal val mDebugConfig by lazy { DebugConfig(false, false, false) }
 
     private lateinit var mActivity: Activity
-    private var mDelegate: WeexDelegate? = null
+    private var mDelegate: WxDelegate? = null
     internal var mWeexPage: WxPage? = null
 
     private var mIsDestroy = false
@@ -98,7 +98,7 @@ class WeexPageDebugger : IWXRenderListener, WeexLifeCycle {
             } else if(mDebugConfig.debugJsInDisk){
                 cacheStrategy = JsCacheStrategy.CACHE_MEMORY_DISK_BOTH
             }
-            Weex.mWeexJsLoader.getTemplateAsync(mActivity,
+            CubeWx.mWxJsLoader.getTemplateAsync(mActivity,
                     JsLoadStrategy.NET_FIRST,cacheStrategy, mWeexPage) {
                 it?.let {
                     if (mDebugMsg.lastTemplate != it) {
@@ -114,7 +114,7 @@ class WeexPageDebugger : IWXRenderListener, WeexLifeCycle {
                         mRefreshCount = 0
                     } else {
                         mRefreshCount++
-                        Weex.mWxReportAdapter.log("startRefresh", "获取到但是没有改变，不作渲染")
+                        CubeWx.mWxReportAdapter.log("startRefresh", "获取到但是没有改变，不作渲染")
                     }
                 }
                 mHandler.post {
@@ -142,7 +142,7 @@ class WeexPageDebugger : IWXRenderListener, WeexLifeCycle {
         mHandler.removeCallbacksAndMessages(null)
     }
 
-    fun onReady(delegate: WeexDelegate) {
+    fun onReady(delegate: WxDelegate) {
         mDelegate = delegate
         mActivity = delegate.mActivity
         mWeexPage = delegate.mWeexPage

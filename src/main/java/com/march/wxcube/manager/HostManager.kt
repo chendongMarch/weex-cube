@@ -1,6 +1,6 @@
 package com.march.wxcube.manager
 
-import com.march.wxcube.Weex
+import com.march.wxcube.CubeWx
 import com.march.wxcube.model.WxPage
 import com.taobao.weex.WXSDKInstance
 
@@ -9,7 +9,7 @@ import com.taobao.weex.WXSDKInstance
  * Describe :
  *   拼接
  *   configUrl http://www.config.test.com/weex-config 就这一个，直接配死
- *   webUrl   /home/test-weex.html 自动添加host、但是不添加schema、加载网页时再添加 schema
+ *   h5Url   /home/test-weex.html 自动添加host、但是不添加schema、加载网页时再添加 schema
  *   openUrl() /home/test-weex.html 自动添加host、但是不添加schema、加载网页时再添加 schema
  *   reqUrl  /list/data  请求的url，发起请求时，添加schema/host
  *   jsUrl /home/test-weex.js 最需要被调试，host 定制
@@ -39,14 +39,14 @@ class HostManager : IManager {
         }
         var mutableUrl = url
         if (mutableUrl.startsWith("//")) {
-            val scheme = if (Weex.mWeexConfig.https) "https" else "http"
+            val scheme = if (CubeWx.mWeexConfig.https) "https" else "http"
             mutableUrl = "$scheme:$mutableUrl"
         } else if (mutableUrl.startsWith("https")) {
-            if (!Weex.mWeexConfig.https) {
+            if (!CubeWx.mWeexConfig.https) {
                 mutableUrl = mutableUrl.replace("https", "http")
             }
         } else if (mutableUrl.startsWith("http")) {
-            if (Weex.mWeexConfig.https) {
+            if (CubeWx.mWeexConfig.https) {
                 mutableUrl = mutableUrl.replace("http", "https")
             }
         }
@@ -72,7 +72,7 @@ class HostManager : IManager {
         return addSchema(mutableUrl)
     }
 
-    // webUrl | openUrl() 使用时需要 / 开头
+    // h5Url | openUrl() 使用时需要 / 开头
     fun makeWebUrl(url: String): String {
         if (url.isBlank()) {
             return url
@@ -86,7 +86,7 @@ class HostManager : IManager {
     }
 
 
-    // webUrl | openUrl() 使用时需要 / 开头
+    // h5Url | openUrl() 使用时需要 / 开头
     fun makeJsResUrl(url: String): String {
         if (url.isBlank()) {
             return url

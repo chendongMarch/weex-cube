@@ -3,7 +3,7 @@ package com.march.wxcube.update
 import android.content.Context
 import com.march.common.Common
 import com.march.common.utils.StreamUtils
-import com.march.wxcube.Weex
+import com.march.wxcube.CubeWx
 import com.march.wxcube.common.DiskLruCache
 import com.march.wxcube.common.report
 import com.march.wxcube.http.HttpListener
@@ -18,10 +18,10 @@ import java.util.concurrent.Executors
  * Describe :
  * @author chendong
  */
-internal class WeexUpdater(private var url: String) {
+class WxUpdater(private var url: String) {
 
     private val mDiskLruCache by lazy {
-        DiskLruCache(Weex.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
+        DiskLruCache(CubeWx.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
     }
     private val mExecutorService by lazy { Executors.newCachedThreadPool() }
 
@@ -67,19 +67,19 @@ internal class WeexUpdater(private var url: String) {
         if (json.isBlank())
             return
         try {
-            val weexPagesResp = Weex.mWxModelAdapter.convert(json)
+            val weexPagesResp = CubeWx.mWxModelAdapter.convert(json)
             val weexPages = weexPagesResp?.datas
             weexPages?.let {
                 // 简化和过滤
                 val pages = simplifyPages(it) { it.isValid }
                 // 完善数据
                 pages.forEach {
-                    it.webUrl = ManagerRegistry.HOST.makeWebUrl(it.webUrl?:"")
+                    it.h5Url = ManagerRegistry.HOST.makeWebUrl(it.h5Url?:"")
                     if (weexPagesResp.indexPage == it.pageName) {
                         it.indexPage = true
                     }
                 }
-                Weex.onWeexConfigUpdate(context, pages)
+                CubeWx.onWeexConfigUpdate(context, pages)
             }
 
         } catch (e: Exception) {

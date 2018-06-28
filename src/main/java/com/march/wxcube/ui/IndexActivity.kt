@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import com.march.common.utils.ToastUtils
-import com.march.wxcube.Weex
+import com.march.wxcube.CubeWx
 import com.march.wxcube.common.Permission
 
 
@@ -25,11 +25,11 @@ class IndexActivity : BaseActivity() {
 
     private val mIndexRunnable = Runnable {
         // 先打开一次，无法打开的话注册一个未来打开的 callback
-        if (Weex.mWeexRouter.openIndexPage(mCtx)) {
+        if (CubeWx.mWxRouter.openIndexPage(mCtx)) {
             finish()
         } else {
-            Weex.mWeexRouter.mRouterReadyCallback = {
-                Weex.mWeexRouter.openIndexPage(mCtx)
+            CubeWx.mWxRouter.mRouterReadyCallback = {
+                CubeWx.mWxRouter.openIndexPage(mCtx)
                 finish()
             }
         }
@@ -37,8 +37,8 @@ class IndexActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Weex.mWxPageAdapter.onPageCreated(this, Weex.PAGE_INDEX)
-        Weex.mWxPageAdapter.getLoading().setIndexContent(this)
+        CubeWx.mWxPageAdapter.onPageCreated(this, CubeWx.PAGE_INDEX)
+        CubeWx.mWxPageAdapter.getLoading().setIndexContent(this)
         checkPermissionAndLaunch()
     }
 
@@ -47,7 +47,7 @@ class IndexActivity : BaseActivity() {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE))
         if (result) {
             // 1.5s 后启动
-            Weex.mWeexUpdater.update(this)
+            CubeWx.mWxUpdater.update(this)
             Handler().postDelayed(mIndexRunnable, TIME_START)
         } else {
             ToastUtils.show("请授予达人店存储权限～")
@@ -61,7 +61,7 @@ class IndexActivity : BaseActivity() {
 
     override fun startActivity(intent: Intent?) {
         super.startActivity(intent)
-        Weex.mWeexRouter.mRouterReadyCallback = null
+        CubeWx.mWxRouter.mRouterReadyCallback = null
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

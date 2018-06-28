@@ -1,7 +1,7 @@
 package com.march.wxcube.manager
 
 import com.march.wxcube.model.WxPage
-import com.march.wxcube.ui.WeexDelegate
+import com.march.wxcube.ui.WxDelegate
 import com.taobao.weex.WXSDKInstance
 
 /**
@@ -12,7 +12,7 @@ import com.taobao.weex.WXSDKInstance
  */
 interface IManager {
     fun onWxInstRelease(weexPage: WxPage?, instance: WXSDKInstance?)
-    fun onWxInstInit(weexPage: WxPage?, instance: WXSDKInstance?, weexDelegate: WeexDelegate?) {}
+    fun onWxInstInit(weexPage: WxPage?, instance: WXSDKInstance?, weexDelegate: WxDelegate?) {}
 }
 
 

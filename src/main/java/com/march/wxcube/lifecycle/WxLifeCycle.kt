@@ -2,7 +2,6 @@ package com.march.wxcube.lifecycle
 
 import android.content.Intent
 import android.view.View
-import com.march.wxcube.ui.WeexDelegate
 
 /**
  * CreateAt : 2018/3/27
@@ -10,7 +9,7 @@ import com.march.wxcube.ui.WeexDelegate
  *
  * @author chendong
  */
-interface WeexLifeCycle {
+interface WxLifeCycle {
 
     fun onCreate() {}
 

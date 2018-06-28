@@ -20,7 +20,7 @@ class WxPage() : Parcelable {
 
     var jsVersion: String? = null // weex 构建版本出来的 js 版本 pageName + jsVersion 唯一标记一个资源
 
-    var webUrl: String? = null  // 降级 web，也是页面的唯一标记
+    var h5Url: String? = null  // 降级 web，也是页面的唯一标记
 
     var remoteJs: String? = null // 远程 js 资源链接
 
@@ -44,7 +44,7 @@ class WxPage() : Parcelable {
     val isValid: Boolean //
         get() = (!TextUtils.isEmpty(pageName)
                 && !TextUtils.isEmpty(jsVersion)
-                && !TextUtils.isEmpty(webUrl)
+                && !TextUtils.isEmpty(h5Url)
                 && !TextUtils.isEmpty(remoteJs))
 
     fun make(openUrl: String): WxPage {
@@ -53,7 +53,7 @@ class WxPage() : Parcelable {
         page.remoteJs = this.remoteJs
         page.appVersion = this.appVersion
         page.jsVersion = this.jsVersion
-        page.webUrl = openUrl
+        page.h5Url = openUrl
         return page
     }
 
@@ -63,7 +63,7 @@ class WxPage() : Parcelable {
         dest.writeString(this.remoteJs)
         dest.writeString(this.appVersion)
         dest.writeString(this.jsVersion)
-        dest.writeString(this.webUrl)
+        dest.writeString(this.h5Url)
     }
 
     constructor(`in`: Parcel) : this() {
@@ -71,7 +71,7 @@ class WxPage() : Parcelable {
         this.remoteJs = `in`.readString()
         this.appVersion = `in`.readString()
         this.jsVersion = `in`.readString()
-        this.webUrl = `in`.readString()
+        this.h5Url = `in`.readString()
     }
 
     override fun describeContents() = 0
@@ -80,7 +80,7 @@ class WxPage() : Parcelable {
         return "WeexPage(pageName=$pageName, " +
                 "jsVersion=$jsVersion, " +
                 "appVersion=$appVersion, " +
-                "webUrl=$webUrl, " +
+                "h5Url=$h5Url, " +
                 "remoteJs=$remoteJs, " +
                 "md5=$md5, " +
                 "comment=$comment, " +
@@ -94,7 +94,7 @@ class WxPage() : Parcelable {
                 .append("remoteJs=").append(remoteJs).newLine()
                 .append("appVersion=").append(appVersion).newLine()
                 .append("jsVersion=").append(jsVersion).newLine()
-                .append("webUrl=").append(webUrl).newLine().toString()
+                .append("h5Url=").append(h5Url).newLine().toString()
     }
 
 

@@ -5,13 +5,10 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.ViewGroup
 
-import com.alibaba.fastjson.JSON
-import com.alibaba.fastjson.JSONArray
-import com.alibaba.fastjson.JSONObject
 import com.march.common.utils.LgUtils
 import com.march.wxcube.manager.ManagerRegistry
-import com.march.wxcube.ui.WeexActivity
-import com.march.wxcube.ui.WeexDelegate
+import com.march.wxcube.ui.WxActivity
+import com.march.wxcube.ui.WxDelegate
 import com.taobao.weex.common.WXModule
 
 /**
@@ -51,11 +48,11 @@ val WXModule.mInstId: String?
     }
 
 // 获取 mWeexAct
-val WXModule.mWeexAct: WeexActivity?
+val WXModule.mWeexAct: WxActivity?
     get() {
         if (mWXSDKInstance != null) {
             val context = mWXSDKInstance.context
-            if (context is WeexActivity) {
+            if (context is WxActivity) {
                 return context
             }
         }
@@ -63,7 +60,7 @@ val WXModule.mWeexAct: WeexActivity?
     }
 
 // 获取 mDelegate
-val WXModule.mWeexDelegate: WeexDelegate?
+val WXModule.mWeexDelegate: WxDelegate?
     get() {
         return ManagerRegistry.WEEXINST.findWeexDelegateByInstanceId(mWXSDKInstance.instanceId)
     }

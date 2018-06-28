@@ -5,7 +5,7 @@ import com.march.common.disklru.DiskLruCache
 import com.march.common.pool.ExecutorsPool
 import com.march.common.utils.NetUtils
 import com.march.common.utils.StreamUtils
-import com.march.wxcube.Weex
+import com.march.wxcube.CubeWx
 import com.march.wxcube.http.HttpListener
 import com.march.wxcube.http.OkHttpMaker
 import com.march.wxcube.model.WxPage
@@ -126,7 +126,7 @@ class RequestManager : IManager {
 
     // 检测网络状态，停止请求
     private fun checkNetWork(listener: IWXHttpAdapter.OnHttpListener?): WXResponse? {
-        if (!NetUtils.isNetworkConnected(Weex.getContext())) {
+        if (!NetUtils.isNetworkConnected(CubeWx.mWeakCtx.get())) {
             val wxResp = WXResponse()
             wxResp.errorCode = ERROR_CODE_FAILURE
             wxResp.statusCode = STATUS_CODE_FAILURE

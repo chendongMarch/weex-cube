@@ -8,7 +8,7 @@ import com.march.wxcube.common.memory
 import com.march.wxcube.common.report
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.WxPage
-import com.march.wxcube.update.OnWeexUpdateListener
+import com.march.wxcube.update.OnWxUpdateListener
 import com.taobao.weex.utils.WXFileUtils
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -20,10 +20,10 @@ import java.util.concurrent.Executors
  *
  * @author chendong
  */
-class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, jsPrepareStrategy: Int) : OnWeexUpdateListener {
+class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, jsPrepareStrategy: Int) : OnWxUpdateListener {
 
     companion object {
-        private val TAG = WeexJsLoader::class.java.simpleName!!
+        private val TAG = WxJsLoader::class.java.simpleName!!
         const val CACHE_DIR = "weex-js-disk-cache"
         const val DISK_MAX_SIZE = 20 * 1024 * 1024L
     }
@@ -41,7 +41,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, 
     // 内存缓存
     private val mJsMemoryCache = JsMemoryCache(context.memory(.3f))
     // 文件缓存
-    private val mJsFileCache = JsFileCache(Weex.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
+    private val mJsFileCache = JsFileCache(CubeWx.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
 
     override fun onWeexCfgUpdate(context: Context, weexPages: List<WxPage>?) {
         if (mJsPrepareStrategy == JsPrepareStrategy.PREPARE_ALL) {
@@ -99,7 +99,7 @@ class WeexJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, 
         }
         mService.execute {
             val template = runnable.invoke()
-            Weex.mWxReportAdapter.log(TAG, "JS加载${page.pageName} cache[${mJsMemoryCache.size()}] $fromWhere")
+            CubeWx.mWxReportAdapter.log(TAG, "JS加载${page.pageName} cache[${mJsMemoryCache.size()}] $fromWhere")
             publishFunc(template)
         }
     }

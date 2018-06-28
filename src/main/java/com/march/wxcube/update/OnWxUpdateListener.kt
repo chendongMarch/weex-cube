@@ -9,6 +9,6 @@ import com.march.wxcube.model.WxPage
  *
  * @author chendong
  */
-internal interface OnWeexUpdateListener {
+internal interface OnWxUpdateListener {
     fun onWeexCfgUpdate(context: Context, weexPages: List<WxPage>?)
 }

@@ -2,7 +2,7 @@ package com.march.wxcube.ui
 
 import android.app.Activity
 import com.march.common.utils.LgUtils
-import com.march.wxcube.Weex
+import com.march.wxcube.CubeWx
 import com.march.wxcube.common.report
 import com.march.wxcube.model.WxPage
 import com.taobao.weex.IWXRenderListener
@@ -16,9 +16,9 @@ import com.taobao.weex.common.WXRenderStrategy
  *
  * @author chendong
  */
-class WeexRender(activity: Activity,
-                 private val mWxInst: WXSDKInstance,
-                 private val listener: IWXRenderListener) {
+class WxRender(activity: Activity,
+               private val mWxInst: WXSDKInstance,
+               private val listener: IWXRenderListener) {
 
 
     init {
@@ -36,7 +36,7 @@ class WeexRender(activity: Activity,
             listener.onException(mWxInst, "100", "页面数据有问题")
             return
         }
-        Weex.mWeexJsLoader.getTemplateAsync(mWxInst.context, page) {
+        CubeWx.mWxJsLoader.getTemplateAsync(mWxInst.context, page) {
             LgUtils.e("render thread = ${Thread.currentThread().name}")
             if (!it.isNullOrBlank()) {
                 consumer?.invoke(it)

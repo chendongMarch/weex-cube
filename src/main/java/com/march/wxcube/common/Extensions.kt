@@ -7,7 +7,7 @@ import android.os.Environment
 import android.view.View
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
-import com.march.wxcube.Weex
+import com.march.wxcube.CubeWx
 import com.march.wxcube.wxadapter.GlideApp
 import java.io.File
 import java.lang.Exception
@@ -25,8 +25,8 @@ import java.security.MessageDigest
 
 // 提交错误
 fun Any.report(msg: String, throwable: Throwable? = null) {
-    if (Weex.mWeexConfig.debug) {
-        Weex.mWxReportAdapter.reportError(throwable, msg)
+    if (CubeWx.mWeexConfig.debug) {
+        CubeWx.mWxReportAdapter.reportError(throwable, msg)
     }
 }
 

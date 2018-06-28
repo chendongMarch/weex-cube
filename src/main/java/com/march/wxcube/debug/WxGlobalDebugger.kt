@@ -4,7 +4,7 @@ import android.content.Context
 import com.alibaba.fastjson.JSON
 import com.march.common.pool.DiskKVManager
 import com.march.common.utils.ToastUtils
-import com.march.wxcube.Weex
+import com.march.wxcube.CubeWx
 import com.march.wxcube.common.DiskLruCache
 import com.march.wxcube.common.report
 import com.march.wxcube.http.HttpListener
@@ -30,7 +30,7 @@ import java.util.concurrent.Executors
  *
  * @author chendong
  */
-internal object WeexGlobalDebugger {
+internal object WxGlobalDebugger {
 
     private const val CONFIG_KEY = "weex-debug-config"
     private const val CACHE_DIR = "debug-config-cache"
@@ -40,12 +40,17 @@ internal object WeexGlobalDebugger {
     private const val DEBUG_ENABLE = "DEBUG_ENABLE"
     private const val DEBUG_HOST = "DEBUG_HOST"
 
+    data class DebugWxPagesResp(
+            var global: Boolean = false,
+            var autoJumpPage: String = "",
+            var datas: List<WxPage> = listOf())
+
     private val mDiskLruCache by lazy {
-        DiskLruCache(Weex.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
+        DiskLruCache(CubeWx.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
     }
 
     private val mExecutorService by lazy { Executors.newCachedThreadPool() }
-    private var mDebugWeexPagesResp: DebugWeexPagesResp? = null
+    private var mDebugWeexPagesResp: DebugWxPagesResp? = null
     internal var mWeexPageMap = mutableMapOf<UrlKey, WxPage>()
 
 
@@ -94,7 +99,7 @@ internal object WeexGlobalDebugger {
         if (!checkDebug()) {
             return
         }
-        val url = Weex.mWxDebugAdapter.makeDebugConfigUrl(mDebugHost)
+        val url = CubeWx.mWxDebugAdapter.makeDebugConfigUrl(mDebugHost)
         // 发起网络，并存文件
         val request = ManagerRegistry.REQ.makeWxRequest(url = url, from = "request-wx-debug-config")
         ManagerRegistry.REQ.request(request, object : HttpListener {
@@ -116,7 +121,7 @@ internal object WeexGlobalDebugger {
             return
         }
         try {
-            val weexPagesResp = JSON.parseObject(json, DebugWeexPagesResp::class.java)
+            val weexPagesResp = JSON.parseObject(json, DebugWxPagesResp::class.java)
             mDebugWeexPagesResp = weexPagesResp
             val originPages = weexPagesResp?.datas ?: return report("调试文件 datas = null")
             // 不管新老页面 pageName 是唯一标识
@@ -125,7 +130,7 @@ internal object WeexGlobalDebugger {
                 if (!it.pageName.isNullOrBlank()) {
                     val p = prepareOldPage(it) ?: prepareNewPage(it)
                     p?.let {
-                        it.webUrl = ManagerRegistry.HOST.makeWebUrl(it.webUrl ?: "")
+                        it.h5Url = ManagerRegistry.HOST.makeWebUrl(it.h5Url ?: "")
                         pages.add(it)
                     }
                 }
@@ -141,7 +146,7 @@ internal object WeexGlobalDebugger {
     // 如果是老页面将会根据线上配置完善相关数据
     private fun prepareOldPage(p: WxPage): WxPage? {
         var page = p
-        val validOldPage = Weex.mWeexRouter.mWeexPageMap.values.firstOrNull {
+        val validOldPage = CubeWx.mWxRouter.mWeexPageMap.values.firstOrNull {
             it.pageName == page.pageName
         }
         return if (validOldPage != null) {
@@ -149,11 +154,11 @@ internal object WeexGlobalDebugger {
             page.comment = validOldPage.comment
             page.jsVersion = MAX_VERSION
             page.appVersion = MIN_VERSION
-            page.webUrl = page.webUrl ?: validOldPage.webUrl
+            page.h5Url = page.h5Url ?: validOldPage.h5Url
             // page.remoteJs = page.remoteJs ?: debugWeexPageMaker(page, mHost)
             page.md5 = ""
-            page = Weex.mWxDebugAdapter.completeDebugWeexPage(page, mDebugHost)
-            if (page.webUrl.isNullOrBlank() || page.remoteJs.isNullOrBlank()) {
+            page = CubeWx.mWxDebugAdapter.completeDebugWeexPage(page, mDebugHost)
+            if (page.h5Url.isNullOrBlank() || page.remoteJs.isNullOrBlank()) {
                 report("老页面自动完善错误 $page ")
                 null
             } else page
@@ -162,16 +167,16 @@ internal object WeexGlobalDebugger {
         }
     }
 
-    // 新页面，webUrl,pageName 都是必须的
+    // 新页面，h5Url,pageName 都是必须的
     private fun prepareNewPage(p: WxPage): WxPage? {
         var page = p
         page.jsVersion = MAX_VERSION
         page.appVersion = MIN_VERSION
-        // page.webUrl = page.webUrl ?: validOldPage.webUrl
+        // page.h5Url = page.h5Url ?: validOldPage.h5Url
         // page.remoteJs = page.remoteJs ?: debugWeexPageMaker(page, mHost)
         page.md5 = ""
-        page = Weex.mWxDebugAdapter.completeDebugWeexPage(page, mDebugHost)
-        return if (page.webUrl.isNullOrBlank() || page.remoteJs.isNullOrBlank()) {
+        page = CubeWx.mWxDebugAdapter.completeDebugWeexPage(page, mDebugHost)
+        return if (page.h5Url.isNullOrBlank() || page.remoteJs.isNullOrBlank()) {
             report("新页面自动完善错误 $page ")
             null
         } else page
@@ -180,11 +185,11 @@ internal object WeexGlobalDebugger {
     private fun updateWeexPageMap(pages: List<WxPage>) {
         mWeexPageMap.isNotEmpty().let { mWeexPageMap.clear() }
         pages.forEach {
-            it.webUrl?.let { url ->
+            it.h5Url?.let { url ->
                 mWeexPageMap[UrlKey.fromUrl(url)] = it
             }
         }
-        Weex.mWeexRouter.mInterceptor = { url ->
+        CubeWx.mWxRouter.mInterceptor = { url ->
             if (url.indexOf("/") == -1) {
                 // 通过 pageName 查找
                 mWeexPageMap.values.firstOrNull {
@@ -199,7 +204,7 @@ internal object WeexGlobalDebugger {
 
     internal fun autoJump(context: Context) {
         mDebugWeexPagesResp?.autoJumpPage?.let {
-            Weex.mWeexRouter.openUrl(context, it)
+            CubeWx.mWxRouter.openUrl(context, it)
         }
     }
 

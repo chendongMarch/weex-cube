@@ -8,7 +8,7 @@ import com.march.common.utils.DimensUtils
  *
  * @author chendong
  */
-object CubeWxUtils {
+object WxUtils {
 
     fun getWxPxByRealPx(px: Int): Float {
         val ratio = 750f / DimensUtils.WIDTH

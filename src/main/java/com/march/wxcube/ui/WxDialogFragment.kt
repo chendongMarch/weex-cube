@@ -19,11 +19,11 @@ import com.march.wxcube.model.WxPage
  *
  * @author chendong
  */
-open class WeexDialogFragment : DialogFragment() {
+open class WxDialogFragment : DialogFragment() {
 
     private lateinit var mConfig: DialogConfig
 
-    private val mDelegate: WeexDelegate by lazy { WeexDelegate(this) }
+    private val mDelegate: WxDelegate by lazy { WxDelegate(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,11 +95,11 @@ open class WeexDialogFragment : DialogFragment() {
     }
 
     companion object {
-        fun newInstance(bundle: WxPage, config: DialogConfig?): WeexDialogFragment {
+        fun newInstance(bundle: WxPage, config: DialogConfig?): WxDialogFragment {
             val args = Bundle()
             args.putParcelable(WxPage.KEY_PAGE, bundle)
             args.putParcelable(DialogConfig.KEY_DIALOG_CONFIG, config)
-            val fragment = WeexDialogFragment()
+            val fragment = WxDialogFragment()
             fragment.arguments = args
             return fragment
         }

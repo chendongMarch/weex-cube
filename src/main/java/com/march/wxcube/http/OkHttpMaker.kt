@@ -1,6 +1,6 @@
 package com.march.wxcube.http
 
-import com.march.wxcube.Weex
+import com.march.wxcube.CubeWx
 import com.march.wxcube.http.cookie.CookieJarImpl
 import com.march.wxcube.http.cookie.CookieStoreImpl
 import okhttp3.OkHttpClient
@@ -26,14 +26,14 @@ internal object OkHttpMaker {
         // 失败后重试
         builder.retryOnConnectionFailure(true)
         // builder.proxy(Proxy.NO_PROXY)
-        Weex.getContext()?.let {
+        CubeWx.mWeakCtx.get()?.let {
             builder.cookieJar(CookieJarImpl(CookieStoreImpl(it)))
         }
         // 进行日志打印，扩展自 HttpLoggingInterceptor
         builder.addInterceptor(LogInterceptor())
         // token校验，返回 403 时
         // builder.authenticator(new TokenAuthenticator());
-        Weex.mWxInitAdapter.onInitOkHttpClient(builder)
+        CubeWx.mWxInitAdapter.onInitOkHttpClient(builder)
         return builder.build()
     }
 

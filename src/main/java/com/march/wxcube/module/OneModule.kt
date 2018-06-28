@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import com.alibaba.fastjson.JSONObject
-import com.march.wxcube.Weex
+import com.march.wxcube.CubeWx
 import com.march.wxcube.common.getDef
 import com.march.wxcube.module.dispatcher.*
 import com.taobao.weex.annotation.JSMethod
@@ -32,7 +32,7 @@ class OneModule : WXModule() {
                 StatusBarDispatcher(),
                 PageDispatcher(this),
                 ImageDispatcher(),
-                *Weex.mWxInitAdapter.getModuleDispatchers()
+                *CubeWx.mWxInitAdapter.getModuleDispatchers()
         )
     }
 

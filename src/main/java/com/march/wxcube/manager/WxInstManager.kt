@@ -1,7 +1,7 @@
 package com.march.wxcube.manager
 
 import com.march.wxcube.model.WxPage
-import com.march.wxcube.ui.WeexDelegate
+import com.march.wxcube.ui.WxDelegate
 import com.taobao.weex.WXSDKInstance
 import java.lang.ref.WeakReference
 
@@ -11,15 +11,15 @@ import java.lang.ref.WeakReference
  *
  * @author chendong
  */
-class WeexInstManager : IManager {
+class WxInstManager : IManager {
 
     companion object {
-        val instance by lazy { WeexInstManager() }
+        val instance by lazy { WxInstManager() }
     }
-    private val mWeexDelegateMap by lazy { mutableMapOf<String, WeakReference<WeexDelegate>>() }
-    private val mWeexActivityMap by lazy { mutableMapOf<String, WeakReference<WeexDelegate>>() }
+    private val mWeexDelegateMap by lazy { mutableMapOf<String, WeakReference<WxDelegate>>() }
+    private val mWeexActivityMap by lazy { mutableMapOf<String, WeakReference<WxDelegate>>() }
 
-    override fun onWxInstInit(weexPage: WxPage?, instance: WXSDKInstance?, weexDelegate: WeexDelegate?) {
+    override fun onWxInstInit(weexPage: WxPage?, instance: WXSDKInstance?, weexDelegate: WxDelegate?) {
         super.onWxInstInit(weexPage, instance, weexDelegate)
         if (instance == null && instance?.instanceId == null || weexDelegate == null) {
             return
@@ -34,7 +34,7 @@ class WeexInstManager : IManager {
         mWeexDelegateMap.remove(instance.instanceId)
     }
 
-    fun findWeexDelegateByInstanceId(instanceId: String): WeexDelegate? {
+    fun findWeexDelegateByInstanceId(instanceId: String): WxDelegate? {
         return mWeexDelegateMap[instanceId]?.get()
     }
 }

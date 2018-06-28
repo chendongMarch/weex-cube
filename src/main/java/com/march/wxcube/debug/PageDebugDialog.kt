@@ -14,7 +14,7 @@ import android.widget.TextView
 import com.march.common.utils.JsonUtils
 import com.march.common.utils.ToastUtils
 import com.march.wxcube.R
-import com.march.wxcube.Weex
+import com.march.wxcube.CubeWx
 import com.march.wxcube.common.click
 import com.march.wxcube.common.newLine
 
@@ -24,7 +24,7 @@ import com.march.wxcube.common.newLine
  *
  * @author chendong
  */
-class PageDebugDialog(context: Context, private val mWeexPageDebugger: WeexPageDebugger)
+class PageDebugDialog(context: Context, private val mWeexPageDebugger: WxPageDebugger)
     : AppCompatDialog(context, R.style.dialog_theme) {
 
     init {
@@ -104,23 +104,23 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WeexPageD
     // 全局调试
     private fun initGlobalDebug() {
         // 请求线上配置
-        findViewById<View>(R.id.req_online_cfg_btn).click { Weex.mWeexUpdater.update(context) }
+        findViewById<View>(R.id.req_online_cfg_btn).click { CubeWx.mWxUpdater.update(context) }
         // 请求调试配置
-        findViewById<View>(R.id.req_debug_cfg_btn).click { WeexGlobalDebugger.updateFromNet() }
+        findViewById<View>(R.id.req_debug_cfg_btn).click { WxGlobalDebugger.updateFromNet() }
         // 清理缓存的js
-        findViewById<View>(R.id.clear_cache_btn).click { Weex.mWeexJsLoader.clearCache() }
+        findViewById<View>(R.id.clear_cache_btn).click { CubeWx.mWxJsLoader.clearCache() }
         // 清理磁盘js
-        findViewById<View>(R.id.clear_disk_btn).click { Weex.clearDiskCache() }
+        findViewById<View>(R.id.clear_disk_btn).click { CubeWx.clearDiskCache() }
         findViewById<View>(R.id.jump_weex_btn).click {
             val text = contentEt?.text.toString()
             if (!text.isBlank()) {
-                Weex.mWeexRouter.openUrl(context, text)
+                CubeWx.mWxRouter.openUrl(context, text)
             }
         }
         findViewById<View>(R.id.jump_web_btn).click {
             val text = contentEt?.text.toString()
             if (!text.isBlank()) {
-                Weex.mWeexRouter.openWeb(context, text)
+                CubeWx.mWxRouter.openWeb(context, text)
             }
         }
     }
@@ -139,27 +139,27 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WeexPageD
         }
         // 自动跳转
         findViewById<View>(R.id.mp_auto_jump).click {
-            WeexGlobalDebugger.autoJump(context)
+            WxGlobalDebugger.autoJump(context)
         }
         // 查看调试配置
         findViewById<View>(R.id.mp_look_debug_cfg).click {
-            val text = JsonUtils.toJsonString(JsonUtils.toJson(WeexGlobalDebugger.mWeexPageMap.values), "解析失败")
+            val text = JsonUtils.toJsonString(JsonUtils.toJson(WxGlobalDebugger.mWeexPageMap.values), "解析失败")
             cfgTv?.text = text
             cfgTv?.visibility = View.VISIBLE
         }
         // 查看线上配置
         findViewById<View>(R.id.mp_look_online_cfg).click {
-            val text = JsonUtils.toJsonString(JsonUtils.toJson(Weex.mWeexRouter.mWeexPageMap.values), "解析失败")
+            val text = JsonUtils.toJsonString(JsonUtils.toJson(CubeWx.mWxRouter.mWeexPageMap.values), "解析失败")
             cfgTv?.text = text
             cfgTv?.visibility = View.VISIBLE
         }
-        mpIpEt?.setText(WeexGlobalDebugger.getDebugHost())
-        mpEnableSw?.isChecked = WeexGlobalDebugger.getDebugEnable()
+        mpIpEt?.setText(WxGlobalDebugger.getDebugHost())
+        mpEnableSw?.isChecked = WxGlobalDebugger.getDebugEnable()
         // 生效
         findViewById<View>(R.id.mp_active).click {
-            WeexGlobalDebugger.setDebugEnable(mpEnableSw?.isChecked ?: false)
-            WeexGlobalDebugger.setDebugHost(mpIpEt?.text.toString())
-            WeexGlobalDebugger.updateFromNet()
+            WxGlobalDebugger.setDebugEnable(mpEnableSw?.isChecked ?: false)
+            WxGlobalDebugger.setDebugHost(mpIpEt?.text.toString())
+            WxGlobalDebugger.updateFromNet()
         }
     }
 

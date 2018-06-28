@@ -3,7 +3,7 @@ package com.march.wxcube.debug
 import android.app.Activity
 import android.os.Bundle
 import com.march.common.impl.ActivityLifecycleCallback
-import com.march.wxcube.ui.WeexActivity
+import com.march.wxcube.ui.WxActivity
 
 /**
  * CreateAt : 2018/6/15
@@ -21,9 +21,9 @@ class WxDebugActivityLifeCycle : ActivityLifecycleCallback() {
 //            return
 //        }
             val activity = act ?: return
-        val debugger = WeexPageDebugger()
+        val debugger = WxPageDebugger()
         debugger.addDebugBtn(activity)
-            if (activity is WeexActivity) {
+            if (activity is WxActivity) {
                 activity.mDelegate.setDebugger(debugger)
             }
         } catch (e: Exception) {

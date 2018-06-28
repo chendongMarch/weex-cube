@@ -1,7 +1,7 @@
 package com.march.wxcube
 
+import android.app.Application
 import android.content.Context
-import com.alibaba.android.bindingx.plugin.weex.BindingX
 import com.march.common.Common
 import com.march.common.CommonInjector
 import com.march.common.adapter.JsonParser
@@ -10,14 +10,13 @@ import com.march.common.utils.FileUtils
 import com.march.webkit.WebKit
 import com.march.wxcube.adapter.*
 import com.march.wxcube.common.JsonParserImpl
+import com.march.wxcube.common.WxInstaller
 import com.march.wxcube.common.sdFile
 import com.march.wxcube.debug.WxDebugActivityLifeCycle
 import com.march.wxcube.manager.*
 import com.march.wxcube.model.WxPage
-import com.march.wxcube.module.OneModule
-import com.march.wxcube.router.WeexRouter
-import com.march.wxcube.update.WeexUpdater
-import com.march.wxcube.widget.Container
+import com.march.wxcube.router.WxRouter
+import com.march.wxcube.update.WxUpdater
 import com.march.wxcube.wxadapter.ImgAdapter
 import com.march.wxcube.wxadapter.JsErrorAdapter
 import com.march.wxcube.wxadapter.OkHttpAdapter
@@ -25,7 +24,6 @@ import com.march.wxcube.wxadapter.UriAdapter
 import com.taobao.weex.InitConfig
 import com.taobao.weex.WXEnvironment
 import com.taobao.weex.WXSDKEngine
-import com.taobao.weex.common.WXException
 import java.io.File
 
 /**
@@ -34,34 +32,34 @@ import java.io.File
  *
  * @author chendong
  */
-object Weex {
+object CubeWx {
 
     const val CACHE_DIR = "weex-cache"
     const val PAGE_WEB = 1
     const val PAGE_WEEX = 2
     const val PAGE_INDEX = 3
 
-    private val mWeakCtx by lazy { WeakContext(mWeexConfig.ctx) } // 上下文虚引用
-    internal val mWeexJsLoader by lazy { WeexJsLoader(mWeexConfig.ctx, mWeexConfig.jsLoadStrategy, mWeexConfig.jsCacheStrategy, mWeexConfig.jsPrepareStrategy) } // 加载 js
-    val mWeexRouter by lazy { WeexRouter() } // 路由页面管理
-    internal val mWeexUpdater by lazy { WeexUpdater(mWeexConfig.configUrl) } // weex 页面更新
+    // model
+    lateinit var mWeexConfig: WxInitConfig
+    lateinit var mWeakCtx: WeakContext
+    // func
+    lateinit var mWxJsLoader: WxJsLoader
+    lateinit var mWxUpdater: WxUpdater
+    lateinit var mWxRouter: WxRouter
+    // adapter
+    lateinit var mWxModelAdapter: IWxModelAdapter
+    lateinit var mWxDebugAdapter: IWxDebugAdapter
+    lateinit var mWxInitAdapter: IWxInitAdapter
+    lateinit var mWxPageAdapter: IWxPageAdapter
+    lateinit var mWxReportAdapter: IWxReportAdapter
 
-    lateinit var mWeexConfig: WeexConfig
-
-    var mWxModelAdapter: IWxModelAdapter = DefaultWxModelAdapter()
-    var mWxDebugAdapter: IWxDebugAdapter = DefaultWxDebugAdapter()
-    var mWxInitAdapter: IWxInitAdapter = DefaultWxInitAdapter()
-    var mWxPageAdapter: IWxPageAdapter = DefaultWxPageAdapter()
-    var mWxReportAdapter: IWxReportAdapter = DefaultWxReportAdapter()
-
-    fun init(config: WeexConfig) {
-        mWeexConfig = config.prepare()
-        val ctx = config.ctx
-
+    fun init(ctx: Application, config: WxInitConfig) {
         ctx.registerActivityLifecycleCallbacks(WxDebugActivityLifeCycle())
+        mWeakCtx = WeakContext(ctx)
+        mWeexConfig = config.prepare(ctx)
+
         WXEnvironment.setOpenDebugLog(config.debug)
         WXEnvironment.setApkDebugable(config.debug)
-        WXSDKEngine.addCustomOptions("container", "weex-cube")
 
         val builder = InitConfig.Builder()
                 // 用户行为捕捉
@@ -82,16 +80,16 @@ object Weex {
                 .setImgAdapter(ImgAdapter())
         mWxInitAdapter.onWxSdkEngineInit(builder)
         WXSDKEngine.initialize(ctx, builder.build())
-        registerModule()
-        registerComponent()
-        registerBindingX()
+        WxInstaller.registerModule()
+        WxInstaller.registerComponent()
+        WxInstaller.registerBindingX()
         mWxInitAdapter.onWxModuleCompRegister()
 
         ManagerRegistry.getInst().register(DataManager.instance)
         ManagerRegistry.getInst().register(EventManager.instance)
         ManagerRegistry.getInst().register(RequestManager.instance)
         ManagerRegistry.getInst().register(HostManager.instance)
-        ManagerRegistry.getInst().register(WeexInstManager.instance)
+        ManagerRegistry.getInst().register(WxInstManager.instance)
 
         ManagerRegistry.HOST.mWebHost = config.webHost
         ManagerRegistry.HOST.mJsResHost = config.jsResHost
@@ -109,36 +107,10 @@ object Weex {
         WebKit.init(ctx, WebKit.CORE_SYS, null)
     }
 
-    private fun registerBindingX() {
-        try {
-            BindingX.register()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    fun getContext() = mWeakCtx.get()
-
-    private fun registerComponent() {
-        try {
-            WXSDKEngine.registerComponent("container", Container::class.java)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun registerModule() {
-        try {
-            WXSDKEngine.registerModule("bridge", OneModule::class.java, true)
-        } catch (e: WXException) {
-            e.printStackTrace()
-        }
-    }
-
     fun makeCacheDir(key: String): File {
         val sdFile = sdFile()
-        var rootFile = getContext()?.cacheDir ?: sdFile
-        if (Weex.mWeexConfig.debug) {
+        var rootFile = mWeakCtx.get()?.cacheDir ?: sdFile
+        if (CubeWx.mWeexConfig.debug) {
             rootFile = sdFile
         }
         val cacheFile = File(rootFile, CACHE_DIR)
@@ -148,21 +120,21 @@ object Weex {
         return destDir
     }
 
-    fun clearDiskCache(){
+    fun clearDiskCache() {
         val sdFile = sdFile()
-        var rootFile = getContext()?.cacheDir ?: sdFile
-        if (Weex.mWeexConfig.debug) {
+        var rootFile = mWeakCtx.get()?.cacheDir ?: sdFile
+        if (CubeWx.mWeexConfig.debug) {
             rootFile = sdFile
         }
         val cacheFile = File(rootFile, CACHE_DIR)
-        if(cacheFile.exists()) {
+        if (cacheFile.exists()) {
             FileUtils.delete(cacheFile)
         }
     }
 
     fun onWeexConfigUpdate(context: Context, pages: List<WxPage>?) {
-        mWeexRouter.onWeexCfgUpdate(context, pages)
-        mWeexJsLoader.onWeexCfgUpdate(context, pages)
+        mWxRouter.onWeexCfgUpdate(context, pages)
+        mWxJsLoader.onWeexCfgUpdate(context, pages)
     }
 }
 
