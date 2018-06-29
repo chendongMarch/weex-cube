@@ -11,7 +11,7 @@ import okhttp3.HttpUrl
  *
  * @author chendong
  */
-internal class CookieJarImpl(val cookieStore: CookieStore) : CookieJar {
+class CookieJarImpl(val cookieStore: CookieStore) : CookieJar {
 
     @Synchronized
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {

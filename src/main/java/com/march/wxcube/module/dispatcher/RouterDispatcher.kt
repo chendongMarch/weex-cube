@@ -71,7 +71,7 @@ class RouterDispatcher : BaseDispatcher() {
     private fun putExtraData(params: JSONObject) {
         val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#putExtraData url is null")
         val data = params[KEY_DATA] ?: throw RuntimeException("Router#putExtraData data is null")
-        ManagerRegistry.DATA.putData(webUrl, data)
+        ManagerRegistry.Data.putData(webUrl, data)
     }
 
     private fun openApp(ctx: Context, params: JSONObject) {

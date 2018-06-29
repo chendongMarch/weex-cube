@@ -9,7 +9,7 @@ import okhttp3.HttpUrl
  *
  * @author chendong
  */
-internal interface CookieStore {
+interface CookieStore {
 
     fun add(uri: HttpUrl, cookies: List<Cookie>)
 

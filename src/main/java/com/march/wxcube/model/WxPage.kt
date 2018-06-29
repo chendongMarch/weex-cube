@@ -39,7 +39,7 @@ class WxPage() : Parcelable {
         get() = "$pageName-$jsVersion-js".replace(".", "-")
 
     val assetsJs: String? // assets js 文件名 js/home-page-weex-1-1-0-js
-        get() = "$pageName-$jsVersion-js".replace(".", "-")
+        get() = "$pageName-$jsVersion".replace(".", "-") + ".js"
 
     val isValid: Boolean //
         get() = (!TextUtils.isEmpty(pageName)

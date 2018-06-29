@@ -15,6 +15,7 @@ import com.march.common.utils.JsonUtils
 import com.march.common.utils.ToastUtils
 import com.march.wxcube.R
 import com.march.wxcube.CubeWx
+import com.march.wxcube.common.WxUtils
 import com.march.wxcube.common.click
 import com.march.wxcube.common.newLine
 
@@ -110,7 +111,7 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WxPageDeb
         // 清理缓存的js
         findViewById<View>(R.id.clear_cache_btn).click { CubeWx.mWxJsLoader.clearCache() }
         // 清理磁盘js
-        findViewById<View>(R.id.clear_disk_btn).click { CubeWx.clearDiskCache() }
+        findViewById<View>(R.id.clear_disk_btn).click { WxUtils.clearDiskCache() }
         findViewById<View>(R.id.jump_weex_btn).click {
             val text = contentEt?.text.toString()
             if (!text.isBlank()) {

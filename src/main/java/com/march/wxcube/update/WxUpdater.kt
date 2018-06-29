@@ -5,6 +5,7 @@ import com.march.common.Common
 import com.march.common.utils.StreamUtils
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.DiskLruCache
+import com.march.wxcube.common.WxUtils
 import com.march.wxcube.common.report
 import com.march.wxcube.http.HttpListener
 import com.march.wxcube.manager.ManagerRegistry
@@ -21,7 +22,7 @@ import java.util.concurrent.Executors
 class WxUpdater(private var url: String) {
 
     private val mDiskLruCache by lazy {
-        DiskLruCache(CubeWx.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
+        DiskLruCache(WxUtils.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
     }
     private val mExecutorService by lazy { Executors.newCachedThreadPool() }
 
@@ -46,8 +47,8 @@ class WxUpdater(private var url: String) {
             }
             parseJsonAndUpdate(context, configJson)
             // 发起网络，并存文件
-            val request = ManagerRegistry.REQ.makeWxRequest(url = url, from = "request-wx-config")
-            ManagerRegistry.REQ.request(request, object : HttpListener {
+            val request = ManagerRegistry.Request.makeWxRequest(url = url, from = "request-wx-config")
+            ManagerRegistry.Request.request(request, object : HttpListener {
                 override fun onHttpFinish(response: WXResponse) {
                     if (response.errorCode == RequestManager.ERROR_CODE_FAILURE) {
                         report("请求配置文件失败")
@@ -74,7 +75,7 @@ class WxUpdater(private var url: String) {
                 val pages = simplifyPages(it) { it.isValid }
                 // 完善数据
                 pages.forEach {
-                    it.h5Url = ManagerRegistry.HOST.makeWebUrl(it.h5Url?:"")
+                    it.h5Url = ManagerRegistry.Host.makeWebUrl(it.h5Url?:"")
                     if (weexPagesResp.indexPage == it.pageName) {
                         it.indexPage = true
                     }

@@ -1,9 +1,11 @@
-package com.march.wxcube
+package com.march.wxcube.loader
 
 import android.content.Context
 import android.os.Build
 import android.util.LruCache
+import com.march.wxcube.CubeWx
 import com.march.wxcube.common.DiskLruCache
+import com.march.wxcube.common.WxUtils
 import com.march.wxcube.common.memory
 import com.march.wxcube.common.report
 import com.march.wxcube.manager.ManagerRegistry
@@ -41,7 +43,7 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
     // 内存缓存
     private val mJsMemoryCache = JsMemoryCache(context.memory(.3f))
     // 文件缓存
-    private val mJsFileCache = JsFileCache(CubeWx.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
+    private val mJsFileCache = JsFileCache(WxUtils.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
 
     override fun onWeexCfgUpdate(context: Context, weexPages: List<WxPage>?) {
         if (mJsPrepareStrategy == JsPrepareStrategy.PREPARE_ALL) {
@@ -112,8 +114,8 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
 
     private fun downloadJs(page: WxPage): String? {
         val url = page.remoteJs ?: return null
-        val http = ManagerRegistry.REQ
-        val makeJsResUrl = ManagerRegistry.HOST.makeJsResUrl(url)
+        val http = ManagerRegistry.Request
+        val makeJsResUrl = ManagerRegistry.Host.makeJsResUrl(url)
         val wxRequest = http.makeWxRequest(url = makeJsResUrl, from = "download-js")
         val resp = http.requestSync(wxRequest, false)
         // val md5 = resp.data.md5()
@@ -126,7 +128,7 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
     // 加载函数
     private fun makeJsLoader(type: Int, context: Context, page: WxPage): () -> String? {
         return when (type) {
-            JsLoadStrategy.CACHE_FIRST -> {
+            JsLoadStrategy.CACHE_FIRST  -> {
                 {
                     fromWhere = "缓存"
                     mJsMemoryCache.get(page.key)
@@ -142,19 +144,19 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
                     }
                 }
             }
-            JsLoadStrategy.FILE_FIRST -> {
+            JsLoadStrategy.FILE_FIRST   -> {
                 {
                     fromWhere = "文件"
                     page.localJs?.let { mJsFileCache.read(it) }
                 }
             }
-            JsLoadStrategy.NET_FIRST -> {
+            JsLoadStrategy.NET_FIRST    -> {
                 {
                     fromWhere = "网络"
                     downloadJs(page)
                 }
             }
-            else -> {
+            else                        -> {
                 { "" }
             }
         }

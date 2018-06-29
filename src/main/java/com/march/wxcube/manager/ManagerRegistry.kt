@@ -18,11 +18,11 @@ class ManagerRegistry : IManager {
 
         fun getInst() = instance
 
-        val EVENT by lazy { getInst().get(EventManager::class.java) as EventManager }
-        val DATA by lazy { getInst().get(DataManager::class.java) as DataManager }
-        val REQ by lazy { getInst().get(RequestManager::class.java) as RequestManager }
-        val HOST by lazy { getInst().get(HostManager::class.java) as HostManager }
-        val WEEXINST by lazy { getInst().get(WxInstManager::class.java) as WxInstManager }
+        val Event by lazy { getInst().get(EventManager::class.java) as EventManager }
+        val Data by lazy { getInst().get(DataManager::class.java) as DataManager }
+        val Request by lazy { getInst().get(RequestManager::class.java) as RequestManager }
+        val Host by lazy { getInst().get(HostManager::class.java) as HostManager }
+        val WxInst by lazy { getInst().get(WxInstManager::class.java) as WxInstManager }
     }
 
     private val mManagerMap by lazy { mutableMapOf<String, IManager>() }

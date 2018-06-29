@@ -41,7 +41,7 @@ class ImageDispatcher : BaseDispatcher() {
         val jsonArray = params.getJSONArray(KEY_LIST) ?: throw RuntimeException("Image#preload list is null")
         for (obj in jsonArray) {
             if (obj is String) {
-                val url = ManagerRegistry.HOST.makeImgUrl(obj)
+                val url = ManagerRegistry.Host.makeImgUrl(obj)
                 GlideApp.with(mProvider.activity()).load(url).preload()
             }
         }

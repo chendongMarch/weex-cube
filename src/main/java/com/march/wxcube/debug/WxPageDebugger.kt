@@ -15,8 +15,8 @@ import com.march.common.utils.DimensUtils
 import com.march.common.utils.RegexUtils
 import com.march.common.utils.ToastUtils
 import com.march.common.view.DragLayout
-import com.march.wxcube.JsCacheStrategy
-import com.march.wxcube.JsLoadStrategy
+import com.march.wxcube.loader.JsCacheStrategy
+import com.march.wxcube.loader.JsLoadStrategy
 import com.march.wxcube.R
 import com.march.wxcube.CubeWx
 import com.march.wxcube.lifecycle.WxLifeCycle
@@ -136,8 +136,8 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
         }
     }
 
-    internal fun stopRefresh() {
-        mDebugMsg.lastTemplate = ""
+    internal fun stopRefresh(immediately:Boolean = true) {
+        mDebugMsg.lastTemplate = if(immediately) "stop" else ""
         mDebugMsg.refreshing = false
         mHandler.removeCallbacksAndMessages(null)
     }
@@ -151,14 +151,14 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
     override fun onDestroy() {
         mVibrator?.cancel()
         mVibrator = null
-        stopRefresh()
+        stopRefresh(false)
         mIsDestroy = true
     }
 
     override fun onPause() {
         super.onPause()
         if (mDebugConfig.isRefreshRemoteJs) {
-            stopRefresh()
+            stopRefresh(false)
             // ToastUtils.show("页面${mWeexPage?.pageName}进入后台，暂停轮询")
         }
     }
@@ -184,7 +184,7 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
         }
         try {
             val jsUrl = mWeexPage?.remoteJs ?: return
-            val js = ManagerRegistry.HOST.makeJsResUrl(jsUrl)
+            val js = ManagerRegistry.Host.makeJsResUrl(jsUrl)
             val uri = Uri.parse(js)
             if (RegexUtils.isIp(uri.host)) {
                 mHandler.sendEmptyMessageDelayed(0, 2000)

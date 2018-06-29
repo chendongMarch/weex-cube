@@ -73,7 +73,7 @@ class WxRouter : OnWxUpdateListener {
      */
     fun openWeb(ctx: Context?, webUrl: String): Pair<Boolean, String> {
         val intent = Intent(ctx, WebActivity::class.java)
-        intent.putExtra(WebKit.KEY_URL, ManagerRegistry.HOST.makeWebUrl(webUrl))
+        intent.putExtra(WebKit.KEY_URL, ManagerRegistry.Host.makeWebUrl(webUrl))
         return start(ctx, intent)
     }
 
@@ -83,7 +83,7 @@ class WxRouter : OnWxUpdateListener {
     fun openBrowser(ctx: Context?, webUrl: String): Pair<Boolean, String> {
         val intent = Intent()
         intent.action = Intent.ACTION_VIEW
-        intent.data = Uri.parse(ManagerRegistry.HOST.makeWebUrl(webUrl))
+        intent.data = Uri.parse(ManagerRegistry.Host.makeWebUrl(webUrl))
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         return start(ctx, intent)
     }
@@ -113,7 +113,7 @@ class WxRouter : OnWxUpdateListener {
             mInterceptor?.invoke(url) ?: mWeexPageMap.values.firstOrNull { it.pageName == url }
         } else {
             // 通过 url 查找
-            val validUrl = ManagerRegistry.HOST.makeWebUrl(url)
+            val validUrl = ManagerRegistry.Host.makeWebUrl(url)
             mInterceptor?.invoke(validUrl) ?: mWeexPageMap[UrlKey.fromUrl(validUrl)]
         }
         if (result == null) {

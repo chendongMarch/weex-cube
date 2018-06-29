@@ -26,7 +26,7 @@ class MyAppGlideModule : AppGlideModule()
 class ImgAdapter : IWXImgLoaderAdapter {
     override fun setImage(url: String?, view: ImageView?, quality: WXImageQuality?, strategy: WXImageStrategy?) {
         if (view != null && url != null) {
-            val safeUrl = ManagerRegistry.HOST.makeImgUrl(url)
+            val safeUrl = ManagerRegistry.Host.makeImgUrl(url)
             var request = GlideApp.with(view.context)
                     .asBitmap()
                     .load(safeUrl)

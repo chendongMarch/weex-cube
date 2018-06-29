@@ -2,6 +2,11 @@ package com.march.wxcube
 
 import android.content.Context
 import com.march.wxcube.adapter.*
+import com.march.wxcube.common.WxUtils
+import com.march.wxcube.loader.JsCacheStrategy
+import com.march.wxcube.loader.JsLoadStrategy
+import com.march.wxcube.loader.JsPrepareStrategy
+import com.march.wxcube.loader.WxJsLoader
 import com.march.wxcube.router.WxRouter
 import com.march.wxcube.update.WxUpdater
 
@@ -39,6 +44,8 @@ class WxInitConfig {
     var wxReportAdapter: IWxReportAdapter = DefaultWxReportAdapter()
 
     fun prepare(ctx: Context): WxInitConfig {
+        CubeWx.mWeexConfig = this
+        CubeWx.mRootCacheDir = WxUtils.makeRootCacheDir()
         // adapter
         CubeWx.mWxModelAdapter = wxModelAdapter
         CubeWx.mWxDebugAdapter = wxDebugAdapter

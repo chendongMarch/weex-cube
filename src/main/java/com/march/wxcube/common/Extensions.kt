@@ -35,10 +35,6 @@ fun Context.memory(float: Float): Int {
     return (activityManager.memoryClass * 1024 * 1024 * float).toInt()
 }
 
-fun Any.sdFile(): File {
-    return Environment.getExternalStorageDirectory();
-}
-
 fun String.md5(): String {
     return try {
         val md = MessageDigest.getInstance("MD5")

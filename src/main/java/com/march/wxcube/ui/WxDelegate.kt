@@ -197,7 +197,7 @@ class WxDelegate : WxLifeCycle {
         mRenderOpts[TOP_SAFEAREA_HEIGHT] = WxUtils.getWxPxByRealPx(StatusBarUtils.getStatusBarHeight(mActivity))
         mRenderOpts[BOTTOM_SAFEAREA_HEIGHT] = 0
         mWeexPage.h5Url?.let {
-            val data = ManagerRegistry.DATA.getData(it)
+            val data = ManagerRegistry.Data.getData(it)
             if (data != null) {
                 mRenderOpts[EXTRA] = data
             }

@@ -40,7 +40,7 @@ class EventDispatcher(val module: OneModule) : BaseDispatcher() {
     private fun registerEvent(params: JSONObject) {
         val instanceId = module.mInstId ?: throw RuntimeException("Event#registerEvent instanceId is null ${params.toJSONString()}")
         val event = params.getString(KEY_EVENT) ?: throw RuntimeException("Event#registerEvent event is null ${params.toJSONString()}")
-        ManagerRegistry.EVENT.registerEvent(event, instanceId)
+        ManagerRegistry.Event.registerEvent(event, instanceId)
     }
 
 
@@ -52,7 +52,7 @@ class EventDispatcher(val module: OneModule) : BaseDispatcher() {
     private fun postEvent(params: JSONObject) {
         val event = params.getString(KEY_EVENT) ?: throw RuntimeException("Event#postEvent event is null ${params.toJSONString()}")
         val data = params.getJSONObject(KEY_DATA) ?: throw RuntimeException("Event#postEvent event is null ${params.toJSONString()}")
-        ManagerRegistry.EVENT.postEvent(event, data.toMap())
+        ManagerRegistry.Event.postEvent(event, data.toMap())
     }
 
 
@@ -64,6 +64,6 @@ class EventDispatcher(val module: OneModule) : BaseDispatcher() {
     private fun unRegisterEvent(params: JSONObject) {
         val instanceId = module.mInstId ?: throw RuntimeException("Event#unRegisterEvent instanceId is null ${params.toJSONString()}")
         val event = params.getString(KEY_EVENT) ?: throw RuntimeException("Event#postEvent event is null ${params.toJSONString()}")
-        ManagerRegistry.EVENT.unRegisterEvent(event, instanceId)
+        ManagerRegistry.Event.unRegisterEvent(event, instanceId)
     }
 }

@@ -59,11 +59,15 @@ class CookieStoreImpl(context: Context) : CookieStore {
 
     // 存储 cookie 到磁盘
     private fun saveCookieToDisk(uri: HttpUrl, cookie: Cookie) {
-        val name = getCookieToken(cookie)
-        val prefsWriter = mCookiePrefs.edit()
-        prefsWriter.putString(uri.host(), TextUtils.join(",", mCookies[uri.host()]?.keys))
-        prefsWriter.putString(COOKIE_NAME_PREFIX + name, encodeCookie(SerializableHttpCookie(cookie)))
-        prefsWriter.apply()
+        try {
+            val name = getCookieToken(cookie)
+            val prefsWriter = mCookiePrefs.edit()
+            prefsWriter.putString(uri.host(), TextUtils.join(",", mCookies[uri.host()]?.keys))
+            prefsWriter.putString(COOKIE_NAME_PREFIX + name, encodeCookie(SerializableHttpCookie(cookie)))
+            prefsWriter.apply()
+        }catch (e:Exception){
+
+        }
     }
 
 
@@ -164,18 +168,22 @@ class CookieStoreImpl(context: Context) : CookieStore {
     }
 
     private fun decodeCookie(cookieString: String): Cookie? {
-        val bytes = hexStringToByteArray(cookieString)
-        val byteArrayInputStream = ByteArrayInputStream(bytes)
-        var cookie: Cookie? = null
         try {
-            val objectInputStream = ObjectInputStream(byteArrayInputStream)
-            cookie = (objectInputStream.readObject() as SerializableHttpCookie).getCookie()
-        } catch (e: IOException) {
-            Log.d(LOG_TAG, "IOException in decodeCookie", e)
-        } catch (e: ClassNotFoundException) {
-            Log.d(LOG_TAG, "ClassNotFoundException in decodeCookie", e)
+            val bytes = hexStringToByteArray(cookieString)
+            val byteArrayInputStream = ByteArrayInputStream(bytes)
+            var cookie: Cookie? = null
+            try {
+                val objectInputStream = ObjectInputStream(byteArrayInputStream)
+                cookie = (objectInputStream.readObject() as SerializableHttpCookie).getCookie()
+            } catch (e: IOException) {
+                Log.d(LOG_TAG, "IOException in decodeCookie", e)
+            } catch (e: ClassNotFoundException) {
+                Log.d(LOG_TAG, "ClassNotFoundException in decodeCookie", e)
+            }
+            return cookie
+        }catch (e:Exception) {
+            return null
         }
-        return cookie
     }
 
     /**

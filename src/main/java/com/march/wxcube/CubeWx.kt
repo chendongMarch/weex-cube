@@ -13,6 +13,7 @@ import com.march.wxcube.common.JsonParserImpl
 import com.march.wxcube.common.WxInstaller
 import com.march.wxcube.common.sdFile
 import com.march.wxcube.debug.WxDebugActivityLifeCycle
+import com.march.wxcube.loader.WxJsLoader
 import com.march.wxcube.manager.*
 import com.march.wxcube.model.WxPage
 import com.march.wxcube.router.WxRouter
@@ -53,6 +54,8 @@ object CubeWx {
     lateinit var mWxPageAdapter: IWxPageAdapter
     lateinit var mWxReportAdapter: IWxReportAdapter
 
+    lateinit var mRootCacheDir:File
+
     fun init(ctx: Application, config: WxInitConfig) {
         ctx.registerActivityLifecycleCallbacks(WxDebugActivityLifeCycle())
         mWeakCtx = WeakContext(ctx)
@@ -91,9 +94,9 @@ object CubeWx {
         ManagerRegistry.getInst().register(HostManager.instance)
         ManagerRegistry.getInst().register(WxInstManager.instance)
 
-        ManagerRegistry.HOST.mWebHost = config.webHost
-        ManagerRegistry.HOST.mJsResHost = config.jsResHost
-        ManagerRegistry.HOST.mApiHost = config.apiHost
+        ManagerRegistry.Host.mWebHost = config.webHost
+        ManagerRegistry.Host.mJsResHost = config.jsResHost
+        ManagerRegistry.Host.mApiHost = config.apiHost
 
         Common.init(ctx, object : CommonInjector {
             override fun getConfigClass(): Class<*> {
@@ -105,31 +108,8 @@ object CubeWx {
             }
         })
         WebKit.init(ctx, WebKit.CORE_SYS, null)
-    }
 
-    fun makeCacheDir(key: String): File {
-        val sdFile = sdFile()
-        var rootFile = mWeakCtx.get()?.cacheDir ?: sdFile
-        if (CubeWx.mWeexConfig.debug) {
-            rootFile = sdFile
-        }
-        val cacheFile = File(rootFile, CACHE_DIR)
-        cacheFile.mkdirs()
-        val destDir = File(cacheFile, key)
-        destDir.mkdirs()
-        return destDir
-    }
-
-    fun clearDiskCache() {
-        val sdFile = sdFile()
-        var rootFile = mWeakCtx.get()?.cacheDir ?: sdFile
-        if (CubeWx.mWeexConfig.debug) {
-            rootFile = sdFile
-        }
-        val cacheFile = File(rootFile, CACHE_DIR)
-        if (cacheFile.exists()) {
-            FileUtils.delete(cacheFile)
-        }
+        mWxUpdater.update(ctx)
     }
 
     fun onWeexConfigUpdate(context: Context, pages: List<WxPage>?) {

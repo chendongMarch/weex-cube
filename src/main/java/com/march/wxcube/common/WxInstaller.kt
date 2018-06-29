@@ -1,10 +1,13 @@
 package com.march.wxcube.common
 
 import com.alibaba.android.bindingx.plugin.weex.BindingX
+import com.march.common.utils.FileUtils
+import com.march.wxcube.CubeWx
 import com.march.wxcube.module.OneModule
 import com.march.wxcube.widget.Container
 import com.taobao.weex.WXSDKEngine
 import com.taobao.weex.common.WXException
+import java.io.File
 
 /**
  * CreateAt : 2018/6/27
@@ -40,5 +43,8 @@ object WxInstaller {
             e.printStackTrace()
         }
     }
+
+
+
 
 }

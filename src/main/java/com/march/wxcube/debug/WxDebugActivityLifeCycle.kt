@@ -15,8 +15,6 @@ class WxDebugActivityLifeCycle : ActivityLifecycleCallback() {
 
     override fun onActivityCreated(act: Activity?, savedInstanceState: Bundle?) {
         try {
-
-
 //        if (act !is WeexActivity) {
 //            return
 //        }

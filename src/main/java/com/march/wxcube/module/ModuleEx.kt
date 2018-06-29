@@ -62,7 +62,7 @@ val WXModule.mWeexAct: WxActivity?
 // 获取 mDelegate
 val WXModule.mWeexDelegate: WxDelegate?
     get() {
-        return ManagerRegistry.WEEXINST.findWeexDelegateByInstanceId(mWXSDKInstance.instanceId)
+        return ManagerRegistry.WxInst.findWeexDelegateByInstanceId(mWXSDKInstance.instanceId)
     }
 
 // 获取 查找 view

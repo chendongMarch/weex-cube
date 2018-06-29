@@ -6,6 +6,7 @@ import com.march.common.pool.DiskKVManager
 import com.march.common.utils.ToastUtils
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.DiskLruCache
+import com.march.wxcube.common.WxUtils
 import com.march.wxcube.common.report
 import com.march.wxcube.http.HttpListener
 import com.march.wxcube.manager.ManagerRegistry
@@ -46,7 +47,7 @@ internal object WxGlobalDebugger {
             var datas: List<WxPage> = listOf())
 
     private val mDiskLruCache by lazy {
-        DiskLruCache(CubeWx.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
+        DiskLruCache(WxUtils.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
     }
 
     private val mExecutorService by lazy { Executors.newCachedThreadPool() }
@@ -101,8 +102,8 @@ internal object WxGlobalDebugger {
         }
         val url = CubeWx.mWxDebugAdapter.makeDebugConfigUrl(mDebugHost)
         // 发起网络，并存文件
-        val request = ManagerRegistry.REQ.makeWxRequest(url = url, from = "request-wx-debug-config")
-        ManagerRegistry.REQ.request(request, object : HttpListener {
+        val request = ManagerRegistry.Request.makeWxRequest(url = url, from = "request-wx-debug-config")
+        ManagerRegistry.Request.request(request, object : HttpListener {
             override fun onHttpFinish(response: WXResponse) {
                 if (response.errorCode == RequestManager.ERROR_CODE_FAILURE) {
                     report("请求调试配置文件失败")
@@ -130,7 +131,7 @@ internal object WxGlobalDebugger {
                 if (!it.pageName.isNullOrBlank()) {
                     val p = prepareOldPage(it) ?: prepareNewPage(it)
                     p?.let {
-                        it.h5Url = ManagerRegistry.HOST.makeWebUrl(it.h5Url ?: "")
+                        it.h5Url = ManagerRegistry.Host.makeWebUrl(it.h5Url ?: "")
                         pages.add(it)
                     }
                 }
