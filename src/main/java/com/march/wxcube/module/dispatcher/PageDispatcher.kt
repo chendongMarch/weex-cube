@@ -49,7 +49,7 @@ class PageDispatcher(val module: OneModule) : BaseDispatcher() {
     }
 
     override fun getMethods(): Array<String> {
-        return arrayOf(initPage, loadTabs, showTab)
+        return arrayOf(initPage, loadTabs, showTab, reloadPage)
     }
 
     /**

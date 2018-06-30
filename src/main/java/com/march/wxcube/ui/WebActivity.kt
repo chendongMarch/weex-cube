@@ -4,6 +4,7 @@ import android.os.Bundle
 import com.march.webkit.WebFragment
 import com.march.wxcube.R
 import com.march.wxcube.CubeWx
+import com.march.wxcube.common.WxConstants
 
 /**
  * CreateAt : 2018/4/17
@@ -19,7 +20,7 @@ class WebActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        CubeWx.mWxPageAdapter.onPageCreated(this, CubeWx.PAGE_WEB)
+        CubeWx.mWxPageAdapter.onPageCreated(this, WxConstants.PAGE_WEB)
         setContentView(R.layout.web_activity)
         supportFragmentManager.beginTransaction()
                 .add(R.id.web_activity_root, mWebFragment)

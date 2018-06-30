@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 
 import com.march.wxcube.CubeWx
+import com.march.wxcube.common.WxConstants
 
 
 /**
@@ -19,7 +20,7 @@ class WxActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        CubeWx.mWxPageAdapter.onPageCreated(this, CubeWx.PAGE_WEEX)
+        CubeWx.mWxPageAdapter.onPageCreated(this, WxConstants.PAGE_WEEX)
         mDelegate.onCreate()
         mDelegate.render()
     }

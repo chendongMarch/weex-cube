@@ -23,7 +23,10 @@ open class DiskLruCache(dir: File, maxSize: Long) {
         }
     }
 
-    fun write(key: String, value: String) {
+    fun write(key: String, value: String?) {
+        if (value == null) {
+            return
+        }
         try {
             val edit = diskCache.edit(key)
             edit?.set(0, value)

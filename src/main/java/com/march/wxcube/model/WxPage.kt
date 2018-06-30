@@ -32,20 +32,21 @@ class WxPage() : Parcelable {
 
     /*********************⬆️以上是数据结构字段⬇️下面是临时生成字段************************/
 
-    val key: String?
-        get() = "$pageName($jsVersion)".replace(".", "")
+    val key: String // page-name-weex-2-1-3
+        get() = "$pageName($jsVersion)".replace(".", "-")
 
-    val localJs: String? // 本地 js 文件名 home-page-weex-1-1-0-js
-        get() = "$pageName-$jsVersion-js".replace(".", "-")
+    val localJs: String // 本地 js 文件名  page-name-weex-2-1-3.0
+        get() = key
 
-    val assetsJs: String? // assets js 文件名 js/home-page-weex-1-1-0-js
-        get() = "$pageName-$jsVersion".replace(".", "-") + ".js"
+    val assetsJs: String // assets js 文件名  page-name-weex-2-1-3.js
+        get() = "$key.js"
 
     val isValid: Boolean //
         get() = (!TextUtils.isEmpty(pageName)
                 && !TextUtils.isEmpty(jsVersion)
                 && !TextUtils.isEmpty(h5Url)
                 && !TextUtils.isEmpty(remoteJs))
+
 
     fun make(openUrl: String): WxPage {
         val page = WxPage()

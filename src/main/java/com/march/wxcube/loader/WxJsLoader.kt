@@ -8,10 +8,8 @@ import com.march.wxcube.common.DiskLruCache
 import com.march.wxcube.common.WxUtils
 import com.march.wxcube.common.memory
 import com.march.wxcube.common.report
-import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.WxPage
 import com.march.wxcube.update.OnWxUpdateListener
-import com.taobao.weex.utils.WXFileUtils
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -30,9 +28,8 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
         const val DISK_MAX_SIZE = 20 * 1024 * 1024L
     }
 
-    private var fromWhere: String = ""
     // 线程池
-    private val mService: ExecutorService = Executors.newFixedThreadPool(1)
+    private val mService: ExecutorService = Executors.newCachedThreadPool()
     // 加载策略
     private val mJsLoadStrategy = jsLoadStrategy
     // 缓存策略
@@ -44,6 +41,13 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
     private val mJsMemoryCache = JsMemoryCache(context.memory(.3f))
     // 文件缓存
     private val mJsFileCache = JsFileCache(WxUtils.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
+    // 资源加载器
+    private val mLoaderRegistry by lazy {
+        mapOf(JsLoadStrategy.CACHE_FIRST to CacheResourceLoader(mJsMemoryCache),
+                JsLoadStrategy.ASSETS_FIRST to AssetsResourceLoader(),
+                JsLoadStrategy.FILE_FIRST to FileResourceLoader(mJsFileCache),
+                JsLoadStrategy.NET_FIRST to NetResourceLoader())
+    }
 
     override fun onWeexCfgUpdate(context: Context, weexPages: List<WxPage>?) {
         if (mJsPrepareStrategy == JsPrepareStrategy.PREPARE_ALL) {
@@ -71,107 +75,61 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
         if (page == null) {
             return
         }
-        val publishFunc: (String?) -> Unit = {
-            consumer(it)
-            if (cacheStrategy != JsCacheStrategy.NO_CACHE) {
-                it?.let {
-                    mJsMemoryCache.checkPut(page.key, it)
-                }
-            }
-        }
-        val runnable = if (loadStrategy != JsLoadStrategy.DEFAULT) {
-            makeJsLoader(loadStrategy, context, page)
-        } else {
-            {
-                var template: String? = ""
-                if (template.isNullOrBlank()) {
-                    template = makeJsLoader(JsLoadStrategy.CACHE_FIRST, context, page)()
-                }
-                if (template.isNullOrBlank() && !page.assetsJs.isNullOrBlank()) {
-                    template = makeJsLoader(JsLoadStrategy.ASSETS_FIRST, context, page)()
-                }
-                if (template.isNullOrBlank() && !page.localJs.isNullOrBlank()) {
-                    template = makeJsLoader(JsLoadStrategy.FILE_FIRST, context, page)()
-                }
-                if (template.isNullOrBlank() && !page.remoteJs.isNullOrBlank()) {
-                    template = makeJsLoader(JsLoadStrategy.NET_FIRST, context, page)()
-                }
-                template
-            }
-        }
         mService.execute {
-            val template = runnable.invoke()
-            CubeWx.mWxReportAdapter.log(TAG, "JS加载${page.pageName} cache[${mJsMemoryCache.size()}] $fromWhere")
-            publishFunc(template)
+            // 同步获取模板数据
+            val (realLoadStrategy, template) = getTemplateSync(context, loadStrategy, page)
+            // 先返回数据给渲染线程
+            consumer(template)
+            // 缓存存储模板数据
+            storeTemplate(realLoadStrategy, cacheStrategy, page, template)
         }
     }
+
+    // 同步加载数据信息
+    private fun getTemplateSync(context: Context, loadStrategy: Int, page: WxPage): Pair<Int, String?> {
+        var realLoadStrategy = loadStrategy
+        var template: String? = null
+        // 指定方式加载
+        if (loadStrategy != JsLoadStrategy.DEFAULT) {
+            template = mLoaderRegistry[loadStrategy]?.load(context, page)
+        } else {
+            val strategies = arrayOf(
+                    JsLoadStrategy.CACHE_FIRST,
+                    JsLoadStrategy.ASSETS_FIRST,
+                    JsLoadStrategy.FILE_FIRST,
+                    JsLoadStrategy.NET_FIRST)
+            for (strategy in strategies) {
+                realLoadStrategy = strategy
+                template = mLoaderRegistry[loadStrategy]?.load(context, page)
+                if (!template.isNullOrBlank()) break
+            }
+        }
+        CubeWx.mWxReportAdapter.log(TAG, "JS加载${page.pageName} cache[${mJsMemoryCache.size()}] ${JsLoadStrategy.desc(realLoadStrategy)}")
+        return realLoadStrategy to template
+    }
+
+    // 同步缓存数据模板信息
+    private fun storeTemplate(realLoadStrategy: Int, cacheStrategy: Int, page: WxPage, template: String?) {
+        // 不管从哪里取出来，都需要往内存中存
+        if (cacheStrategy != JsCacheStrategy.NO_CACHE) {
+            mJsMemoryCache.checkPut(page.key, template)
+        }
+        // 网络获取的考虑存文件
+        if (realLoadStrategy == JsLoadStrategy.NET_FIRST
+                && mJsCacheStrategy == JsCacheStrategy.CACHE_MEMORY_DISK_BOTH
+                && !template.isNullOrBlank()) {
+            mJsFileCache.write(page.localJs, template)
+        }
+    }
+
 
     fun clearCache() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             mJsMemoryCache.trimToSize(-1)
         }
     }
-
-    private fun downloadJs(page: WxPage): String? {
-        val url = page.remoteJs ?: return null
-        val http = ManagerRegistry.Request
-        val makeJsResUrl = ManagerRegistry.Host.makeJsResUrl(url)
-        val wxRequest = http.makeWxRequest(url = makeJsResUrl, from = "download-js")
-        val resp = http.requestSync(wxRequest, false)
-        // val md5 = resp.data.md5()
-        if (page.localJs != null && resp.data != null && mJsCacheStrategy == JsCacheStrategy.CACHE_MEMORY_DISK_BOTH) {
-            mJsFileCache.write(page.localJs!!, resp.data)
-        }
-        return resp.data
-    }
-
-    // 加载函数
-    private fun makeJsLoader(type: Int, context: Context, page: WxPage): () -> String? {
-        return when (type) {
-            JsLoadStrategy.CACHE_FIRST  -> {
-                {
-                    fromWhere = "缓存"
-                    mJsMemoryCache.get(page.key)
-                }
-            }
-            JsLoadStrategy.ASSETS_FIRST -> {
-                {
-                    if (isAssetsExist(page.assetsJs ?: "", context)) {
-                        fromWhere = "assets"
-                        WXFileUtils.loadAsset("js/${page.assetsJs}", context)
-                    } else {
-                        ""
-                    }
-                }
-            }
-            JsLoadStrategy.FILE_FIRST   -> {
-                {
-                    fromWhere = "文件"
-                    page.localJs?.let { mJsFileCache.read(it) }
-                }
-            }
-            JsLoadStrategy.NET_FIRST    -> {
-                {
-                    fromWhere = "网络"
-                    downloadJs(page)
-                }
-            }
-            else                        -> {
-                { "" }
-            }
-        }
-    }
-
-
-    private fun isAssetsExist(name: String, context: Context): Boolean {
-        return try {
-            val files = context.assets.list("js")
-            files.any { name == it }
-        } catch (e: Exception) {
-            false
-        }
-    }
 }
+
 
 // js 内存缓存
 class JsMemoryCache(maxSize: Int) : LruCache<String, String>(maxSize) {
@@ -202,13 +160,23 @@ object JsLoadStrategy {
     const val ASSETS_FIRST = 2 // 只加载 assets
     const val CACHE_FIRST = 3 // 只加载缓存
     const val DEFAULT = 4 // 默认 缓存、文件、assets、网络 一次检查
+
+    fun desc(strategy: Int): String {
+        return when (strategy) {
+            NET_FIRST    -> "网络"
+            FILE_FIRST   -> "文件"
+            ASSETS_FIRST -> "Assets"
+            CACHE_FIRST  -> "缓存"
+            DEFAULT      -> "默认"
+            else         -> "未知"
+        }
+    }
 }
 
 // 预加载策略
 object JsPrepareStrategy {
     const val PREPARE_ALL = 0 // 提前准备所有的js到缓存中
     const val LAZY_LOAD = 1 // 使用时才加载
-    const val NO_CACHE = 2 // 不缓存
 }
 
 // 缓存策略
@@ -216,4 +184,6 @@ object JsCacheStrategy {
     const val NO_CACHE = 0 // 不缓存，加载后仅使用一次，下次仍旧从原资源加载
     const val CACHE_MEMORY_ONLY = 1 // 仅缓存到内存中
     const val CACHE_MEMORY_DISK_BOTH = 2 // 内存和磁盘都缓存
+
+
 }

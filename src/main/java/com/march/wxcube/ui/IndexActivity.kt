@@ -7,6 +7,7 @@ import android.os.Handler
 import com.march.common.utils.ToastUtils
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.Permission
+import com.march.wxcube.common.WxConstants
 
 
 /**
@@ -37,7 +38,7 @@ class IndexActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        CubeWx.mWxPageAdapter.onPageCreated(this, CubeWx.PAGE_INDEX)
+        CubeWx.mWxPageAdapter.onPageCreated(this, WxConstants.PAGE_INDEX)
         CubeWx.mWxPageAdapter.getLoading().setIndexContent(this)
         checkPermissionAndLaunch()
     }

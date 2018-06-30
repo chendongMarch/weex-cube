@@ -6,7 +6,9 @@ import android.net.Uri
 import android.support.v4.app.Fragment
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.march.common.utils.LgUtils
+import com.march.common.utils.ToastUtils
 import com.march.common.utils.immersion.StatusBarUtils
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.WxUtils
@@ -155,6 +157,7 @@ class WxDelegate : WxLifeCycle {
 
         override fun onException(instance: WXSDKInstance?, errCode: String?, msg: String?) {
             report("code = $errCode, msg = $msg")
+            ToastUtils.show("code = $errCode, msg = $msg")
             mWeexDebugger?.onException(instance, errCode, msg)
             // 正在 js 刷新时直接跳过后续异常处理
             if (mWeexDebugger != null) {
@@ -265,7 +268,6 @@ class WxDelegate : WxLifeCycle {
 
     override fun onViewCreated(view: View?) {
         super.onViewCreated(view)
-        LgUtils.e("onViewCreated")
         mContainerView.removeAllViews()
         mContainerView.addView(view, 0)
         mLifeCallbacks.forEach { it.onViewCreated(view) }

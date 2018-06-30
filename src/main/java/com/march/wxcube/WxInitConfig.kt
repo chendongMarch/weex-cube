@@ -25,6 +25,9 @@ class WxInitConfig {
         }
     }
 
+    var smallImgHolder: Int = 0
+    var largeImgHolder: Int = 0
+
     var https: Boolean = false
     var debug: Boolean = true
 

@@ -8,6 +8,7 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.module.AppGlideModule
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.march.wxcube.CubeWx
 import com.march.wxcube.manager.ManagerRegistry
 import com.taobao.weex.adapter.IWXImgLoaderAdapter
 import com.taobao.weex.common.WXImageStrategy
@@ -33,6 +34,11 @@ class ImgAdapter : IWXImgLoaderAdapter {
                     .listener(RequestListenerImpl(url, view, strategy))
             if (view.measuredWidth > 0 && view.measuredHeight > 0) {
                 request = request.override(view.measuredWidth, view.measuredHeight)
+                if (view.measuredWidth > 300 && CubeWx.mWeexConfig.largeImgHolder > 0) {
+                    request.placeholder(CubeWx.mWeexConfig.largeImgHolder).error(CubeWx.mWeexConfig.largeImgHolder)
+                } else if (CubeWx.mWeexConfig.smallImgHolder > 0) {
+                    request.placeholder(CubeWx.mWeexConfig.smallImgHolder).error(CubeWx.mWeexConfig.smallImgHolder)
+                }
             }
             request.into(view)
         } else {

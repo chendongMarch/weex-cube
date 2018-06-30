@@ -11,7 +11,6 @@ import com.march.webkit.WebKit
 import com.march.wxcube.adapter.*
 import com.march.wxcube.common.JsonParserImpl
 import com.march.wxcube.common.WxInstaller
-import com.march.wxcube.common.sdFile
 import com.march.wxcube.debug.WxDebugActivityLifeCycle
 import com.march.wxcube.loader.WxJsLoader
 import com.march.wxcube.manager.*
@@ -34,11 +33,6 @@ import java.io.File
  * @author chendong
  */
 object CubeWx {
-
-    const val CACHE_DIR = "weex-cache"
-    const val PAGE_WEB = 1
-    const val PAGE_WEEX = 2
-    const val PAGE_INDEX = 3
 
     // model
     lateinit var mWeexConfig: WxInitConfig
