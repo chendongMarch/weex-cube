@@ -2,10 +2,8 @@ package com.march.wxcube.debug
 
 import android.content.Context
 import com.alibaba.fastjson.JSON
-import com.march.common.pool.DiskKVManager
 import com.march.common.utils.ToastUtils
 import com.march.wxcube.CubeWx
-import com.march.wxcube.common.DiskLruCache
 import com.march.wxcube.common.WxUtils
 import com.march.wxcube.common.report
 import com.march.wxcube.http.HttpListener
@@ -36,28 +34,19 @@ internal object WxGlobalDebugger {
 
     private const val CONFIG_KEY = "weex-debug-config"
     private const val CACHE_DIR = "debug-config-cache"
-    private const val DISK_MAX_SIZE = Int.MAX_VALUE.toLong()
     private const val MAX_VERSION = "100.100.100"
     private const val MIN_VERSION = "0.0.0"
-    private const val DEBUG_ENABLE = "DEBUG_ENABLE"
-    private const val DEBUG_HOST = "DEBUG_HOST"
 
     data class DebugWxPagesResp(
             var global: Boolean = false,
             var autoJumpPage: String = "",
             var datas: List<WxPage> = listOf())
 
-    private val mDiskLruCache by lazy {
-        DiskLruCache(WxUtils.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
-    }
-
+    private val mDiskLruCache by lazy { WxUtils.makeDiskCahce(CACHE_DIR, Int.MAX_VALUE.toLong()) }
+    internal val mWxDebugCfg by lazy { GlobalWxDebugCfg.backup() }
     private val mExecutorService by lazy { Executors.newCachedThreadPool() }
     private var mDebugWeexPagesResp: DebugWxPagesResp? = null
     internal var mWeexPageMap = mutableMapOf<UrlKey, WxPage>()
-
-
-    private var mDebugHost = ""
-    private var mDebugEnable = false
 
     internal fun init() {
         if (!checkDebug()) {
@@ -69,25 +58,6 @@ internal object WxGlobalDebugger {
         }
     }
 
-    // 设置调试状态
-    fun setDebugHost(host: String = "") {
-        DiskKVManager.getInst().put(DEBUG_HOST, host)
-    }
-
-    // 设置调试状态
-    fun setDebugEnable(debug: Boolean = false) {
-        DiskKVManager.getInst().put(DEBUG_ENABLE, debug)
-    }
-
-    // 设置调试状态
-    fun getDebugHost(): String {
-        return DiskKVManager.getInst().get(DEBUG_HOST, "")
-    }
-
-    // 设置调试状态
-    fun getDebugEnable(): Boolean {
-        return DiskKVManager.getInst().get(DEBUG_ENABLE, false)
-    }
 
     // 从磁盘初始化
     private fun updateFromDisk() {
@@ -101,7 +71,7 @@ internal object WxGlobalDebugger {
         if (!checkDebug()) {
             return
         }
-        val url = CubeWx.mWxDebugAdapter.makeDebugConfigUrl(mDebugHost)
+        val url = CubeWx.mWxDebugAdapter.makeDebugConfigUrl(mWxDebugCfg.multiPageDebugHost)
         // 发起网络，并存文件
         val request = ManagerRegistry.Request.makeWxRequest(url = url, from = "request-wx-debug-config")
         ManagerRegistry.Request.request(request, false, object : HttpListener {
@@ -159,7 +129,7 @@ internal object WxGlobalDebugger {
             page.h5Url = page.h5Url ?: validOldPage.h5Url
             // page.remoteJs = page.remoteJs ?: debugWeexPageMaker(page, mHost)
             page.md5 = ""
-            page = CubeWx.mWxDebugAdapter.completeDebugWeexPage(page, mDebugHost)
+            page = CubeWx.mWxDebugAdapter.completeDebugWeexPage(page, mWxDebugCfg.multiPageDebugHost)
             if (page.h5Url.isNullOrBlank() || page.remoteJs.isNullOrBlank()) {
                 report("老页面自动完善错误 $page ")
                 null
@@ -177,7 +147,7 @@ internal object WxGlobalDebugger {
         // page.h5Url = page.h5Url ?: validOldPage.h5Url
         // page.remoteJs = page.remoteJs ?: debugWeexPageMaker(page, mHost)
         page.md5 = ""
-        page = CubeWx.mWxDebugAdapter.completeDebugWeexPage(page, mDebugHost)
+        page = CubeWx.mWxDebugAdapter.completeDebugWeexPage(page, mWxDebugCfg.multiPageDebugHost)
         return if (page.h5Url.isNullOrBlank() || page.remoteJs.isNullOrBlank()) {
             report("新页面自动完善错误 $page ")
             null
@@ -210,12 +180,9 @@ internal object WxGlobalDebugger {
         }
     }
 
-
     private fun checkDebug(): Boolean {
-        mDebugEnable = DiskKVManager.getInst().get(DEBUG_ENABLE, false)
-        mDebugHost = DiskKVManager.getInst().get(DEBUG_HOST, "")
-        if (!mDebugEnable || mDebugHost.isBlank()) {
-            report("未开启调试 $mDebugHost $mDebugEnable")
+        if (!mWxDebugCfg.multiPageDebugEnable || mWxDebugCfg.multiPageDebugHost.isBlank()) {
+            report("未开启调试 ${mWxDebugCfg.multiPageDebugEnable} ${mWxDebugCfg.multiPageDebugHost}")
             return false
         }
         return true

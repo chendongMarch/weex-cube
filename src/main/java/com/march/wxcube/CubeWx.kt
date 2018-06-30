@@ -34,7 +34,7 @@ import java.io.File
 object CubeWx {
 
     // model
-    lateinit var mWeexConfig: WxInitConfig
+    lateinit var mWxCfg: WxInitConfig
     lateinit var mWeakCtx: WeakContext
     // func
     lateinit var mWxJsLoader: WxJsLoader
@@ -52,7 +52,7 @@ object CubeWx {
     fun init(ctx: Application, config: WxInitConfig) {
         ctx.registerActivityLifecycleCallbacks(WxDebugActivityLifeCycle())
         mWeakCtx = WeakContext(ctx)
-        mWeexConfig = config.prepare(ctx)
+        mWxCfg = config.prepare(ctx)
 
         WXEnvironment.setOpenDebugLog(config.debug)
         WXEnvironment.setApkDebugable(config.debug)

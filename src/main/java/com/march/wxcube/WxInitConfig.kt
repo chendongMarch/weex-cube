@@ -49,7 +49,7 @@ class WxInitConfig {
 
 
     fun prepare(ctx: Context): WxInitConfig {
-        CubeWx.mWeexConfig = this
+        CubeWx.mWxCfg = this
         CubeWx.mRootCacheDir = WxUtils.makeRootCacheDir()
         // adapter
         CubeWx.mWxModelAdapter = wxModelAdapter

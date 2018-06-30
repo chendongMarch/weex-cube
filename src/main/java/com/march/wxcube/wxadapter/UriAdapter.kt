@@ -32,11 +32,11 @@ class UriAdapter : DefaultUriAdapter() {
             addHttpSchema(builder, uri)
             when (type) {
                 URIAdapter.IMAGE   -> builder
-                URIAdapter.REQUEST -> addAuthority(CubeWx.mWeexConfig.reqAuthority, builder, uri)
-                URIAdapter.WEB     -> addAuthority(CubeWx.mWeexConfig.webAuthority, builder, uri)
+                URIAdapter.REQUEST -> addAuthority(CubeWx.mWxCfg.reqAuthority, builder, uri)
+                URIAdapter.WEB     -> addAuthority(CubeWx.mWxCfg.webAuthority, builder, uri)
                 URIAdapter.BUNDLE  -> {
-                    addAuthority(CubeWx.mWeexConfig.bundleAuthority, builder, uri)
-                    addPrefixPath(CubeWx.mWeexConfig.bundlePathPrefix, builder, uri)
+                    addAuthority(CubeWx.mWxCfg.bundleAuthority, builder, uri)
+                    addPrefixPath(CubeWx.mWxCfg.bundlePathPrefix, builder, uri)
                 }
             }
             return builder.build()
@@ -50,7 +50,7 @@ class UriAdapter : DefaultUriAdapter() {
         if (base.scheme != null) {
             return builder
         }
-        if (CubeWx.mWeexConfig.https) {
+        if (CubeWx.mWxCfg.https) {
             builder.scheme("https")
         } else {
             builder.scheme("http")

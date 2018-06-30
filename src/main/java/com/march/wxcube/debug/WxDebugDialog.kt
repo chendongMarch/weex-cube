@@ -7,17 +7,14 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Switch
-import android.widget.TextView
 import com.march.common.utils.JsonUtils
 import com.march.common.utils.ToastUtils
-import com.march.wxcube.R
 import com.march.wxcube.CubeWx
+import com.march.wxcube.R
 import com.march.wxcube.common.WxUtils
 import com.march.wxcube.common.click
 import com.march.wxcube.common.newLine
+import kotlinx.android.synthetic.main.debug_dialog.*
 
 /**
  * CreateAt : 2018/6/17
@@ -25,21 +22,12 @@ import com.march.wxcube.common.newLine
  *
  * @author chendong
  */
-class PageDebugDialog(context: Context, private val mWeexPageDebugger: WxPageDebugger)
+class WxDebugDialog(context: Context, private val mWeexPageDebugger: WxPageDebugger)
     : AppCompatDialog(context, R.style.dialog_theme) {
 
     init {
         setContentView(R.layout.debug_dialog)
     }
-
-    private val hideMsgBtn by lazy { findViewById<Button>(R.id.hide_msg_btn) }
-    private val descTv by lazy { findViewById<TextView>(R.id.desc_tv) }
-    private val cfgTv by lazy { findViewById<TextView>(R.id.config_tv) }
-    private val hideCfgBtn by lazy { findViewById<TextView>(R.id.mp_hide_cfg) }
-    private val refreshJsSw by lazy { findViewById<Switch>(R.id.debug_local_js_sw) }
-    private val mpEnableSw by lazy { findViewById<Switch>(R.id.mp_enable) }
-    private val mpIpEt by lazy { findViewById<EditText>(R.id.mp_ip) }
-    private val contentEt by lazy { findViewById<EditText>(R.id.content_et) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,41 +45,31 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WxPageDeb
 
     // 顶部工具
     private fun initTopDebug() {
-        findViewById<View>(R.id.info_btn).click {
+        debugInfoBtn.click {
             ToastUtils.showLong("""
                     1. 长按可以触发强制刷新
                     2. 当在实时刷新时，图标会保持旋转作为提示
                 """.trimIndent())
         }
         // 关闭
-        findViewById<View>(R.id.close_btn).click { dismiss() }
+        debugCloseBtn.click { dismiss() }
     }
 
     // 页面调试
     private fun initCurPageDebug() {
-        hideMsgBtn.click {
-            if (descTv?.visibility == View.GONE) {
-                descTv?.visibility = View.VISIBLE
+        pageHideMsgBtn.click {
+            if (pageMsgTv?.visibility == View.GONE) {
+                pageMsgTv?.visibility = View.VISIBLE
             } else {
-                descTv?.visibility = View.GONE
+                pageMsgTv?.visibility = View.GONE
             }
         }
         updateMsg()
-        val jsInCacheSw = findViewById<Switch>(R.id.js_in_cache_sw)
-        val debugConfig = mWeexPageDebugger.mDebugConfig
-        jsInCacheSw?.isChecked = debugConfig.debugJsInCache
-        jsInCacheSw?.setOnCheckedChangeListener { _, isChecked ->
-            debugConfig.debugJsInCache = isChecked
-        }
-        val jsInDiskSw = findViewById<Switch>(R.id.js_in_disk_sw)
-        jsInDiskSw?.isChecked = debugConfig.debugJsInDisk
-        jsInDiskSw?.setOnCheckedChangeListener { _, isChecked ->
-            debugConfig.debugJsInDisk = isChecked
-        }
-        refreshJsSw?.isChecked = debugConfig.isRefreshRemoteJs
-        refreshJsSw?.setOnCheckedChangeListener { _, isChecked ->
-            debugConfig.isRefreshRemoteJs = isChecked
-            if (debugConfig.isRefreshRemoteJs) {
+        val debugConfig = mWeexPageDebugger.mWxPageDebugCfg
+        pageRefreshJsSwitch?.isChecked = debugConfig.isRefreshing
+        pageRefreshJsSwitch?.setOnCheckedChangeListener { _, isChecked ->
+            debugConfig.isRefreshing = isChecked
+            if (debugConfig.isRefreshing) {
                 mWeexPageDebugger.stopRefresh()
                 mWeexPageDebugger.startRefresh(false)
                 ToastUtils.show("开始调试远程js")
@@ -104,22 +82,37 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WxPageDeb
 
     // 全局调试
     private fun initGlobalDebug() {
+        // 自动刷新ip js
+        globalForceNetJsSwitch.isChecked = WxGlobalDebugger.mWxDebugCfg.isForceNetJs
+        globalForceNetJsSwitch.setOnCheckedChangeListener { _, isChecked ->
+            WxGlobalDebugger.mWxDebugCfg.apply {
+                isForceNetJs = isChecked
+                flush()
+            }
+        }
+        globalAutoRefreshJsSwitch.isChecked = WxGlobalDebugger.mWxDebugCfg.isAutoRefreshLocalIp
+        globalAutoRefreshJsSwitch.setOnCheckedChangeListener({ _, isChecked ->
+            WxGlobalDebugger.mWxDebugCfg.apply {
+                isAutoRefreshLocalIp = isChecked
+                flush()
+            }
+        })
         // 请求线上配置
-        findViewById<View>(R.id.req_online_cfg_btn).click { CubeWx.mWxUpdater.update(context) }
+        globalUpdateOnlineCfgBtn?.click { CubeWx.mWxUpdater.update(context) }
         // 请求调试配置
-        findViewById<View>(R.id.req_debug_cfg_btn).click { WxGlobalDebugger.updateFromNet() }
+        globalUpdateDebugCfgBtn?.click { WxGlobalDebugger.updateFromNet() }
         // 清理缓存的js
-        findViewById<View>(R.id.clear_cache_btn).click { CubeWx.mWxJsLoader.clearCache() }
+        globalClearCacheBtn?.click { CubeWx.mWxJsLoader.clearCache() }
         // 清理磁盘js
-        findViewById<View>(R.id.clear_disk_btn).click { WxUtils.clearDiskCache() }
-        findViewById<View>(R.id.jump_weex_btn).click {
-            val text = contentEt?.text.toString()
+        globalClearDiskBtn?.click { WxUtils.clearDiskCache() }
+        globalJumpWeexBtn?.click {
+            val text = globalJumpEt?.text.toString()
             if (!text.isBlank()) {
                 CubeWx.mWxRouter.openUrl(context, text)
             }
         }
-        findViewById<View>(R.id.jump_web_btn).click {
-            val text = contentEt?.text.toString()
+        globalJumoWebBtn?.click {
+            val text = globalJumpEt?.text.toString()
             if (!text.isBlank()) {
                 CubeWx.mWxRouter.openWeb(context, text)
             }
@@ -128,38 +121,35 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WxPageDeb
 
     // 多页面调试
     private fun initMultiPageDebug() {
-        hideCfgBtn.click {
-            if (cfgTv?.visibility == View.GONE) {
-                cfgTv?.visibility = View.VISIBLE
-            } else {
-                cfgTv?.visibility = View.GONE
-            }
+        multiPageHideMsgBtn.click {
+            multiPageMsgTv?.visibility = if (multiPageMsgTv?.visibility == View.GONE) View.VISIBLE else View.GONE
         }
-        cfgTv.click {
-            cfgTv?.visibility = View.GONE
-        }
+        multiPageMsgTv.click { multiPageMsgTv?.visibility = View.GONE }
         // 自动跳转
-        findViewById<View>(R.id.mp_auto_jump).click {
+        multiPageAutoJumpBtn?.click {
             WxGlobalDebugger.autoJump(context)
         }
         // 查看调试配置
-        findViewById<View>(R.id.mp_look_debug_cfg).click {
+        multiPageLookDebugCfgBtn?.click {
             val text = JsonUtils.toJsonString(JsonUtils.toJson(WxGlobalDebugger.mWeexPageMap.values), "解析失败")
-            cfgTv?.text = text
-            cfgTv?.visibility = View.VISIBLE
+            multiPageMsgTv?.text = text
+            multiPageMsgTv?.visibility = View.VISIBLE
         }
         // 查看线上配置
-        findViewById<View>(R.id.mp_look_online_cfg).click {
+        multiPageLookOnlineCfgBtn?.click {
             val text = JsonUtils.toJsonString(JsonUtils.toJson(CubeWx.mWxRouter.mWeexPageMap.values), "解析失败")
-            cfgTv?.text = text
-            cfgTv?.visibility = View.VISIBLE
+            multiPageMsgTv?.text = text
+            multiPageMsgTv?.visibility = View.VISIBLE
         }
-        mpIpEt?.setText(WxGlobalDebugger.getDebugHost())
-        mpEnableSw?.isChecked = WxGlobalDebugger.getDebugEnable()
+        multiPageIpHostEt?.setText(WxGlobalDebugger.mWxDebugCfg.multiPageDebugHost)
+        multiPageEnableSwitch?.isChecked = WxGlobalDebugger.mWxDebugCfg.multiPageDebugEnable
         // 生效
-        findViewById<View>(R.id.mp_active).click {
-            WxGlobalDebugger.setDebugEnable(mpEnableSw?.isChecked ?: false)
-            WxGlobalDebugger.setDebugHost(mpIpEt?.text.toString())
+        multiPageActiveBtn?.click {
+            WxGlobalDebugger.mWxDebugCfg.apply {
+                multiPageDebugEnable = multiPageEnableSwitch?.isChecked ?: false
+                multiPageDebugHost = multiPageIpHostEt?.text.toString()
+                flush()
+            }
             WxGlobalDebugger.updateFromNet()
         }
     }
@@ -169,10 +159,10 @@ class PageDebugDialog(context: Context, private val mWeexPageDebugger: WxPageDeb
                 .append("页面：").newLine()
                 .append(mWeexPageDebugger.mWeexPage?.toShowString()).newLine()
                 .append("信息：").newLine()
-                .append(mWeexPageDebugger.mDebugMsg.toShowString()).newLine()
+                .append(mWeexPageDebugger.mWxPageDebugCfg.toShowString()).newLine()
                 .toString()
-        descTv?.text = msg
-        descTv?.visibility = View.VISIBLE
+        pageMsgTv?.text = msg
+        pageMsgTv?.visibility = View.VISIBLE
     }
 
     override fun show() {

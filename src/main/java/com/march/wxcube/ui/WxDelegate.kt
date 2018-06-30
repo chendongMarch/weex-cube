@@ -6,7 +6,6 @@ import android.net.Uri
 import android.support.v4.app.Fragment
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import com.march.common.utils.LgUtils
 import com.march.common.utils.ToastUtils
 import com.march.common.utils.immersion.StatusBarUtils
@@ -160,9 +159,9 @@ class WxDelegate : WxLifeCycle {
             ToastUtils.show("code = $errCode, msg = $msg")
             mWeexDebugger?.onException(instance, errCode, msg)
             // 正在 js 刷新时直接跳过后续异常处理
-            if (mWeexDebugger != null) {
-                return
-            }
+//            if (mWeexDebugger != null) {
+//                return
+//            }
             // 如果已经成功过，则此时不会走失败页面，只会没有反应
             if (mRenderStatus == RenderStatus.RENDER_SUCCESS) {
                 return
@@ -177,7 +176,6 @@ class WxDelegate : WxLifeCycle {
     }
 
     //************************渲染页面*********************//
-
 
     internal fun refreshInstance() {
         val options = parseRenderOptions()
@@ -212,7 +210,7 @@ class WxDelegate : WxLifeCycle {
      * 渲染之前处理
      */
     private fun preRender() {
-        if (mRenderStatus == RenderStatus.RENDER_SUCCESS) {
+        if (mRenderStatus.value >= RenderStatus.RENDER_BUNDLE_JS.value) {
             destroyWxInst()
             createWxInst()
             onCreate()
@@ -226,8 +224,8 @@ class WxDelegate : WxLifeCycle {
     private fun render(page: WxPage) {
         preRender()
         mCurPage = page
-        mWeexRender.render(page, parseRenderOptions())
         mRenderStatus = RenderStatus.RENDER_DOING
+        mWeexRender.render(page, parseRenderOptions()) { mRenderStatus = RenderStatus.RENDER_BUNDLE_JS }
     }
 
     /**
@@ -250,7 +248,7 @@ class WxDelegate : WxLifeCycle {
      * 渲染 not found 页面
      */
     fun renderNotFound() {
-        val errPage = CubeWx.mWxRouter.findPage("/status/not-found-weex") ?: return
+        val errPage = CubeWx.mWxRouter.findPage(CubeWx.mWxPageAdapter.getNotFontPageUrl()) ?: return
         render(errPage)
     }
 
@@ -324,6 +322,8 @@ class WxDelegate : WxLifeCycle {
 enum class RenderStatus(val value: Int) {
     RENDER_NONE(1),
     RENDER_DOING(2),
-    RENDER_SUCCESS(3),
-    RENDER_FAILURE(4),
+    RENDER_BUNDLE_JS(3),
+    RENDER_SUCCESS(4),
+    RENDER_FAILURE(5),
+
 }

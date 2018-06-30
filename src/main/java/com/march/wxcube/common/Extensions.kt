@@ -3,13 +3,11 @@ package com.march.wxcube.common
 import android.app.ActivityManager
 import android.content.Context
 import android.graphics.Bitmap
-import android.os.Environment
 import android.view.View
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.march.wxcube.CubeWx
 import com.march.wxcube.wxadapter.GlideApp
-import java.io.File
 import java.lang.Exception
 import java.math.BigInteger
 import java.nio.charset.Charset
@@ -25,7 +23,7 @@ import java.security.MessageDigest
 
 // 提交错误
 fun Any.report(msg: String, throwable: Throwable? = null) {
-    if (CubeWx.mWeexConfig.debug) {
+    if (CubeWx.mWxCfg.debug) {
         CubeWx.mWxReportAdapter.reportError(throwable, msg)
     }
 }

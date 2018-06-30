@@ -30,10 +30,14 @@ interface IWxPageAdapter {
      */
     fun getLoading(): Loading
 
+    fun getNotFontPageUrl(): String
+
 }
 
 
 open class DefaultWxPageAdapter : IWxPageAdapter {
+
+    override fun getNotFontPageUrl(): String = ""
 
     override fun onPageCreated(activity: Activity, type: Int) {
         ImmersionStatusBarUtils.setStatusBarLightMode(activity)

@@ -9,7 +9,6 @@ import com.bumptech.glide.module.AppGlideModule
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.march.wxcube.CubeWx
-import com.march.wxcube.manager.ManagerRegistry
 import com.taobao.weex.adapter.IWXImgLoaderAdapter
 import com.taobao.weex.common.WXImageStrategy
 import com.taobao.weex.dom.WXImageQuality
@@ -33,10 +32,10 @@ class ImgAdapter : IWXImgLoaderAdapter {
                     .listener(RequestListenerImpl(url, view, strategy))
             if (view.measuredWidth > 0 && view.measuredHeight > 0) {
                 request = request.override(view.measuredWidth, view.measuredHeight)
-                if (view.measuredWidth > 300 && CubeWx.mWeexConfig.largeImgHolder > 0) {
-                    request =  request.placeholder(CubeWx.mWeexConfig.largeImgHolder).error(CubeWx.mWeexConfig.largeImgHolder)
-                } else if (CubeWx.mWeexConfig.smallImgHolder > 0) {
-                    request = request.placeholder(CubeWx.mWeexConfig.smallImgHolder).error(CubeWx.mWeexConfig.smallImgHolder)
+                if (view.measuredWidth > 300 && CubeWx.mWxCfg.largeImgHolder > 0) {
+                    request =  request.placeholder(CubeWx.mWxCfg.largeImgHolder).error(CubeWx.mWxCfg.largeImgHolder)
+                } else if (CubeWx.mWxCfg.smallImgHolder > 0) {
+                    request = request.placeholder(CubeWx.mWxCfg.smallImgHolder).error(CubeWx.mWxCfg.smallImgHolder)
                 }
             }
             request.into(view)
@@ -51,6 +50,14 @@ class ImgAdapter : IWXImgLoaderAdapter {
             private val strategy: WXImageStrategy?) : RequestListener<Bitmap> {
         override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Bitmap>?, isFirstResource: Boolean): Boolean {
             strategy?.imageListener?.onImageFinish(url, view, false, null)
+            view ?: return false
+            if (view.measuredWidth > 0 && view.measuredHeight > 0) {
+                if (view.measuredWidth > 300 && CubeWx.mWxCfg.largeImgHolder > 0) {
+                    view.setImageResource(CubeWx.mWxCfg.largeImgHolder)
+                } else if (CubeWx.mWxCfg.smallImgHolder > 0) {
+                    view.setImageResource(CubeWx.mWxCfg.smallImgHolder)
+                }
+            }
             return false
         }
 

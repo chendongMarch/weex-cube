@@ -30,12 +30,6 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
 
     // 线程池
     private val mService: ExecutorService = Executors.newCachedThreadPool()
-    // 加载策略
-    private val mJsLoadStrategy = jsLoadStrategy
-    // 缓存策略
-    private val mJsCacheStrategy = jsCacheStrategy
-    // 预加载策略
-    private val mJsPrepareStrategy = jsPrepareStrategy
 
     // 内存缓存
     private val mJsMemoryCache = JsMemoryCache(context.memory(.3f))
@@ -50,7 +44,7 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
     }
 
     override fun onWeexCfgUpdate(context: Context, weexPages: List<WxPage>?) {
-        if (mJsPrepareStrategy == JsPrepareStrategy.PREPARE_ALL) {
+        if (CubeWx.mWxCfg.jsPrepareStrategy == JsPrepareStrategy.PREPARE_ALL) {
             weexPages?.forEach { getTemplateAsync(context, it) {} }
         }
     }
@@ -60,7 +54,9 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
      * 使用默认的加载和缓存策略
      */
     fun getTemplateAsync(context: Context, page: WxPage?, consumer: (String?) -> Unit) {
-        getTemplateAsync(context, mJsLoadStrategy, mJsCacheStrategy, page, consumer)
+        val loadStrategy = CubeWx.mWxCfg.jsLoadStrategy
+        val cacheStrategy = CubeWx.mWxCfg.jsCacheStrategy
+        getTemplateAsync(context, loadStrategy, cacheStrategy, page, consumer)
     }
 
     /**
@@ -116,7 +112,7 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
         }
         // 网络获取的考虑存文件
         if (realLoadStrategy == JsLoadStrategy.NET_FIRST
-                && mJsCacheStrategy == JsCacheStrategy.CACHE_MEMORY_DISK_BOTH
+                && CubeWx.mWxCfg.jsCacheStrategy == JsCacheStrategy.CACHE_MEMORY_DISK_BOTH
                 && !template.isNullOrBlank()) {
             mJsFileCache.write(page.localJs, template)
         }
@@ -128,6 +124,8 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
             mJsMemoryCache.trimToSize(-1)
         }
     }
+
+
 }
 
 

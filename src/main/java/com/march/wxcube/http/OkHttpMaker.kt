@@ -40,7 +40,7 @@ internal object OkHttpMaker {
          })
          builder.sslSocketFactory(createSSLSocketFactory())
         // 进行日志打印，扩展自 HttpLoggingInterceptor
-//        builder.addInterceptor(LogInterceptor())
+        builder.addInterceptor(LogInterceptor())
         // token校验，返回 403 时
         // builder.authenticator(new TokenAuthenticator());
         CubeWx.mWxInitAdapter.onInitOkHttpClient(builder)

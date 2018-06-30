@@ -23,14 +23,14 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/info_btn"
+                android:id="@+id/debugInfoBtn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="提示"/>
 
             <Button
-                android:id="@+id/close_btn"
+                android:id="@+id/debugCloseBtn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -59,7 +59,7 @@
                 android:orientation="horizontal">
                 <!--本地调试IP-->
                 <EditText
-                    android:id="@+id/mp_ip"
+                    android:id="@+id/multiPageIpHostEt"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -68,14 +68,14 @@
                     android:textSize="14sp"/>
 
                 <Switch
-                    android:id="@+id/mp_enable"
+                    android:id="@+id/multiPageEnableSwitch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"/>
 
                 <Button
-                    android:id="@+id/mp_active"
+                    android:id="@+id/multiPageActiveBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="0dp"
@@ -90,7 +90,7 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/mp_auto_jump"
+                    android:id="@+id/multiPageAutoJumpBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -99,7 +99,7 @@
                     android:text="跳转"/>
                 <!--正式配置-->
                 <Button
-                    android:id="@+id/mp_look_debug_cfg"
+                    android:id="@+id/multiPageLookDebugCfgBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -108,7 +108,7 @@
                     android:text="调试配置"/>
 
                 <Button
-                    android:id="@+id/mp_look_online_cfg"
+                    android:id="@+id/multiPageLookOnlineCfgBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -117,7 +117,7 @@
                     android:text="正式配置"/>
 
                 <Button
-                    android:id="@+id/mp_hide_cfg"
+                    android:id="@+id/multiPageHideMsgBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -128,7 +128,7 @@
             </LinearLayout>
             <!--信息，错误信息-->
             <TextView
-                android:id="@+id/config_tv"
+                android:id="@+id/multiPageMsgTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
@@ -158,8 +158,27 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
+                <Switch
+                    android:id="@+id/globalAutoRefreshJsSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:switchPadding="5dp"
+                    android:text="自动刷新JS"/>
+                <Switch
+                    android:id="@+id/globalForceNetJsSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:switchPadding="5dp"
+                    android:text="强制远程JS"/>
+            </LinearLayout>
+            <!--跳转页面和web-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
                 <EditText
-                    android:id="@+id/content_et"
+                    android:id="@+id/globalJumpEt"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -168,13 +187,13 @@
                     android:textSize="14sp"/>
 
                 <Button
-                    android:id="@+id/jump_weex_btn"
+                    android:id="@+id/globalJumpWeexBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Weex"/>
 
                 <Button
-                    android:id="@+id/jump_web_btn"
+                    android:id="@+id/globalJumoWebBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Web"/>
@@ -187,7 +206,7 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/clear_cache_btn"
+                    android:id="@+id/globalClearCacheBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -195,7 +214,7 @@
                     android:text="清理缓存js"/>
 
                 <Button
-                    android:id="@+id/clear_disk_btn"
+                    android:id="@+id/globalClearDiskBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -211,20 +230,21 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/req_online_cfg_btn"
+                    android:id="@+id/globalUpdateOnlineCfgBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="更新正式配置"/>
 
                 <Button
-                    android:id="@+id/req_debug_cfg_btn"
+                    android:id="@+id/globalUpdateDebugCfgBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="更新调试配置"/>
 
             </LinearLayout>
+
 
         </LinearLayout>
 
@@ -251,28 +271,12 @@
                 android:orientation="horizontal">
 
                 <Switch
-                    android:id="@+id/debug_local_js_sw"
-                    android:layout_width="0dp"
+                    android:id="@+id/pageRefreshJsSwitch"
+                    android:layout_width="wrap_content"
+                    android:switchPadding="5dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:layout_weight="1"
-                    android:text="开启刷新"/>
+                    android:text="本页面刷新开关"/>
 
-                <Switch
-                    android:layout_width="0dp"
-                    android:id="@+id/js_in_cache_sw"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:text="加入缓存"/>
-
-                <Switch
-                    android:layout_width="0dp"
-                    android:id="@+id/js_in_disk_sw"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:text="加入磁盘"/>
             </LinearLayout>
 
             <LinearLayout
@@ -281,8 +285,8 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/hide_msg_btn"
-                    android:layout_width="0dp"
+                    android:id="@+id/pageHideMsgBtn"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="隐藏/显示"/>
@@ -290,7 +294,7 @@
 
             <!--信息，错误信息-->
             <TextView
-                android:id="@+id/desc_tv"
+                android:id="@+id/pageMsgTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="100dp"

@@ -40,10 +40,9 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
     }
 
     private var mRefreshCount = 0
-    internal val mDebugMsg by lazy { DebugMsg() }
+    internal val mWxPageDebugCfg by lazy { PageWxDebugCfg() }
     private val mHandler by lazy { Handler(Looper.getMainLooper()) { startRefresh(false,false) } }
-    private val mDebugDialog by lazy { PageDebugDialog(mActivity, this) }
-    internal val mDebugConfig by lazy { DebugConfig(false, false, false) }
+    private val mDebugDialog by lazy { WxDebugDialog(mActivity, this) }
 
     private lateinit var mActivity: Activity
     private var mDelegate: WxDelegate? = null
@@ -68,7 +67,7 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
         }
         dragLayout.setOnLongClickListener {
             mVibrator?.vibrate(300)
-            mDebugConfig.isRefreshRemoteJs = true
+            mWxPageDebugCfg.isRefreshing = true
             stopRefresh()
             startRefresh(false)
             true
@@ -92,23 +91,16 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
             return false
         }
         return with(delegate) {
-            mDebugMsg.refreshing = true
-            var cacheStrategy = JsCacheStrategy.NO_CACHE
-            if(mDebugConfig.debugJsInCache) {
-                cacheStrategy = JsCacheStrategy.CACHE_MEMORY_ONLY
-            } else if(mDebugConfig.debugJsInDisk){
-                cacheStrategy = JsCacheStrategy.CACHE_MEMORY_DISK_BOTH
-            }
-            CubeWx.mWxJsLoader.getTemplateAsync(mActivity,
-                    JsLoadStrategy.NET_FIRST,cacheStrategy, mWeexPage) {
+            mWxPageDebugCfg.isRefreshing = true
+            CubeWx.mWxJsLoader.getTemplateAsync(mActivity, JsLoadStrategy.NET_FIRST, JsCacheStrategy.NO_CACHE, mWeexPage) {
                 it?.let {
-                    if (mDebugMsg.lastTemplate != it) {
-                        if (mDebugMsg.lastTemplate.isBlank()) {
-                            mDebugMsg.lastTemplate = it
+                    if (mWxPageDebugCfg.renderTemplate != it) {
+                        if (mWxPageDebugCfg.renderTemplate.isBlank()) {
+                            mWxPageDebugCfg.renderTemplate = it
                         } else {
                             mActivity.runOnUiThread {
                                 renderJs(it)
-                                mDebugMsg.lastTemplate = it
+                                mWxPageDebugCfg.renderTemplate = it
                                 ToastUtils.show("已为您刷新～")
                             }
                         }
@@ -129,7 +121,7 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
                             })
                             ?.start()
                 }
-                if (!once && mDebugMsg.refreshing && mDebugConfig.isRefreshRemoteJs) {
+                if (!once && mWxPageDebugCfg.isRefreshing && mWxPageDebugCfg.isRefreshing) {
                     mHandler.sendEmptyMessageDelayed(0, 5000)
                 }
             }
@@ -138,8 +130,8 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
     }
 
     internal fun stopRefresh(immediately:Boolean = true) {
-        mDebugMsg.lastTemplate = if(immediately) "stop" else ""
-        mDebugMsg.refreshing = false
+        mWxPageDebugCfg.renderTemplate = if (immediately) "stop" else ""
+        mWxPageDebugCfg.isRefreshing = false
         mHandler.removeCallbacksAndMessages(null)
     }
 
@@ -158,7 +150,7 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
 
     override fun onPause() {
         super.onPause()
-        if (mDebugConfig.isRefreshRemoteJs) {
+        if (mWxPageDebugCfg.isRefreshing) {
             stopRefresh(false)
             // ToastUtils.show("页面${mWeexPage?.pageName}进入后台，暂停轮询")
         }
@@ -166,7 +158,7 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
 
     override fun onResume() {
         super.onResume()
-        if (mDebugConfig.isRefreshRemoteJs) {
+        if (mWxPageDebugCfg.isRefreshing) {
             startRefresh(false)
             // ToastUtils.show("页面${mWeexPage?.pageName}进入后台，开始轮询")
         }
@@ -180,7 +172,7 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
     }
 
     override fun onRenderSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
-        if (mDebugMsg.refreshing || mIsDestroy) {
+        if (mWxPageDebugCfg.isRefreshing || mIsDestroy || !WxGlobalDebugger.mWxDebugCfg.isAutoRefreshLocalIp) {
             return
         }
         try {
@@ -189,8 +181,7 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
             val uri = Uri.parse(js)
             if (RegexUtils.isIp(uri.host)) {
                 mHandler.sendEmptyMessageDelayed(0, 2000)
-                mDebugMsg.refreshing = true
-                mDebugConfig.isRefreshRemoteJs = true
+                mWxPageDebugCfg.isRefreshing = true
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -198,7 +189,7 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
     }
 
     override fun onException(instance: WXSDKInstance?, errCode: String?, msg: String?) {
-        mDebugMsg.errorMsg = "code = $errCode msg = $msg"
+        mWxPageDebugCfg.errorMsg = "code = $errCode msg = $msg"
     }
 
 
