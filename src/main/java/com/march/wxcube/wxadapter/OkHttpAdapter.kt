@@ -13,6 +13,6 @@ import com.taobao.weex.common.WXRequest
 class OkHttpAdapter : IWXHttpAdapter {
 
     override fun sendRequest(request: WXRequest, listener: IWXHttpAdapter.OnHttpListener) {
-        ManagerRegistry.Request.request(request, listener, true)
+        ManagerRegistry.Request.request(request, true, listener)
     }
 }

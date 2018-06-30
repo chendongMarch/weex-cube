@@ -15,16 +15,17 @@ import com.march.common.utils.DimensUtils
 import com.march.common.utils.RegexUtils
 import com.march.common.utils.ToastUtils
 import com.march.common.view.DragLayout
+import com.march.wxcube.CubeWx
+import com.march.wxcube.R
+import com.march.wxcube.common.WxUtils
+import com.march.wxcube.lifecycle.WxLifeCycle
 import com.march.wxcube.loader.JsCacheStrategy
 import com.march.wxcube.loader.JsLoadStrategy
-import com.march.wxcube.R
-import com.march.wxcube.CubeWx
-import com.march.wxcube.lifecycle.WxLifeCycle
-import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.WxPage
 import com.march.wxcube.ui.WxDelegate
 import com.taobao.weex.IWXRenderListener
 import com.taobao.weex.WXSDKInstance
+import com.taobao.weex.adapter.URIAdapter
 
 /**
  * CreateAt : 2018/5/3
@@ -184,7 +185,7 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
         }
         try {
             val jsUrl = mWeexPage?.remoteJs ?: return
-            val js = ManagerRegistry.Host.makeJsResUrl(jsUrl)
+            val js = WxUtils.rewriteUrl(jsUrl, URIAdapter.BUNDLE)
             val uri = Uri.parse(js)
             if (RegexUtils.isIp(uri.host)) {
                 mHandler.sendEmptyMessageDelayed(0, 2000)

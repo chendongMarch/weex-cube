@@ -6,6 +6,7 @@ import com.march.common.pool.ExecutorsPool
 import com.march.common.utils.NetUtils
 import com.march.common.utils.StreamUtils
 import com.march.wxcube.CubeWx
+import com.march.wxcube.common.WxUtils
 import com.march.wxcube.http.HttpListener
 import com.march.wxcube.http.OkHttpMaker
 import com.march.wxcube.http.cookie.CookieJarImpl
@@ -13,6 +14,7 @@ import com.march.wxcube.http.cookie.CookieStore
 import com.march.wxcube.model.WxPage
 import com.taobao.weex.WXSDKInstance
 import com.taobao.weex.adapter.IWXHttpAdapter
+import com.taobao.weex.adapter.URIAdapter
 import com.taobao.weex.common.WXRequest
 import com.taobao.weex.common.WXResponse
 import okhttp3.*
@@ -96,7 +98,7 @@ class RequestManager : IManager {
     /**
      * 发起异步网络请求
      */
-    fun request(wxRequest: WXRequest, listener: IWXHttpAdapter.OnHttpListener, originData: Boolean = true) {
+    fun request(wxRequest: WXRequest, originData: Boolean, listener: IWXHttpAdapter.OnHttpListener) {
         if (checkNetWork(listener) != null) {
             return
         }
@@ -145,7 +147,7 @@ class RequestManager : IManager {
     // 通过 weex 请求构建 http 请求
     private fun makeHttpRequest(wxRequest: WXRequest): Request {
         val method = if (wxRequest.method == null) "get" else wxRequest.method
-        val url = ManagerRegistry.Host.makeRequestUrl(wxRequest.url)
+        val url = WxUtils.rewriteUrl(wxRequest.url, URIAdapter.REQUEST)
         val body = wxRequest.body
         val paramMap = wxRequest.paramMap
         var reqBuilder = Request.Builder().url(url)

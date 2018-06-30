@@ -1,8 +1,10 @@
 package com.march.wxcube.loader
 
 import android.content.Context
+import com.march.wxcube.common.WxUtils
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.WxPage
+import com.taobao.weex.adapter.URIAdapter
 import com.taobao.weex.utils.WXFileUtils
 
 /**
@@ -25,7 +27,7 @@ class NetResourceLoader : ResourceLoader {
     private fun downloadJs(page: WxPage): String? {
         val url = page.remoteJs ?: return null
         val http = ManagerRegistry.Request
-        val makeJsResUrl = ManagerRegistry.Host.makeJsResUrl(url)
+        val makeJsResUrl = WxUtils.rewriteUrl(url, URIAdapter.BUNDLE)
         val wxRequest = http.makeWxRequest(url = makeJsResUrl, from = "download-js")
         val resp = http.requestSync(wxRequest, false)
         return resp.data

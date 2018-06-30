@@ -36,15 +36,17 @@ class WxInitConfig {
     var jsPrepareStrategy: Int = JsPrepareStrategy.PREPARE_ALL
 
     var configUrl: String = ""
-    var apiHost: String = ""
-    var jsResHost: String = ""
-    var webHost: String = ""
+    var reqAuthority: String = ""
+    var bundleAuthority: String = ""
+    var bundlePathPrefix: String = ""
+    var webAuthority: String = ""
 
     var wxModelAdapter: IWxModelAdapter = DefaultWxModelAdapter()
     var wxDebugAdapter: IWxDebugAdapter = DefaultWxDebugAdapter()
     var wxInitAdapter: IWxInitAdapter = DefaultWxInitAdapter()
     var wxPageAdapter: IWxPageAdapter = DefaultWxPageAdapter()
     var wxReportAdapter: IWxReportAdapter = DefaultWxReportAdapter()
+
 
     fun prepare(ctx: Context): WxInitConfig {
         CubeWx.mWeexConfig = this

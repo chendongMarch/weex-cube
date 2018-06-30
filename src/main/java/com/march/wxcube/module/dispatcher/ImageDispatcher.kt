@@ -1,9 +1,10 @@
 package com.march.wxcube.module.dispatcher
 
 import com.alibaba.fastjson.JSONObject
-import com.march.wxcube.manager.ManagerRegistry
+import com.march.wxcube.common.WxUtils
 import com.march.wxcube.module.JsCallbackWrap
 import com.march.wxcube.wxadapter.GlideApp
+import com.taobao.weex.adapter.URIAdapter
 
 /**
  * CreateAt : 2018/6/20
@@ -41,7 +42,7 @@ class ImageDispatcher : BaseDispatcher() {
         val jsonArray = params.getJSONArray(KEY_LIST) ?: throw RuntimeException("Image#preload list is null")
         for (obj in jsonArray) {
             if (obj is String) {
-                val url = ManagerRegistry.Host.makeImgUrl(obj)
+                val url = WxUtils.rewriteUrl(obj, URIAdapter.IMAGE)
                 GlideApp.with(mProvider.activity()).load(url).preload()
             }
         }

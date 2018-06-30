@@ -1,10 +1,13 @@
 package com.march.wxcube.common
 
+import android.net.Uri
 import android.os.Environment
 import com.march.common.utils.DimensUtils
 import com.march.common.utils.FileUtils
 import com.march.wxcube.CubeWx
+import com.taobao.weex.WXSDKManager
 import java.io.File
+import java.net.URLDecoder
 
 /**
  * CreateAt : 2018/6/20
@@ -39,5 +42,14 @@ object WxUtils {
 
     fun clearDiskCache() {
         FileUtils.delete(CubeWx.mRootCacheDir)
+    }
+
+    fun rewriteUrl(url: String?, type: String): String {
+        if (url.isNullOrBlank()) {
+            return url ?: ""
+        }
+        val uri = Uri.parse(url)
+        val rewrite = WXSDKManager.getInstance().uriAdapter.rewrite(null, type, uri)
+        return URLDecoder.decode(rewrite.toString(),"utf-8")
     }
 }

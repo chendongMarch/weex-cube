@@ -7,13 +7,14 @@ import android.support.v7.app.AppCompatActivity
 import com.march.common.Common
 import com.march.webkit.WebKit
 import com.march.wxcube.CubeWx
+import com.march.wxcube.common.WxUtils
 import com.march.wxcube.common.report
-import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.WxPage
 import com.march.wxcube.ui.WebActivity
 import com.march.wxcube.ui.WxDialogFragment
 import com.march.wxcube.update.OnWxUpdateListener
+import com.taobao.weex.adapter.URIAdapter
 
 /**
  * CreateAt : 2018/3/27
@@ -73,7 +74,7 @@ class WxRouter : OnWxUpdateListener {
      */
     fun openWeb(ctx: Context?, webUrl: String): Pair<Boolean, String> {
         val intent = Intent(ctx, WebActivity::class.java)
-        intent.putExtra(WebKit.KEY_URL, ManagerRegistry.Host.makeWebUrl(webUrl))
+        intent.putExtra(WebKit.KEY_URL, WxUtils.rewriteUrl(webUrl, URIAdapter.WEB))
         return start(ctx, intent)
     }
 
@@ -83,7 +84,7 @@ class WxRouter : OnWxUpdateListener {
     fun openBrowser(ctx: Context?, webUrl: String): Pair<Boolean, String> {
         val intent = Intent()
         intent.action = Intent.ACTION_VIEW
-        intent.data = Uri.parse(ManagerRegistry.Host.makeWebUrl(webUrl))
+        intent.data = Uri.parse(WxUtils.rewriteUrl(webUrl, URIAdapter.WEB))
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         return start(ctx, intent)
     }
@@ -113,7 +114,7 @@ class WxRouter : OnWxUpdateListener {
             mInterceptor?.invoke(url) ?: mWeexPageMap.values.firstOrNull { it.pageName == url }
         } else {
             // 通过 url 查找
-            val validUrl = ManagerRegistry.Host.makeWebUrl(url)
+            val validUrl = WxUtils.rewriteUrl(url, URIAdapter.WEB)
             mInterceptor?.invoke(validUrl) ?: mWeexPageMap[UrlKey.fromUrl(validUrl)]
         }
         if (result == null) {

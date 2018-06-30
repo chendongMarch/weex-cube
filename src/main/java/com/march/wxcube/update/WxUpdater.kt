@@ -10,6 +10,7 @@ import com.march.wxcube.common.report
 import com.march.wxcube.http.HttpListener
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.manager.RequestManager
+import com.taobao.weex.adapter.URIAdapter
 import com.taobao.weex.common.WXResponse
 
 /**
@@ -39,48 +40,47 @@ class WxUpdater(private var url: String) {
         ExecutorsPool.getInst().execute {
             // 磁盘缓存读取
             var configJson = mDiskLruCache.read(CONFIG_KEY)
-            if (configJson.isBlank()) { // assets 读取
+            // assets 读取
+            if (configJson.isBlank()) {
                 configJson = readAssets(context, "config/config.json")
             }
+            // 解析缓存
             parseJsonAndUpdate(context, configJson)
-            // 发起网络，并存文件
+            // 发起网络请求最新配置
             val request = ManagerRegistry.Request.makeWxRequest(url = url, from = "request-wx-config")
-            ManagerRegistry.Request.request(request, object : HttpListener {
+            ManagerRegistry.Request.request(request, false, object : HttpListener {
                 override fun onHttpFinish(response: WXResponse) {
                     if (response.errorCode == RequestManager.ERROR_CODE_FAILURE) {
                         report("请求配置文件失败")
-                    } else {
-                        val netJson = response.data ?: return
-                        mDiskLruCache.write(CONFIG_KEY, netJson)
-                        parseJsonAndUpdate(context, netJson)
+                    } else if (parseJsonAndUpdate(context, response.data)) {
+                        mDiskLruCache.write(CONFIG_KEY, response.data)
                     }
+                    response.data = null
                 }
-            }, false)
+            })
         }
     }
 
-
     // 解析配置文件，并通知出去
-    private fun parseJsonAndUpdate(context: Context, json: String) {
-        if (json.isBlank())
-            return
+    private fun parseJsonAndUpdate(context: Context, json: String?): Boolean {
+        json ?: return false
+        if (json.isBlank()) return false
         try {
-            val weexPagesResp = CubeWx.mWxModelAdapter.convert(json)
-            val weexPages = weexPagesResp?.datas
-            weexPages?.let {
-                val pages = PageFilter.filter(it)
-                pages.forEach {
-                    it.h5Url = ManagerRegistry.Host.makeWebUrl(it.h5Url?:"")
-                    if (weexPagesResp.indexPage == it.pageName) {
-                        it.indexPage = true
-                    }
+            val wxPageResp = CubeWx.mWxModelAdapter.convert(json)
+            val wxPages = wxPageResp?.datas ?: return false
+            val filterPages = PageFilter.filter(wxPages)
+            filterPages.forEach {
+                it.h5Url = WxUtils.rewriteUrl(it.h5Url, URIAdapter.WEB)
+                if (wxPageResp.indexPage == it.pageName) {
+                    it.indexPage = true
                 }
-                CubeWx.onWeexConfigUpdate(context, pages)
             }
-
+            CubeWx.onWeexConfigUpdate(context, filterPages)
         } catch (e: Exception) {
             e.printStackTrace()
+            return false
         }
+        return true
     }
 
     private fun readAssets(context: Context, assetsPath: String): String {

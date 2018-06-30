@@ -6,7 +6,6 @@ import com.march.common.Common
 import com.march.common.CommonInjector
 import com.march.common.adapter.JsonParser
 import com.march.common.model.WeakContext
-import com.march.common.utils.FileUtils
 import com.march.webkit.WebKit
 import com.march.wxcube.adapter.*
 import com.march.wxcube.common.JsonParserImpl
@@ -85,12 +84,7 @@ object CubeWx {
         ManagerRegistry.getInst().register(DataManager.instance)
         ManagerRegistry.getInst().register(EventManager.instance)
         ManagerRegistry.getInst().register(RequestManager.instance)
-        ManagerRegistry.getInst().register(HostManager.instance)
         ManagerRegistry.getInst().register(WxInstManager.instance)
-
-        ManagerRegistry.Host.mWebHost = config.webHost
-        ManagerRegistry.Host.mJsResHost = config.jsResHost
-        ManagerRegistry.Host.mApiHost = config.apiHost
 
         Common.init(ctx, object : CommonInjector {
             override fun getConfigClass(): Class<*> {

@@ -13,6 +13,7 @@ import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.manager.RequestManager
 import com.march.wxcube.model.WxPage
 import com.march.wxcube.router.UrlKey
+import com.taobao.weex.adapter.URIAdapter
 import com.taobao.weex.common.WXResponse
 import java.util.concurrent.Executors
 
@@ -103,7 +104,7 @@ internal object WxGlobalDebugger {
         val url = CubeWx.mWxDebugAdapter.makeDebugConfigUrl(mDebugHost)
         // 发起网络，并存文件
         val request = ManagerRegistry.Request.makeWxRequest(url = url, from = "request-wx-debug-config")
-        ManagerRegistry.Request.request(request, object : HttpListener {
+        ManagerRegistry.Request.request(request, false, object : HttpListener {
             override fun onHttpFinish(response: WXResponse) {
                 if (response.errorCode == RequestManager.ERROR_CODE_FAILURE) {
                     report("请求调试配置文件失败")
@@ -113,7 +114,7 @@ internal object WxGlobalDebugger {
                     parseDebugJsonAndUpdate(netJson)
                 }
             }
-        }, false)
+        })
     }
 
     // 解析配置文件，并通知出去
@@ -129,9 +130,9 @@ internal object WxGlobalDebugger {
             val pages = mutableListOf<WxPage>()
             originPages.forEach {
                 if (!it.pageName.isNullOrBlank()) {
-                    val p = prepareOldPage(it) ?: prepareNewPage(it)
-                    p?.let {
-                        it.h5Url = ManagerRegistry.Host.makeWebUrl(it.h5Url ?: "")
+                    val page = prepareOldPage(it) ?: prepareNewPage(it)
+                    page?.let {
+                        it.h5Url = WxUtils.rewriteUrl(it.h5Url, URIAdapter.WEB)
                         pages.add(it)
                     }
                 }
