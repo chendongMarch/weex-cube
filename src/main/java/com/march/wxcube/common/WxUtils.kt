@@ -7,7 +7,6 @@ import com.march.common.utils.FileUtils
 import com.march.wxcube.CubeWx
 import com.taobao.weex.WXSDKManager
 import java.io.File
-import java.net.URLDecoder
 
 /**
  * CreateAt : 2018/6/20
@@ -50,6 +49,6 @@ object WxUtils {
         }
         val uri = Uri.parse(url)
         val rewrite = WXSDKManager.getInstance().uriAdapter.rewrite(null, type, uri)
-        return URLDecoder.decode(rewrite.toString(),"utf-8")
+        return rewrite.toString();
     }
 }

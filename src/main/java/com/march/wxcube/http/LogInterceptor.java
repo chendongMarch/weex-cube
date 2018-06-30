@@ -207,9 +207,6 @@ public final class LogInterceptor implements Interceptor {
             }
         }
         String respStr = sb.toString();
-        if (respStr.length() > 500) {
-            respStr = respStr.substring(0, 490) + "...";
-        }
         log(respStr);
         log("\n=============================== Request End =======================================================\n\n");
     }

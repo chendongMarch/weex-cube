@@ -34,9 +34,9 @@ class ImgAdapter : IWXImgLoaderAdapter {
             if (view.measuredWidth > 0 && view.measuredHeight > 0) {
                 request = request.override(view.measuredWidth, view.measuredHeight)
                 if (view.measuredWidth > 300 && CubeWx.mWeexConfig.largeImgHolder > 0) {
-                    request.placeholder(CubeWx.mWeexConfig.largeImgHolder).error(CubeWx.mWeexConfig.largeImgHolder)
+                    request =  request.placeholder(CubeWx.mWeexConfig.largeImgHolder).error(CubeWx.mWeexConfig.largeImgHolder)
                 } else if (CubeWx.mWeexConfig.smallImgHolder > 0) {
-                    request.placeholder(CubeWx.mWeexConfig.smallImgHolder).error(CubeWx.mWeexConfig.smallImgHolder)
+                    request = request.placeholder(CubeWx.mWeexConfig.smallImgHolder).error(CubeWx.mWeexConfig.smallImgHolder)
                 }
             }
             request.into(view)

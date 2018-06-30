@@ -14,9 +14,6 @@ import com.taobao.weex.adapter.URIAdapter
  */
 class UriAdapter : DefaultUriAdapter() {
 
-    companion object {
-        // const val IMG = "cube-img"
-    }
 
     /*
      *   absolute 带有显式 scheme  pattern
