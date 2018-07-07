@@ -40,12 +40,12 @@ open class DefaultWxPageAdapter : IWxPageAdapter {
     override fun getNotFontPageUrl(): String = ""
 
     override fun onPageCreated(activity: Activity, type: Int) {
-        ImmersionStatusBarUtils.setStatusBarLightMode(activity)
         if (type == WxConstants.PAGE_WEEX || type == WxConstants.PAGE_INDEX) {
             ImmersionStatusBarUtils.translucent(activity)
         } else if (type == WxConstants.PAGE_WEB) {
             activity.window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
         }
+        ImmersionStatusBarUtils.setStatusBarLightMode(activity)
     }
 
     override fun getLoading(): Loading = SimpleLoading()

@@ -68,9 +68,10 @@ class WxUpdater(private var url: String) {
         try {
             val wxPageResp = CubeWx.mWxModelAdapter.convert(json)
             val wxPages = wxPageResp?.datas ?: return false
-            val filterPages = PageFilter.filter(wxPages)
+            val filterPages = PageFilter.filter(context, wxPages)
             filterPages.forEach {
                 it.h5Url = WxUtils.rewriteUrl(it.h5Url, URIAdapter.WEB)
+                // it.remoteJs = WxUtils.rewriteUrl(it.remoteJs, URIAdapter.BUNDLE)
                 if (wxPageResp.indexPage == it.pageName) {
                     it.indexPage = true
                 }

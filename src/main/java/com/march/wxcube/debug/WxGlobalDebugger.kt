@@ -37,12 +37,11 @@ internal object WxGlobalDebugger {
     private const val MAX_VERSION = "100.100.100"
     private const val MIN_VERSION = "0.0.0"
 
-    data class DebugWxPagesResp(
+    class DebugWxPagesResp(
             var global: Boolean = false,
-            var autoJumpPage: String = "",
-            var datas: List<WxPage> = listOf())
+            var list: List<WxPage> = listOf())
 
-    private val mDiskLruCache by lazy { WxUtils.makeDiskCahce(CACHE_DIR, Int.MAX_VALUE.toLong()) }
+    private val mDiskLruCache by lazy { WxUtils.makeDiskCache(CACHE_DIR, Int.MAX_VALUE.toLong()) }
     internal val mWxDebugCfg by lazy { GlobalWxDebugCfg.backup() }
     private val mExecutorService by lazy { Executors.newCachedThreadPool() }
     private var mDebugWeexPagesResp: DebugWxPagesResp? = null
@@ -93,9 +92,10 @@ internal object WxGlobalDebugger {
             return
         }
         try {
-            val weexPagesResp = JSON.parseObject(json, DebugWxPagesResp::class.java)
+            val myJson = json.replace("weexPage", "pageName").replace("autoJump", "indexPage")
+            val weexPagesResp = JSON.parseObject(myJson, DebugWxPagesResp::class.java)
             mDebugWeexPagesResp = weexPagesResp
-            val originPages = weexPagesResp?.datas ?: return report("调试文件 datas = null")
+            val originPages = weexPagesResp?.list ?: return report("调试文件 list = null")
             // 不管新老页面 pageName 是唯一标识
             val pages = mutableListOf<WxPage>()
             originPages.forEach {
@@ -127,7 +127,6 @@ internal object WxGlobalDebugger {
             page.jsVersion = MAX_VERSION
             page.appVersion = MIN_VERSION
             page.h5Url = page.h5Url ?: validOldPage.h5Url
-            // page.remoteJs = page.remoteJs ?: debugWeexPageMaker(page, mHost)
             page.md5 = ""
             page = CubeWx.mWxDebugAdapter.completeDebugWeexPage(page, mWxDebugCfg.multiPageDebugHost)
             if (page.h5Url.isNullOrBlank() || page.remoteJs.isNullOrBlank()) {
@@ -175,8 +174,11 @@ internal object WxGlobalDebugger {
     }
 
     internal fun autoJump(context: Context) {
-        mDebugWeexPagesResp?.autoJumpPage?.let {
-            CubeWx.mWxRouter.openUrl(context, it)
+        val page = mDebugWeexPagesResp?.list?.firstOrNull { it.indexPage }
+        if (page?.h5Url != null) {
+            CubeWx.mWxRouter.openUrl(context, page.h5Url!!)
+        } else {
+            ToastUtils.show("auto jump is $page")
         }
     }
 

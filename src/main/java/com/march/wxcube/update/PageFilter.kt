@@ -1,26 +1,23 @@
 package com.march.wxcube.update
 
+import android.content.Context
 import com.march.common.Common
+import com.march.common.pool.ExecutorsPool
+import com.march.common.utils.LgUtils
+import com.march.wxcube.CubeWx
 import com.march.wxcube.model.WxPage
 
 /**
  * CreateAt : 2018/6/29
  * Describe :
- * 过滤：
- * app 版本号 小于等于 当前版本号
  *
  * @author chendong
  */
 object PageFilter {
-    /*
-     * 过滤规则：
-     * app 版本号 小于等于 当前版本号
-     * 相同页面只保留 jsVersion 较高的一个
-     * 资源在本地或者包内已经准备好，
-     */
 
-    fun filter(pages: List<WxPage>): List<WxPage> {
-        return filterBestPages(pages)
+    fun filter(context: Context, pages: List<WxPage>): List<WxPage> {
+        // return filterBestPages(pages)
+        return filterBestPagesV2(context, pages)
     }
 
     // 过滤，页面数据OK，版本支持OK，VersionCode 合法
@@ -40,7 +37,7 @@ object PageFilter {
                 return@filterTo false
             }
             // 当前版本要 >= 最小支持版本
-            curVersionCodes.moreThan(appVersionCodes)
+            compareVersion(curVersionCodes, appVersionCodes) >= 0
         }
         return resultPages
     }
@@ -49,7 +46,6 @@ object PageFilter {
     private fun filterBestPages(pages: List<WxPage>): List<WxPage> {
         val resultPages = filterAllValidPages(pages)
         val pageNameWxPageMap = mutableMapOf<String, WxPage>()
-        val needPreparePages = mutableListOf<WxPage>()
         // 每个页面只保留一个配置
         resultPages.forEach {
             val pageName = it.pageName ?: return@forEach
@@ -61,7 +57,7 @@ object PageFilter {
                 // 比较 jsVersion，如果当前的 js 版本比较大，则选择当前的
                 val curJsVersionCodes = getVersionCodes(it.jsVersion)
                 val lastJsVersionCodes = getVersionCodes(value.jsVersion)
-                if (curJsVersionCodes.moreThan(lastJsVersionCodes)) {
+                if (compareVersion(curJsVersionCodes, lastJsVersionCodes) >= 0) {
                     pageNameWxPageMap[pageName] = it
                 }
             }
@@ -71,9 +67,72 @@ object PageFilter {
         return resultPages
     }
 
+
+    // 生成 Map<pageName,List<WxPage>> 配置表, 表示某个页面下的所有配置项
+    // 配置项按照 jsVersion 版本由高到低排序
+    // 从高版本开始查找，搜索资源已经存在的配置项，称为有效配置项
+    // 找到有效配置，中断检索，加入正式配置列表
+    // 找到无效配置（版本高，但资源没有下载），加入准备配置列表，后续下载，继续检索
+    private fun filterBestPagesV2(context: Context, pages: List<WxPage>): List<WxPage> {
+        val pageCfgsMap = mutableMapOf<String, MutableSet<WxPage>>()
+        val validPages = filterAllValidPages(pages)
+        val needPreparePages = mutableListOf<WxPage>()
+        val resultPages = mutableListOf<WxPage>()
+        validPages.forEach { page ->
+            page.pageName?.let { pageName ->
+                val set = pageCfgsMap[pageName] ?: mutableSetOf()
+                set.add(page)
+                pageCfgsMap[pageName] = set
+            }
+        }
+        pageCfgsMap.forEach { _, cfgs ->
+            // 先对 cfgs 按照 js 版本排序
+            val sortCfgs = cfgs.sortedWith(Comparator { last, cur ->
+                val lastJsVersionCodes = getVersionCodes(last.jsVersion)
+                val curJsVersionCodes = getVersionCodes(cur.jsVersion)
+                compareVersion(curJsVersionCodes, lastJsVersionCodes)
+            })
+            // 从高版本开始，找到每个页面最优的版本，正式版本时需要资源存在
+            for (page in sortCfgs) {
+                if (!CubeWx.mWxCfg.debug) {
+                    if (isResourceExist(context, page)) {
+                        resultPages.add(page)
+                        break
+                    } else {
+                        needPreparePages.add(page)
+                        continue
+                    }
+                } else {
+                    // 调试时直接使用最优版本
+                    resultPages.add(page)
+                    break
+                }
+            }
+        }
+        // prepare pages js resource from network
+        ExecutorsPool.getInst().execute {
+            CubeWx.mWxJsLoader.prepareRemoteJs(context, needPreparePages)
+        }
+        needPreparePages.forEach { page ->
+            LgUtils.e("chendong", "prepare ${page.pageName} appV = ${page.appVersion} jsV = ${page.jsVersion}")
+        }
+        // 出去之后，会加载 result pages
+        // CubeWx.onWeexConfigUpdate(context, filterPages)
+        return resultPages
+    }
+
     // 生产环境，所有加载的资源必须保证在本地有，否则降级
-    private fun isResourceExist(page: WxPage): Boolean {
-        return true
+    private fun isResourceExist(context: Context, page: WxPage): Boolean {
+        if (page.remoteJs?.contains("test") == true) {
+            return true
+        }
+        // 检索 assets
+        var exist = CubeWx.mWxJsLoader.isAssetsJsExist(context, page)
+        // 检索文件
+        if (!exist) {
+            exist = CubeWx.mWxJsLoader.isLocalJsExist(page)
+        }
+        return exist
     }
 
     // 根据字符串生成 版本 int 类型列表
@@ -88,10 +147,28 @@ object PageFilter {
         }
     }
 
-    // 当前版本大于传入版本
-    // 版本的对比，如果要大于
-    private fun List<Int>.moreThan(versionCodes: List<Int>): Boolean {
-        return this[0] >= versionCodes[0] && this[1] >= versionCodes[1] && this[2] >= versionCodes[2]
+
+    private fun compareVersion(v1s: List<Int>, v2s: List<Int>): Int {
+        var result = 0
+        for (index in 0..2) {
+            if (v1s[index] > v2s[index]) {
+                result = 1
+                break
+            } else if (v1s[index] < v2s[index]) {
+                result = -1
+                break
+            }
+        }
+        return result
     }
 
+
+    private fun compareVersion(v1: String, v2: String): Int {
+        val v1s = getVersionCodes(v1)
+        val v2s = getVersionCodes(v2)
+        if (v1s.size != 3 || v2s.size != 3) {
+            return -1000
+        }
+        return compareVersion(v1s, v2s)
+    }
 }

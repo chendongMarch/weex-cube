@@ -34,6 +34,9 @@ class WxRender(activity: Activity,
             listener.onException(mWxInst, WxConstants.ERR_PAGE_NOT_VALID, "页面数据有问题${page.toShowString()}")
             return
         }
+        if(mWxInst.context == null) {
+            return
+        }
         CubeWx.mWxJsLoader.getTemplateAsync(mWxInst.context, page) {
             if (!it.isNullOrBlank()) {
                 renderJsCallback?.invoke(it)

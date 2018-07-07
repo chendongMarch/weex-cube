@@ -51,6 +51,10 @@ class PageDispatcher(val module: OneModule) : BaseDispatcher() {
     override fun getMethods(): Array<String> {
         return arrayOf(initPage, loadTabs, showTab, reloadPage)
     }
+//
+//    private fun goHome(method: String, params: JSONObject) {
+//        mProvider.doBySelf(method, params)
+//    }
 
     /**
      * 初始化页面

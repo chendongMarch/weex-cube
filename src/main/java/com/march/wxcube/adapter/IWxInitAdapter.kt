@@ -38,6 +38,11 @@ interface IWxInitAdapter {
      */
     fun getModuleDispatchers(): Array<BaseDispatcher> = arrayOf()
 
+    /**
+     * 获取应用
+     */
+    fun getAppKey() = "cubewx"
+
 }
 
 class DefaultWxInitAdapter : IWxInitAdapter

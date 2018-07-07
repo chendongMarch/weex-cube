@@ -9,6 +9,8 @@ import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.getDef
 import com.march.wxcube.module.dispatcher.*
+import com.march.wxcube.ui.WxActivity
+import com.taobao.weex.WXSDKManager
 import com.taobao.weex.annotation.JSMethod
 import com.taobao.weex.bridge.JSCallback
 import com.taobao.weex.common.WXModule
@@ -70,7 +72,7 @@ class OneModule : WXModule() {
 
         override fun activity(): AppCompatActivity = module.mAct ?: throw RuntimeException("activity find error")
 
-        override fun doBySelf(method: String, params: JSONObject) {
+        override fun doBySelf(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap?) {
             when (method) {
                 RouterDispatcher.closePage -> {
                     val delegate = module.mWeexDelegate ?: throw RuntimeException("Router#closePage delegate is null")
@@ -94,6 +96,16 @@ class OneModule : WXModule() {
                         container.removeView(loadingView)
                     }
                 }
+//                PageDispatcher.goHome      -> {
+//                    val allInstances = WXSDKManager.getInstance().wxRenderManager.allInstances
+//                    for (inst in allInstances) {
+//                        val wxAct = inst?.context as? WxActivity
+//                        if (wxAct?.mDelegate?.mWeexPage?.indexPage == false) {
+//                            wxAct.finish()
+//                        }
+//                    }
+//                    // jsCallbackWrap?.invoke(mapOf(BaseDispatcher.KEY_SUCCESS to true, BaseDispatcher.KEY_MSG to "page#goHome finish"))
+//                }
             }
         }
     }

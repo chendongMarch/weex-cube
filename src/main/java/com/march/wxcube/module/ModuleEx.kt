@@ -9,6 +9,7 @@ import com.march.common.utils.LgUtils
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.ui.WxActivity
 import com.march.wxcube.ui.WxDelegate
+import com.taobao.weex.WXSDKManager
 import com.taobao.weex.common.WXModule
 
 /**
@@ -62,6 +63,12 @@ val WXModule.mWeexAct: WxActivity?
 // 获取 mDelegate
 val WXModule.mWeexDelegate: WxDelegate?
     get() {
+//        (WXSDKManager.getInstance()?.wxRenderManager?.allInstances?.firstOrNull {
+//            mWXSDKInstance.instanceId == it.instanceId
+//        }?.context as? WxActivity)?.mDelegate
+//        WXSDKManager.getInstance()?.wxRenderManager?.allInstances?.firstOrNull {
+//            mWXSDKInstance.instanceId == it.instanceId
+//        }?.
         return ManagerRegistry.WxInst.findWeexDelegateByInstanceId(mWXSDKInstance.instanceId)
     }
 

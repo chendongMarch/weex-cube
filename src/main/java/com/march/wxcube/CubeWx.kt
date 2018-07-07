@@ -11,15 +11,13 @@ import com.march.wxcube.adapter.*
 import com.march.wxcube.common.JsonParserImpl
 import com.march.wxcube.common.WxInstaller
 import com.march.wxcube.debug.WxDebugActivityLifeCycle
+import com.march.wxcube.debug.WxGlobalDebugger
 import com.march.wxcube.loader.WxJsLoader
 import com.march.wxcube.manager.*
 import com.march.wxcube.model.WxPage
 import com.march.wxcube.router.WxRouter
 import com.march.wxcube.update.WxUpdater
-import com.march.wxcube.wxadapter.ImgAdapter
-import com.march.wxcube.wxadapter.JsErrorAdapter
-import com.march.wxcube.wxadapter.OkHttpAdapter
-import com.march.wxcube.wxadapter.UriAdapter
+import com.march.wxcube.wxadapter.*
 import com.taobao.weex.InitConfig
 import com.taobao.weex.WXEnvironment
 import com.taobao.weex.WXSDKEngine
@@ -53,7 +51,7 @@ object CubeWx {
         ctx.registerActivityLifecycleCallbacks(WxDebugActivityLifeCycle())
         mWeakCtx = WeakContext(ctx)
         mWxCfg = config.prepare(ctx)
-
+        initLibrary(ctx)
         WXEnvironment.setOpenDebugLog(config.debug)
         WXEnvironment.setApkDebugable(config.debug)
 
@@ -62,8 +60,8 @@ object CubeWx {
                 // .setUtAdapter(new UtAdapter())
                 // 网络请求 def
                 .setHttpAdapter(OkHttpAdapter())
-                // 存储管理
-                // .setStorageAdapter(new StorageAdapter())
+                // 存储管理，加缓存也并没有变快，读取数据库速度也还可以
+                // .setStorageAdapter(StorageAdapter(mWeakCtx.get()))
                 // URI 重写 def
                 .setURIAdapter(UriAdapter())
                 // js 错误
@@ -86,6 +84,10 @@ object CubeWx {
         ManagerRegistry.getInst().register(RequestManager.instance)
         ManagerRegistry.getInst().register(WxInstManager.instance)
 
+        mWxUpdater.update(ctx)
+    }
+
+    private fun initLibrary(ctx: Application) {
         Common.init(ctx, object : CommonInjector {
             override fun getConfigClass(): Class<*> {
                 return mWxInitAdapter.getConfigClass()
@@ -96,13 +98,12 @@ object CubeWx {
             }
         })
         WebKit.init(ctx, WebKit.CORE_SYS, null)
-
-        mWxUpdater.update(ctx)
     }
 
     fun onWeexConfigUpdate(context: Context, pages: List<WxPage>?) {
         mWxRouter.onWeexCfgUpdate(context, pages)
         mWxJsLoader.onWeexCfgUpdate(context, pages)
+        WxGlobalDebugger.init()
     }
 }
 

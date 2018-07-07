@@ -8,10 +8,9 @@ import com.taobao.weex.bridge.JSCallback
  *
  * @author chendong
  */
-class JsCallbackWrap(private val jsCallback: JSCallback) {
-
+class JsCallbackWrap(private var jsCallback: JSCallback?) {
     fun invoke(obj: Any) {
-        jsCallback.invoke(obj)
+        jsCallback?.invoke(obj)
+        jsCallback = null
     }
-
 }

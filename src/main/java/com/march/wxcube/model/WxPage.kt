@@ -55,6 +55,7 @@ class WxPage() : Parcelable {
         page.appVersion = this.appVersion
         page.jsVersion = this.jsVersion
         page.h5Url = openUrl
+        page.indexPage = this.indexPage
         return page
     }
 
@@ -65,6 +66,8 @@ class WxPage() : Parcelable {
         dest.writeString(this.appVersion)
         dest.writeString(this.jsVersion)
         dest.writeString(this.h5Url)
+        dest.writeString(this.md5)
+        dest.writeByte(if (this.indexPage) 1 else 0)
     }
 
     constructor(`in`: Parcel) : this() {
@@ -73,12 +76,14 @@ class WxPage() : Parcelable {
         this.appVersion = `in`.readString()
         this.jsVersion = `in`.readString()
         this.h5Url = `in`.readString()
+        this.md5 = `in`.readString()
+        this.indexPage = `in`.readByte() == 1.toByte()
     }
 
     override fun describeContents() = 0
 
     override fun toString(): String {
-        return "WeexPage(pageName=$pageName, " +
+        return "Page(pageName=$pageName, " +
                 "jsVersion=$jsVersion, " +
                 "appVersion=$appVersion, " +
                 "h5Url=$h5Url, " +

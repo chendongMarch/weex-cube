@@ -9,7 +9,7 @@ package com.march.wxcube.common
 object WxConstants {
 
     // 混存路径
-    const val CACHE_ROOT_DIR_NAME = "CubeWxCache"
+    const val CACHE_ROOT_DIR_NAME = "wx-cache"
 
     // 页面类型
     const val PAGE_WEB = 1

@@ -5,10 +5,13 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.CubeWx
+import com.march.wxcube.common.getDef
 import com.march.wxcube.common.toObjEx
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.module.JsCallbackWrap
+import com.march.wxcube.ui.WxActivity
+import com.taobao.weex.WXSDKManager
 
 /**
  * CreateAt : 2018/6/6
@@ -19,6 +22,7 @@ import com.march.wxcube.module.JsCallbackWrap
 class RouterDispatcher : BaseDispatcher() {
 
     companion object {
+        const val KEY_NO_REPEAT = "notRepeat"
         // method
         const val openUrl = "openUrl"
         const val openNative = "openNative"
@@ -28,6 +32,7 @@ class RouterDispatcher : BaseDispatcher() {
         const val openApp = "openApp"
         const val closePage = "closePage"
         const val putExtraData = "putExtraData"
+        const val openHomePage = "openHomePage"
     }
 
     override fun getMethods(): Array<String> {
@@ -37,9 +42,10 @@ class RouterDispatcher : BaseDispatcher() {
                 openDialog,
                 openBrowser,
                 openApp,
+                openNative,
+                openHomePage,
                 closePage,
-                putExtraData,
-                openNative
+                putExtraData
         )
     }
 
@@ -54,6 +60,7 @@ class RouterDispatcher : BaseDispatcher() {
             closePage    -> closePage(params)
             putExtraData -> putExtraData(params)
             openNative   -> openNative(params)
+            openHomePage -> openHomePage(act, params)
         }
     }
 
@@ -108,8 +115,26 @@ class RouterDispatcher : BaseDispatcher() {
         }
     }
 
+    private fun openHomePage(ctx: Context, params: JSONObject) {
+        val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openUrl url is null")
+        val allInstances = WXSDKManager.getInstance().wxRenderManager.allInstances
+        var hasHome = false
+        for (inst in allInstances) {
+            val wxAct = inst?.context as? WxActivity
+            if (wxAct?.mDelegate?.mWeexPage?.h5Url?.contains(webUrl) == false) {
+                wxAct.finish()
+            } else {
+                hasHome = true
+            }
+        }
+        if (!hasHome) {
+            openUrl(ctx, params)
+        }
+    }
+
     private fun openUrl(ctx: Context, params: JSONObject) {
         val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openUrl url is null")
+        val noRepeat = params.getDef(KEY_NO_REPEAT, false)
         val result = CubeWx.mWxRouter.openUrl(ctx, webUrl)
         if (!result.first) {
             throw RuntimeException("Router#openUrl Error ${result.second}")

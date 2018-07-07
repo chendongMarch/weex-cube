@@ -14,7 +14,7 @@ abstract class BaseDispatcher {
 
     interface Provider {
         fun activity(): AppCompatActivity
-        fun doBySelf(method: String, params: JSONObject)
+        fun doBySelf(method: String, params: JSONObject,jsCallbackWrap: JsCallbackWrap? = null)
     }
 
     lateinit var mProvider: Provider

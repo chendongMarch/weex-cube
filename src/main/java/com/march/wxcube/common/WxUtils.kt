@@ -2,10 +2,12 @@ package com.march.wxcube.common
 
 import android.net.Uri
 import android.os.Environment
+import com.march.common.Common
 import com.march.common.utils.DimensUtils
 import com.march.common.utils.FileUtils
 import com.march.wxcube.CubeWx
 import com.taobao.weex.WXSDKManager
+import com.taobao.weex.adapter.URIAdapter
 import java.io.File
 
 /**
@@ -29,7 +31,7 @@ object WxUtils {
         if (CubeWx.mWxCfg.debug) {
             rootFile = sdFile
         }
-        val cacheFile = File(rootFile, WxConstants.CACHE_ROOT_DIR_NAME)
+        val cacheFile = File(rootFile, "${CubeWx.mWxInitAdapter.getAppKey()}-${WxConstants.CACHE_ROOT_DIR_NAME}")
         cacheFile.mkdirs()
         return cacheFile
     }
@@ -53,11 +55,15 @@ object WxUtils {
         }
         val uri = Uri.parse(url)
         val rewrite = WXSDKManager.getInstance().uriAdapter.rewrite(null, type, uri)
-        return rewrite.toString().replace("%3A", ":")
+        if(type == URIAdapter.REQUEST) {
+            return rewrite.toString().replace("%3A",":")
+        } else {
+            return Uri.decode(rewrite.toString())
+        }
     }
 
     // 创建一个 disk cache
-    fun makeDiskCahce(dirName: String, size: Long): DiskLruCache {
+    fun makeDiskCache(dirName: String, size: Long): DiskLruCache {
         return DiskLruCache(WxUtils.makeCacheDir(dirName), size)
     }
 }

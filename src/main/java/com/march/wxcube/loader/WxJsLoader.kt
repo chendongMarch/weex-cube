@@ -3,6 +3,7 @@ package com.march.wxcube.loader
 import android.content.Context
 import android.os.Build
 import android.util.LruCache
+import com.march.common.model.WeakContext
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.DiskLruCache
 import com.march.wxcube.common.WxUtils
@@ -73,7 +74,7 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
         }
         mService.execute {
             // 同步获取模板数据
-            val (realLoadStrategy, template) = getTemplateSync(context, loadStrategy, page)
+            val (realLoadStrategy, template) = getTemplateSync(WeakContext(context), loadStrategy, page)
             // 先返回数据给渲染线程
             consumer(template)
             // 缓存存储模板数据
@@ -82,12 +83,12 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
     }
 
     // 同步加载数据信息
-    private fun getTemplateSync(context: Context, loadStrategy: Int, page: WxPage): Pair<Int, String?> {
+    private fun getTemplateSync(weakCtx: WeakContext, loadStrategy: Int, page: WxPage): Pair<Int, String?> {
         var realLoadStrategy = loadStrategy
         var template: String? = null
         // 指定方式加载
         if (loadStrategy != JsLoadStrategy.DEFAULT) {
-            template = mLoaderRegistry[loadStrategy]?.load(context, page)
+            template = mLoaderRegistry[loadStrategy]?.load(weakCtx.get(), page)
         } else {
             val strategies = arrayOf(
                     JsLoadStrategy.CACHE_FIRST,
@@ -96,7 +97,7 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
                     JsLoadStrategy.NET_FIRST)
             for (strategy in strategies) {
                 realLoadStrategy = strategy
-                template = mLoaderRegistry[loadStrategy]?.load(context, page)
+                template = mLoaderRegistry[strategy]?.load(weakCtx.get(), page)
                 if (!template.isNullOrBlank()) break
             }
         }
@@ -118,14 +119,38 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
         }
     }
 
-
     fun clearCache() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             mJsMemoryCache.trimToSize(-1)
         }
     }
 
+    fun isAssetsJsExist(context: Context?, page: WxPage): Boolean {
+        if (context == null) {
+            return false
+        }
+        return try {
+            val files = context.assets.list("js")
+            files.any { page.assetsJs == it }
+        } catch (e: Exception) {
+            false
+        }
+    }
 
+    fun isLocalJsExist(page: WxPage): Boolean {
+        val cacheDir = WxUtils.makeCacheDir(CACHE_DIR)
+        val files = cacheDir.list()
+        return files.any { it.startsWith(page.localJs) }
+    }
+
+    fun prepareRemoteJs(context: Context,pages: List<WxPage>) {
+        if(pages.isEmpty()){
+            return
+        }
+        pages.forEach {
+            mLoaderRegistry[JsLoadStrategy.NET_FIRST]?.load(context, it)
+        }
+    }
 }
 
 

@@ -50,13 +50,15 @@ class WxInitConfig {
 
     fun prepare(ctx: Context): WxInitConfig {
         CubeWx.mWxCfg = this
-        CubeWx.mRootCacheDir = WxUtils.makeRootCacheDir()
+
         // adapter
         CubeWx.mWxModelAdapter = wxModelAdapter
         CubeWx.mWxDebugAdapter = wxDebugAdapter
         CubeWx.mWxInitAdapter = wxInitAdapter
         CubeWx.mWxPageAdapter = wxPageAdapter
         CubeWx.mWxReportAdapter = wxReportAdapter
+        //
+        CubeWx.mRootCacheDir = WxUtils.makeRootCacheDir()
         //
         CubeWx.mWxJsLoader = WxJsLoader(ctx, jsLoadStrategy, jsCacheStrategy, jsPrepareStrategy)
         CubeWx.mWxUpdater = WxUpdater(configUrl)

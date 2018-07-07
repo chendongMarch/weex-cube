@@ -34,8 +34,11 @@ class RequestManager : IManager {
         const val KEY_TAG = "http-tag"
         const val ERROR_CODE_SUCCESS = "0"
         const val ERROR_CODE_FAILURE = "-1"
+
         const val STATUS_CODE_SUCCESS = "200"
-        const val STATUS_CODE_FAILURE = "-1"
+        const val STATUS_CODE_FAILURE = "1"
+        const val STATUS_NO_NETWORK = "-1"
+
         val instance: RequestManager by lazy { RequestManager() }
     }
 
@@ -62,23 +65,20 @@ class RequestManager : IManager {
      * 发起同步网络请求
      */
     fun requestSync(wxRequest: WXRequest, originData: Boolean = true): WXResponse {
-        val netResp = checkNetWork(null)
-        if (netResp != null) {
-            return netResp
-        }
         var wxResp = WXResponse()
+        if (!checkNetWork()) {
+            return wxResp.init(ERROR_CODE_FAILURE, STATUS_NO_NETWORK, "网络错误")
+        }
+
         val request = makeHttpRequest(wxRequest)
-        val failure: (e: Exception?) -> WXResponse = {
-            val resp = WXResponse()
-            resp.errorCode = ERROR_CODE_FAILURE
-            resp.statusCode = STATUS_CODE_FAILURE
-            resp.errorMsg = "请求失败 ${it?.message} "
-            resp
+
+        if (!checkUrlValid(request.url())) {
+            return wxResp.init(ERROR_CODE_FAILURE, STATUS_CODE_FAILURE, "参数错误")
         }
         try {
             val response = mOkHttpClient.newCall(request).execute()
             if (response == null) {
-                wxResp = failure(IOException("wxResp is null"))
+                wxResp = wxResp.init(ERROR_CODE_FAILURE, STATUS_CODE_FAILURE, "请求失败")
             } else if (response.isSuccessful) {
                 wxResp.errorCode = ERROR_CODE_SUCCESS
                 wxResp.statusCode = response.code().toString()
@@ -89,27 +89,39 @@ class RequestManager : IManager {
                 }
             }
         } catch (e: Exception) {
-            wxResp = failure(e)
+            wxResp.init(ERROR_CODE_FAILURE, STATUS_CODE_FAILURE, "请求失败 ${e.message}")
         }
         return wxResp
     }
 
+    private fun checkUrlValid(url: HttpUrl?): Boolean {
+        if (url?.host() == null || url.scheme() == null) {
+            return false
+        }
+        return true
+    }
 
     /**
      * 发起异步网络请求
      */
     fun request(wxRequest: WXRequest, originData: Boolean, listener: IWXHttpAdapter.OnHttpListener) {
-        if (checkNetWork(listener) != null) {
+        val wxResp = WXResponse()
+        if (!checkNetWork()) {
+            listener.onHttpFinish(wxResp.init(ERROR_CODE_FAILURE, STATUS_NO_NETWORK, "网络错误"))
             return
         }
-        val wxResp = WXResponse()
         val request = makeHttpRequest(wxRequest)
         listener.onHttpStart()
+        if (!checkUrlValid(request.url())) {
+            listener.onHttpFinish(wxResp.init(ERROR_CODE_FAILURE, STATUS_CODE_FAILURE, "参数错误"))
+            return
+        }
         mOkHttpClient.newCall(request).enqueue(object : Callback {
+
             override fun onResponse(call: Call?, response: Response?) {
-                if (response == null) {
-                    onFailure(call, IOException("wxResp is null"))
-                } else if (response.isSuccessful) {
+                if (response == null || !response.isSuccessful) {
+                    listener.onHttpFinish(wxResp.init(ERROR_CODE_FAILURE, response?.code().toString(), "请求失败"))
+                } else {
                     listener.onHeadersReceived(response.code(), response.headers().toMultimap())
                     wxResp.errorCode = ERROR_CODE_SUCCESS
                     wxResp.statusCode = response.code().toString()
@@ -123,25 +135,25 @@ class RequestManager : IManager {
             }
 
             override fun onFailure(call: Call?, e: IOException?) {
-                wxResp.errorCode = ERROR_CODE_FAILURE
-                wxResp.statusCode = STATUS_CODE_FAILURE
-                wxResp.errorMsg = "请求失败 ${e?.message}"
-                listener.onHttpFinish(wxResp)
+                listener.onHttpFinish(wxResp.init(ERROR_CODE_FAILURE, STATUS_CODE_FAILURE, "请求失败 ${e?.message}"))
             }
         })
     }
 
+    private fun WXResponse.init(errorCode: String, statusCode: String,
+                                msg: String?): WXResponse {
+        this.errorCode = errorCode
+        this.statusCode = statusCode
+        this.errorMsg = msg
+        return this
+    }
+
     // 检测网络状态，停止请求
-    private fun checkNetWork(listener: IWXHttpAdapter.OnHttpListener?): WXResponse? {
+    private fun checkNetWork(): Boolean {
         if (!NetUtils.isNetworkConnected(CubeWx.mWeakCtx.get())) {
-            val wxResp = WXResponse()
-            wxResp.errorCode = ERROR_CODE_FAILURE
-            wxResp.statusCode = STATUS_CODE_FAILURE
-            wxResp.errorMsg = "网络未连接"
-            listener?.onHttpFinish(wxResp)
-            return wxResp
+            return false
         }
-        return null
+        return true
     }
 
     // 通过 weex 请求构建 http 请求
@@ -167,7 +179,7 @@ class RequestManager : IManager {
                 RequestBody.create(MediaType.parse(body), body)
             }
         }
-        reqBuilder = when (method) {
+        reqBuilder = when (method.toLowerCase()) {
             "get" -> reqBuilder.get()
             "post" -> reqBuilder.post(reqBodyCreator())
             "put" -> reqBuilder.put(reqBodyCreator())

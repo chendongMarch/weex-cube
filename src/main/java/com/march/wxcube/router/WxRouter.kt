@@ -16,6 +16,7 @@ import com.march.wxcube.ui.WxDialogFragment
 import com.march.wxcube.update.OnWxUpdateListener
 import com.taobao.weex.adapter.URIAdapter
 
+
 /**
  * CreateAt : 2018/3/27
  * Describe : weex 路由管理
@@ -51,11 +52,13 @@ class WxRouter : OnWxUpdateListener {
     /**
      * 打开一个 web url
      */
-    fun openUrl(ctx: Context, url: String): Pair<Boolean, String> {
+    fun openUrl(ctx: Context, url: String, rewrite: (Intent) -> Intent = { i -> i }): Pair<Boolean, String> {
         val page = findPage(url) ?: return openWeb(ctx, url)
-        val intent = Intent()
-        intent.putExtra(WxPage.KEY_PAGE, page)
-        intent.data = Uri.parse("cube://${Common.BuildConfig.APPLICATION_ID}.weex/weex")
+        val intent = Intent().apply {
+            putExtra(WxPage.KEY_PAGE, page)
+            data = Uri.parse("cube://${Common.BuildConfig.APPLICATION_ID}.weex/weex")
+            rewrite(this)
+        }
         return start(ctx, intent)
     }
 
