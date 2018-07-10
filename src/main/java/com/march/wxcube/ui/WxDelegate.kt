@@ -34,6 +34,8 @@ class WxDelegate : WxLifeCycle {
         const val INSTANCE_ID = "instanceId"
         const val TOP_SAFE_AREA_HEIGHT = "topSafeAreaHeight"
         const val BOTTOM_SAFE_AREA_HEIGHT = "bottomSafeAreaHeight"
+        const val BUNDLE_URL = "bundleUrl"
+        const val H5_URL = "h5Url"
     }
 
     // 渲染状态
@@ -198,7 +200,8 @@ class WxDelegate : WxLifeCycle {
         mRenderOpts[INSTANCE_ID] = mWeexInst.instanceId
         mRenderOpts[TOP_SAFE_AREA_HEIGHT] = WxUtils.getWxPxByRealPx(StatusBarUtils.getStatusBarHeight(mActivity))
         mRenderOpts[BOTTOM_SAFE_AREA_HEIGHT] = 0
-        mRenderOpts["bundleUrl"] = WxUtils.rewriteUrl(mWeexPage.remoteJs, URIAdapter.BUNDLE)
+        mRenderOpts[BUNDLE_URL] = WxUtils.rewriteUrl(mWeexPage.remoteJs, URIAdapter.BUNDLE)
+        mRenderOpts[H5_URL] = WxUtils.rewriteUrl(mWeexPage.h5Url, URIAdapter.WEB)
         mWeexPage.h5Url?.let {
             val data = ManagerRegistry.Data.getData(it)
             if (data != null) {

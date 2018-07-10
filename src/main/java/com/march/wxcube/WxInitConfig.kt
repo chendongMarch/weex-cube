@@ -30,6 +30,7 @@ class WxInitConfig {
 
     var https: Boolean = false
     var debug: Boolean = true
+    var showDebugBtn = true
 
     var jsLoadStrategy: Int = JsLoadStrategy.DEFAULT
     var jsCacheStrategy: Int = JsCacheStrategy.CACHE_MEMORY_DISK_BOTH

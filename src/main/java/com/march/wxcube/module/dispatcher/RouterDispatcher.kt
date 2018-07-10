@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.CubeWx
 import com.march.wxcube.R
+import com.march.wxcube.common.WxUtils
 import com.march.wxcube.common.getDef
 import com.march.wxcube.common.toObjEx
 import com.march.wxcube.manager.ManagerRegistry
@@ -117,18 +118,22 @@ class RouterDispatcher : BaseDispatcher() {
     }
 
     private fun openHomePage(ctx: Context, params: JSONObject) {
-        val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openUrl url is null")
-        val allInstances = WXSDKManager.getInstance().wxRenderManager.allInstances
-        var hasHome = false
-        for (inst in allInstances) {
-            val wxAct = inst?.context as? WxActivity
-            if (wxAct?.mDelegate?.mWeexPage?.h5Url?.contains(webUrl) == false) {
-                wxAct.finish()
-            } else {
-                hasHome = true
+        try {
+            val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openUrl url is null")
+            val allInstances = WXSDKManager.getInstance().wxRenderManager.allInstances
+            var hasHome = false
+            for (inst in allInstances) {
+                val wxAct = inst?.context as? WxActivity
+                if (wxAct?.mDelegate?.mWeexPage?.h5Url?.contains(webUrl) == false) {
+                    WxUtils.checkFinish(wxAct)
+                } else {
+                    hasHome = true
+                }
             }
-        }
-        if (!hasHome) {
+            if (!hasHome) {
+                openUrl(ctx, params)
+            }
+        } catch (e: Exception) {
             openUrl(ctx, params)
         }
     }

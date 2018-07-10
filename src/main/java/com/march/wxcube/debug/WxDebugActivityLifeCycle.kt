@@ -3,6 +3,7 @@ package com.march.wxcube.debug
 import android.app.Activity
 import android.os.Bundle
 import com.march.common.impl.ActivityLifecycleCallback
+import com.march.wxcube.CubeWx
 import com.march.wxcube.ui.WxActivity
 
 /**
@@ -14,13 +15,13 @@ import com.march.wxcube.ui.WxActivity
 class WxDebugActivityLifeCycle : ActivityLifecycleCallback() {
 
     override fun onActivityCreated(act: Activity?, savedInstanceState: Bundle?) {
+        if (!CubeWx.mWxCfg.showDebugBtn) {
+            return
+        }
         try {
-//        if (act !is WeexActivity) {
-//            return
-//        }
-        val activity = act ?: return
-        val debugger = WxPageDebugger()
-        debugger.addDebugBtn(activity)
+            val activity = act ?: return
+            val debugger = WxPageDebugger()
+            debugger.addDebugBtn(activity)
             if (activity is WxActivity) {
                 activity.mDelegate.setDebugger(debugger)
             }
@@ -28,5 +29,4 @@ class WxDebugActivityLifeCycle : ActivityLifecycleCallback() {
 
         }
     }
-
 }

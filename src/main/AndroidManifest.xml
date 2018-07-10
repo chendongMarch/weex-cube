@@ -22,14 +22,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".ui.IndexActivity"
-            android:theme="@style/Theme.AppCompat.AppStartUseDrawable">
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN"/>-->
-                <!--<category android:name="android.intent.category.LAUNCHER"/>-->
-            <!--</intent-filter>-->
-        </activity>
         <activity android:name="com.march.wxcube.ui.WebActivity"/>
     </application>
 </manifest>

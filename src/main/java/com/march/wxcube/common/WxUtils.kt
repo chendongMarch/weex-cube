@@ -1,6 +1,8 @@
 package com.march.wxcube.common
 
+import android.app.Activity
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import com.march.common.Common
 import com.march.common.utils.DimensUtils
@@ -65,5 +67,20 @@ object WxUtils {
     // 创建一个 disk cache
     fun makeDiskCache(dirName: String, size: Long): DiskLruCache {
         return DiskLruCache(WxUtils.makeCacheDir(dirName), size)
+    }
+
+
+    fun checkFinish(act:Activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            if (!act.isFinishing && !act.isDestroyed) {
+                act.finish()
+                act.overridePendingTransition(0, 0)
+            }
+        } else {
+            if (!act.isFinishing) {
+                act.finish()
+                act.overridePendingTransition(0, 0)
+            }
+        }
     }
 }
