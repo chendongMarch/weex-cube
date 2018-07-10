@@ -60,7 +60,7 @@ class WxInitConfig {
         //
         CubeWx.mRootCacheDir = WxUtils.makeRootCacheDir()
         //
-        CubeWx.mWxJsLoader = WxJsLoader(ctx, jsLoadStrategy, jsCacheStrategy, jsPrepareStrategy)
+        CubeWx.mWxJsLoader = WxJsLoader(ctx)
         CubeWx.mWxUpdater = WxUpdater(configUrl)
         CubeWx.mWxRouter = WxRouter()
         return this

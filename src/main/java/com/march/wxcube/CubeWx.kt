@@ -84,7 +84,7 @@ object CubeWx {
         ManagerRegistry.getInst().register(RequestManager.instance)
         ManagerRegistry.getInst().register(WxInstManager.instance)
 
-        mWxUpdater.update(ctx)
+        // mWxUpdater.update(ctx)
     }
 
     private fun initLibrary(ctx: Application) {

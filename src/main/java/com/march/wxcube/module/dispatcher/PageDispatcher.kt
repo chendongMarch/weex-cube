@@ -10,6 +10,7 @@ import com.march.common.utils.ColorUtils
 import com.march.common.utils.DimensUtils
 import com.march.common.utils.DrawableUtils
 import com.march.wxcube.CubeWx
+import com.march.wxcube.common.WxUtils
 import com.march.wxcube.common.downloadImage
 import com.march.wxcube.common.getDef
 import com.march.wxcube.common.toListEx
@@ -18,6 +19,7 @@ import com.march.wxcube.module.*
 import com.march.wxcube.performer.FragmentPerformer
 import com.march.wxcube.ui.WxActivity
 import com.march.wxcube.ui.WxFragment
+import com.taobao.weex.adapter.URIAdapter
 
 /**
  * CreateAt : 2018/6/7
@@ -64,21 +66,23 @@ class PageDispatcher(val module: OneModule) : BaseDispatcher() {
         val background = params.getJSONObject("background")
         val containerView = module.mWeexDelegate?.mContainerView ?: throw RuntimeException("Page#initPage containerView is null")
         if (background != null) {
+            val color = background.getString("color")
+            color?.let {
+                containerView.setBackgroundColor(ColorUtils.parseColor(it, Color.WHITE))
+            }
             val image = background.getString("image")
-            if (image != null) {
+            image?.let {
                 val repeat = background.getDef("repeat", false)
                 val widthScale = background.getDef("widthScale", 1f)
                 val aspectRatio = background.getDef("aspectRatio", 1f)
-                activity.downloadImage(image) {
+                val imgUrl = WxUtils.rewriteUrl(image, URIAdapter.IMAGE)
+                activity.downloadImage(imgUrl) {
                     containerView.background = if (repeat) {
                         DrawableUtils.newRepeatXYDrawable(activity, it, DimensUtils.WIDTH, widthScale, aspectRatio)
                     } else {
                         BitmapDrawable(activity.resources, it)
                     }
                 }
-            } else {
-                val color = background.getString("color")
-                containerView.setBackgroundColor(ColorUtils.parseColor(color, Color.WHITE))
             }
         }
         val interceptBack = params.getDef("interceptBack", false)

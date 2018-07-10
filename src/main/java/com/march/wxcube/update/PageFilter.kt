@@ -85,20 +85,22 @@ object PageFilter {
                 pageCfgsMap[pageName] = set
             }
         }
-        pageCfgsMap.forEach { _, cfgs ->
+        for ((key, cfgs) in pageCfgsMap) {
             // 先对 cfgs 按照 js 版本排序
             val sortCfgs = cfgs.sortedWith(Comparator { last, cur ->
                 val lastJsVersionCodes = getVersionCodes(last.jsVersion)
                 val curJsVersionCodes = getVersionCodes(cur.jsVersion)
                 compareVersion(curJsVersionCodes, lastJsVersionCodes)
             })
+            var add2ResultPage: WxPage? = null
             // 从高版本开始，找到每个页面最优的版本，正式版本时需要资源存在
             for (page in sortCfgs) {
                 if (!CubeWx.mWxCfg.debug) {
                     if (isResourceExist(context, page)) {
-                        resultPages.add(page)
+                        add2ResultPage = page
                         break
                     } else {
+                        LgUtils.e("chendong", "prepare ${page.toSimpleString()}")
                         needPreparePages.add(page)
                         continue
                     }
@@ -108,13 +110,25 @@ object PageFilter {
                     break
                 }
             }
+            if (add2ResultPage != null) {
+                resultPages.add(add2ResultPage)
+                LgUtils.e("chendong", "result success ${add2ResultPage.toSimpleString()}")
+            } else if (sortCfgs.isNotEmpty()) {
+                resultPages.add(sortCfgs[0])
+                LgUtils.e("chendong", "result fail ${sortCfgs[0].toSimpleString()}")
+            } else {
+                LgUtils.e("chendong", "result not found")
+            }
         }
         // prepare pages js resource from network
         ExecutorsPool.getInst().execute {
-            CubeWx.mWxJsLoader.prepareRemoteJs(context, needPreparePages)
+            try {
+                CubeWx.mWxJsLoader.prepareRemoteJsSync(context, needPreparePages)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
         needPreparePages.forEach { page ->
-            LgUtils.e("chendong", "prepare ${page.pageName} appV = ${page.appVersion} jsV = ${page.jsVersion}")
         }
         // 出去之后，会加载 result pages
         // CubeWx.onWeexConfigUpdate(context, filterPages)
@@ -123,14 +137,17 @@ object PageFilter {
 
     // 生产环境，所有加载的资源必须保证在本地有，否则降级
     private fun isResourceExist(context: Context, page: WxPage): Boolean {
-        if (page.remoteJs?.contains("test") == true) {
-            return true
-        }
         // 检索 assets
         var exist = CubeWx.mWxJsLoader.isAssetsJsExist(context, page)
+        if (exist) {
+            LgUtils.e("chendong", "assets 存在")
+        }
         // 检索文件
         if (!exist) {
             exist = CubeWx.mWxJsLoader.isLocalJsExist(page)
+            if (exist) {
+                LgUtils.e("chendong", "文件 存在")
+            }
         }
         return exist
     }

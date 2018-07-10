@@ -21,7 +21,7 @@ import java.util.concurrent.Executors
  *
  * @author chendong
  */
-class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, jsPrepareStrategy: Int) : OnWxUpdateListener {
+class WxJsLoader(context: Context) : OnWxUpdateListener {
 
     companion object {
         private val TAG = WxJsLoader::class.java.simpleName!!
@@ -113,7 +113,7 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
         }
         // 网络获取的考虑存文件
         if (realLoadStrategy == JsLoadStrategy.NET_FIRST
-                && CubeWx.mWxCfg.jsCacheStrategy == JsCacheStrategy.CACHE_MEMORY_DISK_BOTH
+                && cacheStrategy == JsCacheStrategy.CACHE_MEMORY_DISK_BOTH
                 && !template.isNullOrBlank()) {
             mJsFileCache.write(page.localJs, template)
         }
@@ -143,12 +143,13 @@ class WxJsLoader(context: Context, jsLoadStrategy: Int, jsCacheStrategy: Int, js
         return files.any { it.startsWith(page.localJs) }
     }
 
-    fun prepareRemoteJs(context: Context,pages: List<WxPage>) {
+    fun prepareRemoteJsSync(context: Context, pages: List<WxPage>) {
         if(pages.isEmpty()){
             return
         }
         pages.forEach {
-            mLoaderRegistry[JsLoadStrategy.NET_FIRST]?.load(context, it)
+            val template = mLoaderRegistry[JsLoadStrategy.NET_FIRST]?.load(context, it)
+            storeTemplate(JsLoadStrategy.NET_FIRST, JsCacheStrategy.CACHE_MEMORY_DISK_BOTH, it, template)
         }
     }
 }

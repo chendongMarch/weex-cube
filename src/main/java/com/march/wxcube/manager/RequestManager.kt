@@ -9,8 +9,7 @@ import com.march.wxcube.CubeWx
 import com.march.wxcube.common.WxUtils
 import com.march.wxcube.http.HttpListener
 import com.march.wxcube.http.OkHttpMaker
-import com.march.wxcube.http.cookie.CookieJarImpl
-import com.march.wxcube.http.cookie.CookieStore
+import com.march.wxcube.http.cookie.PersistentCookieJarImpl
 import com.march.wxcube.model.WxPage
 import com.taobao.weex.WXSDKInstance
 import com.taobao.weex.adapter.IWXHttpAdapter
@@ -44,9 +43,11 @@ class RequestManager : IManager {
 
     private val mOkHttpClient by lazy { OkHttpMaker.buildOkHttpClient() }
 
-    fun getCookieStore(): CookieStore {
-        return (ManagerRegistry.Request.mOkHttpClient.cookieJar() as CookieJarImpl).cookieStore
+    fun getCookieJar(): PersistentCookieJarImpl {
+        return (ManagerRegistry.Request.mOkHttpClient.cookieJar() as PersistentCookieJarImpl)
     }
+
+
     // 结束该页面的请求
     override fun onWxInstRelease(weexPage: WxPage?, instance: WXSDKInstance?) {
         val tag = instance?.instanceId ?: return

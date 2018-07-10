@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 
 import com.march.wxcube.CubeWx
+import com.march.wxcube.R
 import com.march.wxcube.common.WxConstants
 
 
@@ -62,5 +63,16 @@ class WxActivity : BaseActivity() {
             return
         }
         super.onBackPressed()
+    }
+
+    override fun finish() {
+        super.finish()
+        val anim = intent.getStringExtra("animation")
+        when (anim) {
+            "btc"  -> overridePendingTransition(R.anim.act_no_anim, R.anim.act_bottom_out)
+            "fade" -> overridePendingTransition(R.anim.act_no_anim, android.R.anim.fade_out)
+            "rtl"  -> overridePendingTransition(R.anim.act_no_anim, R.anim.act_translate_out)
+            else   -> overridePendingTransition(R.anim.act_no_anim, R.anim.act_translate_out)
+        }
     }
 }

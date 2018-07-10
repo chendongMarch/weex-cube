@@ -19,6 +19,7 @@ import com.march.wxcube.model.WxPage
 import com.march.wxcube.performer.IPerformer
 import com.taobao.weex.IWXRenderListener
 import com.taobao.weex.WXSDKInstance
+import com.taobao.weex.adapter.URIAdapter
 
 /**
  * CreateAt : 2018/3/27
@@ -197,6 +198,7 @@ class WxDelegate : WxLifeCycle {
         mRenderOpts[INSTANCE_ID] = mWeexInst.instanceId
         mRenderOpts[TOP_SAFE_AREA_HEIGHT] = WxUtils.getWxPxByRealPx(StatusBarUtils.getStatusBarHeight(mActivity))
         mRenderOpts[BOTTOM_SAFE_AREA_HEIGHT] = 0
+        mRenderOpts["bundleUrl"] = WxUtils.rewriteUrl(mWeexPage.remoteJs, URIAdapter.BUNDLE)
         mWeexPage.h5Url?.let {
             val data = ManagerRegistry.Data.getData(it)
             if (data != null) {

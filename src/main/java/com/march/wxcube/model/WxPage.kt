@@ -33,7 +33,7 @@ class WxPage() : Parcelable {
     /*********************⬆️以上是数据结构字段⬇️下面是临时生成字段************************/
 
     val key: String // page-name-weex-2-1-3
-        get() = "$pageName($jsVersion)".replace(".", "-")
+        get() = "$pageName-$jsVersion".replace(".", "-")
 
     val localJs: String // 本地 js 文件名  page-name-weex-2-1-3.0
         get() = key
@@ -103,6 +103,9 @@ class WxPage() : Parcelable {
                 .append("h5Url=").append(h5Url).newLine().toString()
     }
 
+    fun toSimpleString(): String {
+        return "$pageName $appVersion $jsVersion"
+    }
 
     companion object {
 

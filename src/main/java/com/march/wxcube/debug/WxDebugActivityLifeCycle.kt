@@ -18,7 +18,7 @@ class WxDebugActivityLifeCycle : ActivityLifecycleCallback() {
 //        if (act !is WeexActivity) {
 //            return
 //        }
-            val activity = act ?: return
+        val activity = act ?: return
         val debugger = WxPageDebugger()
         debugger.addDebugBtn(activity)
             if (activity is WxActivity) {

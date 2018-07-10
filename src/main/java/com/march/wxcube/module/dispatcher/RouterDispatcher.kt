@@ -5,6 +5,7 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.CubeWx
+import com.march.wxcube.R
 import com.march.wxcube.common.getDef
 import com.march.wxcube.common.toObjEx
 import com.march.wxcube.manager.ManagerRegistry
@@ -134,8 +135,17 @@ class RouterDispatcher : BaseDispatcher() {
 
     private fun openUrl(ctx: Context, params: JSONObject) {
         val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openUrl url is null")
-        val noRepeat = params.getDef(KEY_NO_REPEAT, false)
-        val result = CubeWx.mWxRouter.openUrl(ctx, webUrl)
+        val anim = params.getDef("animation", "normal")
+        val result = CubeWx.mWxRouter.openUrl(ctx, webUrl) {
+            it.putExtra("animation", anim)
+        }
+        mProvider.activity().overridePendingTransition(R.anim.act_bottom_in, R.anim.act_no_anim)
+        when (anim) {
+            "btc"  -> mProvider.activity().overridePendingTransition(R.anim.act_bottom_in, R.anim.act_no_anim)
+            "fade" -> mProvider.activity().overridePendingTransition(android.R.anim.fade_in, R.anim.act_no_anim)
+            "rtl" -> mProvider.activity().overridePendingTransition(android.R.anim.fade_in, R.anim.act_no_anim)
+            else   -> mProvider.activity().overridePendingTransition(R.anim.act_translate_in, R.anim.act_no_anim)
+        }
         if (!result.first) {
             throw RuntimeException("Router#openUrl Error ${result.second}")
         }

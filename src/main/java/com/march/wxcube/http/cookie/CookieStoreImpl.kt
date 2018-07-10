@@ -37,7 +37,8 @@ class CookieStoreImpl(context: Context) : CookieStore {
     }
 
     // 从存储获取 cookie, 耗时
-    private fun backUpCookies() {
+    fun backUpCookies() {
+        mCookies.clear()
         val prefsMap = mCookiePrefs.all
         prefsMap.forEach { key, value ->
             if (value != null && !(value as String).startsWith(COOKIE_NAME_PREFIX)) {

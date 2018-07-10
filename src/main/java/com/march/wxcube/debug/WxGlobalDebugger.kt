@@ -161,15 +161,18 @@ internal object WxGlobalDebugger {
             }
         }
         CubeWx.mWxRouter.mInterceptor = { url ->
-            if (url.indexOf("/") == -1) {
-                // 通过 pageName 查找
-                mWeexPageMap.values.firstOrNull {
-                    it.pageName == url
+            if (checkDebug()) {
+                if (url.indexOf("/") == -1) {
+                    // 通过 pageName 查找
+                    mWeexPageMap.values.firstOrNull {
+                        it.pageName == url
+                    }
+                } else {
+                    // 通过 url 查找
+                    mWeexPageMap[UrlKey.fromUrl(url)]
                 }
-            } else {
-                // 通过 url 查找
-                mWeexPageMap[UrlKey.fromUrl(url)]
-            }
+            } else
+                null
         }
     }
 

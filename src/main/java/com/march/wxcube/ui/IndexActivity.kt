@@ -8,6 +8,7 @@ import com.march.common.utils.ToastUtils
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.Permission
 import com.march.wxcube.common.WxConstants
+import java.lang.Exception
 
 
 /**
@@ -38,9 +39,13 @@ class IndexActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        CubeWx.mWxPageAdapter.onPageCreated(this, WxConstants.PAGE_INDEX)
-        CubeWx.mWxPageAdapter.getLoading().setIndexContent(this)
-        checkPermissionAndLaunch()
+        try {
+            CubeWx.mWxPageAdapter.onPageCreated(this, WxConstants.PAGE_INDEX)
+            CubeWx.mWxPageAdapter.getLoading().setIndexContent(this)
+            checkPermissionAndLaunch()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun checkPermissionAndLaunch() {
@@ -51,7 +56,7 @@ class IndexActivity : BaseActivity() {
             CubeWx.mWxUpdater.update(this)
             Handler().postDelayed(mIndexRunnable, TIME_START)
         } else {
-            ToastUtils.show("请授予达人店存储权限～")
+            ToastUtils.show("请授予存储权限～")
         }
     }
 

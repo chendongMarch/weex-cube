@@ -166,7 +166,11 @@ class WxDebugDialog(context: Context, private val mWeexPageDebugger: WxPageDebug
     }
 
     override fun show() {
-        super.show()
+        try {
+            super.show()
+        } catch (e: Exception) {
+
+        }
         updateMsg()
     }
 

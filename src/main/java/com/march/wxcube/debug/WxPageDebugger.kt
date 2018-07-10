@@ -61,7 +61,7 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
         val params = FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         params.gravity = Gravity.END or Gravity.BOTTOM
         params.rightMargin = 100
-        params.bottomMargin = 330
+        params.bottomMargin = 530
         dragLayout.setOnClickListener {
             mDebugDialog.show()
         }
