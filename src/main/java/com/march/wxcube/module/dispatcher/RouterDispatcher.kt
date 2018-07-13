@@ -125,7 +125,7 @@ class RouterDispatcher : BaseDispatcher() {
             for (inst in allInstances) {
                 val wxAct = inst?.context as? WxActivity
                 if (wxAct?.mDelegate?.mWeexPage?.h5Url?.contains(webUrl) == false) {
-                    WxUtils.checkFinish(wxAct)
+                    WxUtils.finishActivity(wxAct)
                 } else {
                     hasHome = true
                 }

@@ -1,6 +1,7 @@
 package com.march.wxcube.adapter
 
 import com.march.common.utils.LgUtils
+import com.march.wxcube.CubeWx
 
 /**
  * CreateAt : 2018/6/27
@@ -40,7 +41,10 @@ open class DefaultWxReportAdapter : IWxReportAdapter {
     }
 
     override fun log(tag: String, msg: String, throwable: Throwable?) {
-        LgUtils.e(tag, msg + "  " + throwable?.message)
+        if (!CubeWx.mWxCfg.logEnable) {
+            return
+        }
+        LgUtils.e(tag, msg)
         throwable?.let {
             LgUtils.e(tag, throwable)
         }

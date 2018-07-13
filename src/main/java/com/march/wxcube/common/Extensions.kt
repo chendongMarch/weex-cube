@@ -22,13 +22,14 @@ import java.security.MessageDigest
 
 // 提交错误
 fun Any.log(msg: String, throwable: Throwable? = null) {
-    if (CubeWx.mWxCfg.debug) {
-        CubeWx.mWxReportAdapter.log(this::class.java.simpleName, msg, throwable)
-    }
+    CubeWx.mWxReportAdapter.log(this::class.java.simpleName, msg, throwable)
 }
 
 
-fun Context.memory(float: Float): Int {
+fun Context?.memory(float: Float): Int {
+    if (this == null) {
+        return 5 * 1024 * 1024
+    }
     val activityManager = this.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     return (activityManager.memoryClass * 1024 * 1024 * float).toInt()
 }

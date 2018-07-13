@@ -13,10 +13,6 @@ import java.lang.ref.WeakReference
  */
 class WxInstManager : IManager {
 
-    companion object {
-        val instance by lazy { WxInstManager() }
-    }
-
     private val mWeexDelegateMap by lazy { mutableMapOf<String, WeakReference<WxDelegate>>() }
     private val mWeexActivityMap by lazy { mutableMapOf<String, WeakReference<WxDelegate>>() }
 

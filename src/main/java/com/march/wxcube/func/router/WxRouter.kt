@@ -1,4 +1,4 @@
-package com.march.wxcube.router
+package com.march.wxcube.func.router
 
 import android.content.Context
 import android.content.Intent
@@ -13,7 +13,7 @@ import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.WxPage
 import com.march.wxcube.ui.WebActivity
 import com.march.wxcube.ui.WxDialogFragment
-import com.march.wxcube.update.OnWxUpdateListener
+import com.march.wxcube.func.update.OnWxUpdateListener
 import com.taobao.weex.adapter.URIAdapter
 
 

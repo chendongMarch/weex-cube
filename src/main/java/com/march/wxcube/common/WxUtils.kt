@@ -4,13 +4,16 @@ import android.app.Activity
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
-import com.march.common.Common
 import com.march.common.utils.DimensUtils
 import com.march.common.utils.FileUtils
 import com.march.wxcube.CubeWx
 import com.taobao.weex.WXSDKManager
 import com.taobao.weex.adapter.URIAdapter
 import java.io.File
+import java.lang.Exception
+import java.math.BigInteger
+import java.nio.charset.Charset
+import java.security.MessageDigest
 
 /**
  * CreateAt : 2018/6/20
@@ -70,7 +73,8 @@ object WxUtils {
     }
 
 
-    fun checkFinish(act:Activity) {
+    // 结束界面
+    fun finishActivity(act: Activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             if (!act.isFinishing && !act.isDestroyed) {
                 act.finish()
@@ -85,4 +89,13 @@ object WxUtils {
     }
 
 
+    fun md5(template: String): String {
+        return try {
+            val md = MessageDigest.getInstance("MD5")
+            val md5Data = BigInteger(1, md.digest(template.toByteArray(Charset.forName("utf-8"))))
+            String.format("%032X", md5Data)
+        } catch (e: Exception) {
+            "${e.message}"
+        }
+    }
 }

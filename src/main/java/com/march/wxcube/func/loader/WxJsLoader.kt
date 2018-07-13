@@ -1,14 +1,18 @@
-package com.march.wxcube.loader
+package com.march.wxcube.func.loader
 
+import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
 import android.util.LruCache
 import com.march.common.model.WeakContext
+import com.march.common.utils.LgUtils
 import com.march.wxcube.CubeWx
 import com.march.wxcube.adapter.IWxReportAdapter
-import com.march.wxcube.common.*
+import com.march.wxcube.common.DiskLruCache
+import com.march.wxcube.common.WxUtils
+import com.march.wxcube.common.log
+import com.march.wxcube.func.update.OnWxUpdateListener
 import com.march.wxcube.model.WxPage
-import com.march.wxcube.update.OnWxUpdateListener
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -29,11 +33,23 @@ class WxJsLoader(context: Context) : OnWxUpdateListener {
 
     // 线程池
     private val mService: ExecutorService = Executors.newCachedThreadPool()
-
     // 内存缓存
-    private val mJsMemoryCache = JsMemoryCache(context.memory(.3f))
+    private val mJsMemoryCache by lazy {
+        JsMemoryCache(let {
+            val ctx = CubeWx.mWeakCtx.get()
+            if (ctx == null) {
+                5 * 1024 * 1024
+            } else {
+                val memoryRatio = .3
+                val activityManager = ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+                (activityManager.memoryClass * 1024 * 1024 * memoryRatio).toInt()
+            }
+        })
+    }
     // 文件缓存
-    private val mJsFileCache = JsFileCache(WxUtils.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
+    private val mJsFileCache by lazy {
+        JsFileCache(WxUtils.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
+    }
     // 资源加载器
     private val mLoaderRegistry by lazy {
         mapOf(JsLoadStrategy.CACHE_FIRST to CacheResourceLoader(mJsMemoryCache),
@@ -122,7 +138,11 @@ class WxJsLoader(context: Context) : OnWxUpdateListener {
         if (realLoadStrategy == JsLoadStrategy.NET_FIRST
                 && cacheStrategy == JsCacheStrategy.CACHE_MEMORY_DISK_BOTH) {
             // 调试模式没有 md5 || 正式模式有 md5
-            if (page.md5.isBlank() || page.md5 == template.md5()) {
+            val curMd5 = WxUtils.md5(template)
+            val pageMd5 = page.md5
+            LgUtils.e("md5 check ${page.pageName} $curMd5 $pageMd5")
+            if (pageMd5.isBlank() || curMd5.equals(pageMd5, true)) {
+                LgUtils.e("write page $page")
                 mJsFileCache.write(page.localJs, template)
             } else {
                 CubeWx.mWxReportAdapter.report(IWxReportAdapter.CODE_MD5_NOT_MATCH, """
@@ -160,7 +180,7 @@ class WxJsLoader(context: Context) : OnWxUpdateListener {
     }
 
     fun prepareRemoteJsSync(context: Context, pages: List<WxPage>) {
-        if(pages.isEmpty()){
+        if (pages.isEmpty()) {
             return
         }
         pages.forEach {

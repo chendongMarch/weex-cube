@@ -1,4 +1,4 @@
-package com.march.wxcube.loader
+package com.march.wxcube.func.loader
 
 import android.content.Context
 import com.march.wxcube.CubeWx

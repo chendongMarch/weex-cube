@@ -3,7 +3,7 @@ package com.march.wxcube.debug
 import com.march.common.pool.DiskKVManager
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.newLine
-import com.march.wxcube.loader.JsLoadStrategy
+import com.march.wxcube.func.loader.JsLoadStrategy
 
 /**
  * CreateAt : 2018/6/30

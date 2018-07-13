@@ -6,7 +6,7 @@ apply plugin: 'kotlin-android-extensions'
 
 apply plugin: 'kotlin-kapt'
 
-// project/build.gradle
+// project/buildDebug.gradle
 // apply from: 'https://coding.net/u/devlab/p/Resource/git/raw/master/android/project.gradle'
 def libs = rootProject.ext.libs
 def version = rootProject.ext.version

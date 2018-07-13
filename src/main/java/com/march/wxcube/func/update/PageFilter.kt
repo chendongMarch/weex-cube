@@ -1,10 +1,10 @@
-package com.march.wxcube.update
+package com.march.wxcube.func.update
 
 import android.content.Context
 import com.march.common.Common
 import com.march.common.pool.ExecutorsPool
-import com.march.common.utils.LgUtils
 import com.march.wxcube.CubeWx
+import com.march.wxcube.common.log
 import com.march.wxcube.model.WxPage
 
 /**
@@ -110,14 +110,14 @@ object PageFilter {
                     break
                 }
             }
-            if (add2ResultPage != null) {
-                resultPages.add(add2ResultPage)
-                // LgUtils.e("chendong", "result success ${add2ResultPage.toSimpleString()}")
-            } else if (sortCfgs.isNotEmpty()) {
-                resultPages.add(sortCfgs[0])
-                // LgUtils.e("chendong", "result fail ${sortCfgs[0].toSimpleString()}")
-            } else {
-                // LgUtils.e("chendong", "result not found")
+            when {
+                add2ResultPage != null -> resultPages.add(add2ResultPage)
+                // log( "result success ${add2ResultPage.toSimpleString()}")
+                sortCfgs.isNotEmpty()  -> resultPages.add(sortCfgs[0])
+                // log("result fail ${sortCfgs[0].toSimpleString()}")
+                else                   -> {
+                    // log( "result not found")
+                }
             }
         }
         // prepare pages js resource from network
@@ -140,13 +140,13 @@ object PageFilter {
         // 检索 assets
         var exist = CubeWx.mWxJsLoader.isAssetsJsExist(context, page)
         if (exist) {
-            LgUtils.e("chendong", "assets 存在")
+            log("assets 存在")
         }
         // 检索文件
         if (!exist) {
             exist = CubeWx.mWxJsLoader.isLocalJsExist(page)
             if (exist) {
-                LgUtils.e("chendong", "文件 存在")
+                log("文件 存在")
             }
         }
         return exist

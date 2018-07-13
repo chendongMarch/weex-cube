@@ -1,7 +1,7 @@
 package com.march.wxcube.adapter
 
 import com.alibaba.fastjson.JSON
-import com.march.wxcube.update.WxPagesResp
+import com.march.wxcube.func.update.WxPagesResp
 
 /**
  * CreateAt : 2018/6/27

@@ -83,8 +83,6 @@ class WxPage() : Parcelable {
     override fun describeContents() = 0
 
 
-
-
     fun toShowString(): String {
         return StringBuilder()
                 .append("pageName=").append(pageName).newLine()

@@ -10,7 +10,7 @@ import com.march.wxcube.http.HttpListener
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.manager.RequestManager
 import com.march.wxcube.model.WxPage
-import com.march.wxcube.router.UrlKey
+import com.march.wxcube.func.router.UrlKey
 import com.taobao.weex.adapter.URIAdapter
 import com.taobao.weex.common.WXResponse
 import java.util.concurrent.Executors

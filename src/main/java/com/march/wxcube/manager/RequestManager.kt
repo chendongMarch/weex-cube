@@ -38,7 +38,6 @@ class RequestManager : IManager {
         const val STATUS_CODE_FAILURE = "1"
         const val STATUS_NO_NETWORK = "-1"
 
-        val instance: RequestManager by lazy { RequestManager() }
     }
 
     private val mOkHttpClient by lazy { OkHttpMaker.buildOkHttpClient() }

@@ -89,12 +89,6 @@ class WxDelegate : WxLifeCycle {
     private fun init(activity: Activity) {
         mActivity = activity
         createWxInst()
-
-        CubeWx.mWxReportAdapter.report(IWxReportAdapter.CODE_RENDER_ERROR, """
-                code = code
-                msg = msg
-                page = $mWeexPage
-            """.trimIndent())
     }
 
     fun initContainerView(view: ViewGroup) {

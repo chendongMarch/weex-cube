@@ -1,4 +1,4 @@
-package com.march.wxcube.update
+package com.march.wxcube.func.update
 
 import android.content.Context
 import com.march.common.pool.ExecutorsPool
@@ -18,7 +18,7 @@ import com.taobao.weex.common.WXResponse
  * Describe : 配置更新管理
  * @author chendong
  */
-class WxUpdater(private var url: String) {
+class WxUpdater {
 
     private val mDiskLruCache by lazy {
         DiskLruCache(WxUtils.makeCacheDir(CACHE_DIR), DISK_MAX_SIZE)
@@ -47,7 +47,7 @@ class WxUpdater(private var url: String) {
             // 解析缓存
             parseJsonAndUpdate(context, configJson)
             // 发起网络请求最新配置
-            val request = ManagerRegistry.Request.makeWxRequest(url = url, from = "request-wx-config")
+            val request = ManagerRegistry.Request.makeWxRequest(url = CubeWx.mWxCfg.configUrl, from = "request-wx-config")
             ManagerRegistry.Request.request(request, false, object : HttpListener {
                 override fun onHttpFinish(response: WXResponse) {
                     if (response.errorCode == RequestManager.ERROR_CODE_FAILURE) {

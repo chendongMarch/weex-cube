@@ -11,10 +11,6 @@ import com.taobao.weex.WXSDKInstance
  */
 class DataManager : IManager {
 
-    companion object {
-        val instance: DataManager by lazy { DataManager() }
-    }
-
     private val mCacheExtraData: MutableMap<String, Any> = mutableMapOf()
 
     override fun onWxInstRelease(weexPage: WxPage?, instance: WXSDKInstance?) {

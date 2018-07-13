@@ -12,12 +12,15 @@ import com.march.wxcube.common.JsonParserImpl
 import com.march.wxcube.common.WxInstaller
 import com.march.wxcube.debug.WxDebugActivityLifeCycle
 import com.march.wxcube.debug.WxGlobalDebugger
-import com.march.wxcube.loader.WxJsLoader
+import com.march.wxcube.func.loader.WxJsLoader
+import com.march.wxcube.func.router.WxRouter
+import com.march.wxcube.func.update.WxUpdater
 import com.march.wxcube.manager.*
 import com.march.wxcube.model.WxPage
-import com.march.wxcube.router.WxRouter
-import com.march.wxcube.update.WxUpdater
-import com.march.wxcube.wxadapter.*
+import com.march.wxcube.wxadapter.ImgAdapter
+import com.march.wxcube.wxadapter.JsErrorAdapter
+import com.march.wxcube.wxadapter.OkHttpAdapter
+import com.march.wxcube.wxadapter.UriAdapter
 import com.taobao.weex.InitConfig
 import com.taobao.weex.WXEnvironment
 import com.taobao.weex.WXSDKEngine
@@ -79,10 +82,11 @@ object CubeWx {
         WxInstaller.registerBindingX()
         mWxInitAdapter.onWxModuleCompRegister()
 
-        ManagerRegistry.getInst().register(DataManager.instance)
-        ManagerRegistry.getInst().register(EventManager.instance)
-        ManagerRegistry.getInst().register(RequestManager.instance)
-        ManagerRegistry.getInst().register(WxInstManager.instance)
+        ManagerRegistry.getInst().register(DataManager())
+        ManagerRegistry.getInst().register(EventManager())
+        ManagerRegistry.getInst().register(RequestManager())
+        ManagerRegistry.getInst().register(WxInstManager())
+        ManagerRegistry.getInst().register(OnlineCfgManager())
 
         // mWxUpdater.update(ctx)
     }

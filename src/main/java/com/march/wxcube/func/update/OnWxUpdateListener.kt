@@ -1,4 +1,4 @@
-package com.march.wxcube.update
+package com.march.wxcube.func.update
 
 import android.content.Context
 import com.march.wxcube.model.WxPage

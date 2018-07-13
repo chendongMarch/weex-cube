@@ -1,4 +1,4 @@
-package com.march.wxcube.update
+package com.march.wxcube.func.update
 
 import com.march.wxcube.model.WxPage
 

@@ -20,8 +20,8 @@ import com.march.wxcube.R
 import com.march.wxcube.common.WxUtils
 import com.march.wxcube.common.log
 import com.march.wxcube.lifecycle.WxLifeCycle
-import com.march.wxcube.loader.JsCacheStrategy
-import com.march.wxcube.loader.JsLoadStrategy
+import com.march.wxcube.func.loader.JsCacheStrategy
+import com.march.wxcube.func.loader.JsLoadStrategy
 import com.march.wxcube.model.WxPage
 import com.march.wxcube.ui.WxDelegate
 import com.taobao.weex.IWXRenderListener

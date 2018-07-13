@@ -1,4 +1,4 @@
-package com.march.wxcube.router
+package com.march.wxcube.func.router
 
 import android.net.Uri
 

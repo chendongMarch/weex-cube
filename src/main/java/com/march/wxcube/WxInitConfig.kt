@@ -3,12 +3,12 @@ package com.march.wxcube
 import android.content.Context
 import com.march.wxcube.adapter.*
 import com.march.wxcube.common.WxUtils
-import com.march.wxcube.loader.JsCacheStrategy
-import com.march.wxcube.loader.JsLoadStrategy
-import com.march.wxcube.loader.JsPrepareStrategy
-import com.march.wxcube.loader.WxJsLoader
-import com.march.wxcube.router.WxRouter
-import com.march.wxcube.update.WxUpdater
+import com.march.wxcube.func.loader.JsCacheStrategy
+import com.march.wxcube.func.loader.JsLoadStrategy
+import com.march.wxcube.func.loader.JsPrepareStrategy
+import com.march.wxcube.func.loader.WxJsLoader
+import com.march.wxcube.func.router.WxRouter
+import com.march.wxcube.func.update.WxUpdater
 
 
 /**
@@ -20,8 +20,16 @@ import com.march.wxcube.update.WxUpdater
 class WxInitConfig {
 
     companion object {
-        fun build(complete: WxInitConfig.() -> Unit): WxInitConfig {
+        fun buildDebug(complete: WxInitConfig.() -> Unit): WxInitConfig {
             return WxInitConfig().apply(complete)
+        }
+
+        fun buildRelease(complete: WxInitConfig.() -> Unit): WxInitConfig {
+            return WxInitConfig().apply {
+                debug = false
+                showDebugBtn = false
+                logEnable = false
+            }.apply(complete)
         }
     }
 
@@ -31,6 +39,7 @@ class WxInitConfig {
     var https: Boolean = false
     var debug: Boolean = true
     var showDebugBtn = true
+    var logEnable = true
 
     var jsLoadStrategy: Int = JsLoadStrategy.DEFAULT
     var jsCacheStrategy: Int = JsCacheStrategy.CACHE_MEMORY_DISK_BOTH
@@ -62,7 +71,7 @@ class WxInitConfig {
         CubeWx.mRootCacheDir = WxUtils.makeRootCacheDir()
         //
         CubeWx.mWxJsLoader = WxJsLoader(ctx)
-        CubeWx.mWxUpdater = WxUpdater(configUrl)
+        CubeWx.mWxUpdater = WxUpdater()
         CubeWx.mWxRouter = WxRouter()
         return this
     }
