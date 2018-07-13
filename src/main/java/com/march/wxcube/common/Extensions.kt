@@ -20,13 +20,13 @@ import java.security.MessageDigest
  * @author chendong
  */
 
-
 // 提交错误
-fun Any.report(msg: String, throwable: Throwable? = null) {
+fun Any.log(msg: String, throwable: Throwable? = null) {
     if (CubeWx.mWxCfg.debug) {
-        CubeWx.mWxReportAdapter.reportError(throwable, msg)
+        CubeWx.mWxReportAdapter.log(this::class.java.simpleName, msg, throwable)
     }
 }
+
 
 fun Context.memory(float: Float): Int {
     val activityManager = this.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager

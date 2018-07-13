@@ -15,6 +15,7 @@ import com.march.wxcube.ui.WxActivity
 class WxDebugActivityLifeCycle : ActivityLifecycleCallback() {
 
     override fun onActivityCreated(act: Activity?, savedInstanceState: Bundle?) {
+        super.onActivityCreated(act, savedInstanceState)
         if (!CubeWx.mWxCfg.showDebugBtn) {
             return
         }

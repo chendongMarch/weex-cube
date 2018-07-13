@@ -18,6 +18,7 @@ import com.march.common.view.DragLayout
 import com.march.wxcube.CubeWx
 import com.march.wxcube.R
 import com.march.wxcube.common.WxUtils
+import com.march.wxcube.common.log
 import com.march.wxcube.lifecycle.WxLifeCycle
 import com.march.wxcube.loader.JsCacheStrategy
 import com.march.wxcube.loader.JsLoadStrategy
@@ -107,7 +108,7 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
                         mRefreshCount = 0
                     } else {
                         mRefreshCount++
-                        CubeWx.mWxReportAdapter.log("startRefresh", "获取到但是没有改变，不作渲染")
+                        log("获取到但是没有改变，不作渲染")
                     }
                 }
                 mHandler.post {
@@ -190,10 +191,11 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
 
     override fun onException(instance: WXSDKInstance?, errCode: String?, msg: String?) {
         mWxPageDebugCfg.errorMsg = "code = $errCode msg = $msg"
+        log("code = $errCode, msg = $msg")
+        ToastUtils.show("code = $errCode, msg = $msg")
     }
 
 
     data class DebugConfig(var isRefreshRemoteJs: Boolean, var debugJsInCache: Boolean, var debugJsInDisk: Boolean)
-
 
 }

@@ -5,10 +5,8 @@ import android.os.Build
 import android.util.LruCache
 import com.march.common.model.WeakContext
 import com.march.wxcube.CubeWx
-import com.march.wxcube.common.DiskLruCache
-import com.march.wxcube.common.WxUtils
-import com.march.wxcube.common.memory
-import com.march.wxcube.common.report
+import com.march.wxcube.adapter.IWxReportAdapter
+import com.march.wxcube.common.*
 import com.march.wxcube.model.WxPage
 import com.march.wxcube.update.OnWxUpdateListener
 import java.io.File
@@ -24,7 +22,7 @@ import java.util.concurrent.Executors
 class WxJsLoader(context: Context) : OnWxUpdateListener {
 
     companion object {
-        private val TAG = WxJsLoader::class.java.simpleName!!
+        private const val TAG = "WxJsLoader"
         const val CACHE_DIR = "weex-js-disk-cache"
         const val DISK_MAX_SIZE = 20 * 1024 * 1024L
     }
@@ -101,21 +99,39 @@ class WxJsLoader(context: Context) : OnWxUpdateListener {
                 if (!template.isNullOrBlank()) break
             }
         }
-        CubeWx.mWxReportAdapter.log(TAG, "JS加载${page.pageName} cache[${mJsMemoryCache.size()}] ${JsLoadStrategy.desc(realLoadStrategy)}")
+        log("JS加载${page.pageName} cache[${mJsMemoryCache.size()}] ${JsLoadStrategy.desc(realLoadStrategy)}")
         return realLoadStrategy to template
     }
 
     // 同步缓存数据模板信息
     private fun storeTemplate(realLoadStrategy: Int, cacheStrategy: Int, page: WxPage, template: String?) {
+        if (template == null || template.isBlank()) {
+            CubeWx.mWxReportAdapter.report(IWxReportAdapter.CODE_JS_LOAD_ERROR, """
+                    page = $page
+                    loadStrategy = $realLoadStrategy
+                    cacheStrategy = $cacheStrategy
+                    templateSize = ${template?.length}
+                """.trimIndent())
+            return
+        }
         // 不管从哪里取出来，都需要往内存中存
         if (cacheStrategy != JsCacheStrategy.NO_CACHE) {
             mJsMemoryCache.checkPut(page.key, template)
         }
         // 网络获取的考虑存文件
         if (realLoadStrategy == JsLoadStrategy.NET_FIRST
-                && cacheStrategy == JsCacheStrategy.CACHE_MEMORY_DISK_BOTH
-                && !template.isNullOrBlank()) {
-            mJsFileCache.write(page.localJs, template)
+                && cacheStrategy == JsCacheStrategy.CACHE_MEMORY_DISK_BOTH) {
+            // 调试模式没有 md5 || 正式模式有 md5
+            if (page.md5.isBlank() || page.md5 == template.md5()) {
+                mJsFileCache.write(page.localJs, template)
+            } else {
+                CubeWx.mWxReportAdapter.report(IWxReportAdapter.CODE_MD5_NOT_MATCH, """
+                    $page
+                    loadStrategy = $realLoadStrategy
+                    cacheStrategy = $cacheStrategy
+                    templateSize = ${template.length}
+                """.trimIndent())
+            }
         }
     }
 
@@ -163,11 +179,11 @@ class JsMemoryCache(maxSize: Int) : LruCache<String, String>(maxSize) {
 
     fun checkPut(key: String?, value: String?) {
         if (key.isNullOrBlank()) {
-            report("JsMemCache key is empty $key")
+            log("JsMemCache key is empty $key")
             return
         }
         if (value.isNullOrBlank()) {
-            report("JsMemCache value is empty $value")
+            log("JsMemCache value is empty $value")
             return
         }
         put(key, value)

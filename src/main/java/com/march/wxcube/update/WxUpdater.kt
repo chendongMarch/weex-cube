@@ -6,7 +6,7 @@ import com.march.common.utils.StreamUtils
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.DiskLruCache
 import com.march.wxcube.common.WxUtils
-import com.march.wxcube.common.report
+import com.march.wxcube.common.log
 import com.march.wxcube.http.HttpListener
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.manager.RequestManager
@@ -51,7 +51,7 @@ class WxUpdater(private var url: String) {
             ManagerRegistry.Request.request(request, false, object : HttpListener {
                 override fun onHttpFinish(response: WXResponse) {
                     if (response.errorCode == RequestManager.ERROR_CODE_FAILURE) {
-                        report("请求配置文件失败")
+                        log("请求配置文件失败")
                     } else if (parseJsonAndUpdate(context, response.data)) {
                         mDiskLruCache.write(CONFIG_KEY, response.data)
                     }

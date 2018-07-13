@@ -17,8 +17,7 @@ open class DiskLruCache(dir: File, maxSize: Long) {
         return try {
             diskCache.get(key)?.getString(0)?:""
         } catch (e: Exception) {
-            e.printStackTrace()
-            report("read disk error key = $key")
+            log("磁盘读取 key = $key", e)
             ""
         }
     }
@@ -32,10 +31,8 @@ open class DiskLruCache(dir: File, maxSize: Long) {
             edit?.set(0, value)
             edit?.commit()
         } catch (e: Exception) {
-            e.printStackTrace()
-            report("write disk error key = $key")
+            log("磁盘写入 key = $key", e)
         }
-
     }
 
     fun close() {

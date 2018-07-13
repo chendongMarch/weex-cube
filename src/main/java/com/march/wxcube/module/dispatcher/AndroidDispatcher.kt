@@ -3,6 +3,7 @@ package com.march.wxcube.module.dispatcher
 import android.app.Activity
 import com.alibaba.fastjson.JSONObject
 import com.march.common.utils.immersion.ImmersionStatusBarUtils
+import com.march.wxcube.common.Device
 import com.march.wxcube.module.JsCallbackWrap
 
 /**
@@ -11,17 +12,21 @@ import com.march.wxcube.module.JsCallbackWrap
  *
  * @author chendong
  */
-class StatusBarDispatcher : BaseDispatcher() {
+class AndroidDispatcher : BaseDispatcher() {
 
     companion object {
         const val translucentStatusBar = "translucentStatusBar"
         const val setStatusBarLight = "setStatusBarLight"
         const val setStatusBarDark = "setStatusBarDark"
+        const val hideBottomUI = "hideBottomUI"
     }
 
 
     override fun getMethods(): Array<String> {
-        return arrayOf(translucentStatusBar, setStatusBarDark, setStatusBarLight)
+        return arrayOf(translucentStatusBar,
+                setStatusBarDark,
+                setStatusBarLight,
+                hideBottomUI)
     }
 
     override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
@@ -30,6 +35,7 @@ class StatusBarDispatcher : BaseDispatcher() {
             translucentStatusBar -> translucentStatusBar(act)
             setStatusBarDark     -> setStatusBarDark(act)
             setStatusBarLight    -> setStatusBarLight(act)
+            hideBottomUI         -> hideBottomUI(act)
         }
     }
 
@@ -39,6 +45,14 @@ class StatusBarDispatcher : BaseDispatcher() {
      */
     private fun translucentStatusBar(act: Activity) {
         ImmersionStatusBarUtils.translucent(act)
+    }
+
+    private fun hideBottomUI(act: Activity) {
+        try {
+            Device.hideBottomUI(act)
+        } catch (e: Exception) {
+
+        }
     }
 
     /**

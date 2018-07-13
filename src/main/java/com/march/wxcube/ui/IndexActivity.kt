@@ -56,7 +56,7 @@ class IndexActivity : BaseActivity() {
             CubeWx.mWxUpdater.update(this)
             Handler().postDelayed(mIndexRunnable, TIME_START)
         } else {
-            ToastUtils.show("请授予存储权限～")
+//            ToastUtils.show("请授予存储权限～")
         }
     }
 

@@ -8,7 +8,7 @@ import com.march.common.Common
 import com.march.webkit.WebKit
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.WxUtils
-import com.march.wxcube.common.report
+import com.march.wxcube.common.log
 import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.WxPage
 import com.march.wxcube.ui.WebActivity
@@ -121,7 +121,7 @@ class WxRouter : OnWxUpdateListener {
             mInterceptor?.invoke(validUrl) ?: mWeexPageMap[UrlKey.fromUrl(validUrl)]
         }
         if (result == null) {
-            report("open Url, can not find page, url => $url")
+            log("open Url, can not find page, url => $url")
             return null
         }
         return result.make(url)

@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSON
 import com.march.common.utils.ToastUtils
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.WxUtils
-import com.march.wxcube.common.report
+import com.march.wxcube.common.log
 import com.march.wxcube.http.HttpListener
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.manager.RequestManager
@@ -76,7 +76,7 @@ internal object WxGlobalDebugger {
         ManagerRegistry.Request.request(request, false, object : HttpListener {
             override fun onHttpFinish(response: WXResponse) {
                 if (response.errorCode == RequestManager.ERROR_CODE_FAILURE) {
-                    report("请求调试配置文件失败")
+                    log("请求调试配置文件失败")
                 } else {
                     val netJson = response.data ?: return
                     mDiskLruCache.write(CONFIG_KEY, netJson)
@@ -95,7 +95,7 @@ internal object WxGlobalDebugger {
             val myJson = json.replace("weexPage", "pageName").replace("autoJump", "indexPage")
             val weexPagesResp = JSON.parseObject(myJson, DebugWxPagesResp::class.java)
             mDebugWeexPagesResp = weexPagesResp
-            val originPages = weexPagesResp?.list ?: return report("调试文件 list = null")
+            val originPages = weexPagesResp?.list ?: return log("调试文件 list = null")
             // 不管新老页面 pageName 是唯一标识
             val pages = mutableListOf<WxPage>()
             originPages.forEach {
@@ -110,7 +110,7 @@ internal object WxGlobalDebugger {
             updateWeexPageMap(pages)
         } catch (e: Exception) {
             e.printStackTrace()
-            report(e.message ?: "", e)
+            log(e.message ?: "", e)
             ToastUtils.show("调试配置文件解析失败 ${e.message}")
         }
     }
@@ -130,7 +130,7 @@ internal object WxGlobalDebugger {
             page.md5 = ""
             page = CubeWx.mWxDebugAdapter.completeDebugWeexPage(page, mWxDebugCfg.multiPageDebugHost)
             if (page.h5Url.isNullOrBlank() || page.remoteJs.isNullOrBlank()) {
-                report("老页面自动完善错误 $page ")
+                log("老页面自动完善错误 $page ")
                 null
             } else page
         } else {
@@ -148,7 +148,7 @@ internal object WxGlobalDebugger {
         page.md5 = ""
         page = CubeWx.mWxDebugAdapter.completeDebugWeexPage(page, mWxDebugCfg.multiPageDebugHost)
         return if (page.h5Url.isNullOrBlank() || page.remoteJs.isNullOrBlank()) {
-            report("新页面自动完善错误 $page ")
+            log("新页面自动完善错误 $page ")
             null
         } else page
     }
@@ -187,7 +187,7 @@ internal object WxGlobalDebugger {
 
     private fun checkDebug(): Boolean {
         if (!mWxDebugCfg.multiPageDebugEnable || mWxDebugCfg.multiPageDebugHost.isBlank()) {
-            report("未开启调试 ${mWxDebugCfg.multiPageDebugEnable} ${mWxDebugCfg.multiPageDebugHost}")
+            log("未开启调试 ${mWxDebugCfg.multiPageDebugEnable} ${mWxDebugCfg.multiPageDebugHost}")
             return false
         }
         return true

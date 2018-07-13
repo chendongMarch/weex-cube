@@ -1,6 +1,6 @@
 package com.march.wxcube.manager
 
-import com.march.wxcube.common.report
+import com.march.wxcube.common.log
 import com.march.wxcube.model.WxPage
 import com.taobao.weex.WXSDKInstance
 import com.taobao.weex.WXSDKManager
@@ -53,7 +53,7 @@ class EventManager : IManager {
     // globalEvent.addEventListener('myEvent', (params) => {});
     fun registerEvent(event: String?, instantId: String?) {
         if (instantId == null) {
-            report("registerEvent error mInstId = null")
+            log("registerEvent error mInstId = null")
             return
         }
         val nonNullEvent = event ?: return
@@ -67,12 +67,12 @@ class EventManager : IManager {
     // event.post('myEvent',{isOk:true});
     fun postEvent(event: String, params: Map<String, Any>) {
         if (WXSDKManager.getInstance() == null) {
-            report("post event WXSDKManager.getInstance() == null")
+            log("post event WXSDKManager.getInstance() == null")
             return
         }
         val renderManager = WXSDKManager.getInstance().wxRenderManager
         if (renderManager == null) {
-            report("post event WXSDKManager.getInstance().wxRenderManager == null")
+            log("post event WXSDKManager.getInstance().wxRenderManager == null")
             return
         }
         val registerInstantIds = mEventInstanceIdMap[event] ?: listOf<String>()

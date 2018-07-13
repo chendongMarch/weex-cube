@@ -24,7 +24,7 @@ class WxPage() : Parcelable {
 
     var remoteJs: String? = null // 远程 js 资源链接
 
-    var md5: String? = null // 远端生成 md5 用来校验下载文件完整性
+    var md5: String = "" // 远端生成 md5 用来校验下载文件完整性
 
     var comment: String? = null // 对该页面的注释，生产环境不返回
 
@@ -82,16 +82,7 @@ class WxPage() : Parcelable {
 
     override fun describeContents() = 0
 
-    override fun toString(): String {
-        return "Page(pageName=$pageName, " +
-                "jsVersion=$jsVersion, " +
-                "appVersion=$appVersion, " +
-                "h5Url=$h5Url, " +
-                "remoteJs=$remoteJs, " +
-                "md5=$md5, " +
-                "comment=$comment, " +
-                "indexPage=$indexPage)"
-    }
+
 
 
     fun toShowString(): String {
@@ -105,6 +96,17 @@ class WxPage() : Parcelable {
 
     fun toSimpleString(): String {
         return "$pageName $appVersion $jsVersion"
+    }
+
+    override fun toString(): String {
+        return "WxPage(pageName=$pageName, " +
+                "appVersion=$appVersion, " +
+                "jsVersion=$jsVersion, " +
+                "h5Url=$h5Url, " +
+                "remoteJs=$remoteJs, " +
+                "md5='$md5', " +
+                "comment=$comment, " +
+                "indexPage=$indexPage)"
     }
 
     companion object {

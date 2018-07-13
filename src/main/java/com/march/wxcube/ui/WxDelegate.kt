@@ -7,11 +7,11 @@ import android.support.v4.app.Fragment
 import android.view.View
 import android.view.ViewGroup
 import com.march.common.utils.LgUtils
-import com.march.common.utils.ToastUtils
 import com.march.common.utils.immersion.StatusBarUtils
 import com.march.wxcube.CubeWx
+import com.march.wxcube.adapter.IWxReportAdapter
+import com.march.wxcube.common.Device
 import com.march.wxcube.common.WxUtils
-import com.march.wxcube.common.report
 import com.march.wxcube.debug.WxPageDebugger
 import com.march.wxcube.lifecycle.WxLifeCycle
 import com.march.wxcube.manager.ManagerRegistry
@@ -35,7 +35,10 @@ class WxDelegate : WxLifeCycle {
         const val TOP_SAFE_AREA_HEIGHT = "topSafeAreaHeight"
         const val BOTTOM_SAFE_AREA_HEIGHT = "bottomSafeAreaHeight"
         const val BUNDLE_URL = "bundleUrl"
+        const val VIRTUAL_BAR_HEIGHT = "virtualBarHeight"
         const val H5_URL = "h5Url"
+
+        var virtualHeight = -1
     }
 
     // 渲染状态
@@ -86,6 +89,12 @@ class WxDelegate : WxLifeCycle {
     private fun init(activity: Activity) {
         mActivity = activity
         createWxInst()
+
+        CubeWx.mWxReportAdapter.report(IWxReportAdapter.CODE_RENDER_ERROR, """
+                code = code
+                msg = msg
+                page = $mWeexPage
+            """.trimIndent())
     }
 
     fun initContainerView(view: ViewGroup) {
@@ -147,7 +156,6 @@ class WxDelegate : WxLifeCycle {
 
     inner class RenderListener : IWXRenderListener {
         override fun onRenderSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
-            LgUtils.e("onRenderSuccess")
             mRenderStatus = RenderStatus.RENDER_SUCCESS
             mLoadingHandler.finishWeexLoading(mContainerView)
             mWeexDebugger?.onRenderSuccess(instance, width, height)
@@ -158,13 +166,12 @@ class WxDelegate : WxLifeCycle {
         }
 
         override fun onException(instance: WXSDKInstance?, errCode: String?, msg: String?) {
-            report("code = $errCode, msg = $msg")
-            ToastUtils.show("code = $errCode, msg = $msg")
             mWeexDebugger?.onException(instance, errCode, msg)
-            // 正在 js 刷新时直接跳过后续异常处理
-//            if (mWeexDebugger != null) {
-//                return
-//            }
+            CubeWx.mWxReportAdapter.report(IWxReportAdapter.CODE_RENDER_ERROR, """
+                code = $errCode
+                msg = $msg
+                page = $mWeexPage
+            """.trimIndent())
             // 如果已经成功过，则此时不会走失败页面，只会没有反应
             if (mRenderStatus == RenderStatus.RENDER_SUCCESS) {
                 return
@@ -202,6 +209,10 @@ class WxDelegate : WxLifeCycle {
         mRenderOpts[BOTTOM_SAFE_AREA_HEIGHT] = 0
         mRenderOpts[BUNDLE_URL] = WxUtils.rewriteUrl(mWeexPage.remoteJs, URIAdapter.BUNDLE)
         mRenderOpts[H5_URL] = WxUtils.rewriteUrl(mWeexPage.h5Url, URIAdapter.WEB)
+        if (virtualHeight < 0) {
+            virtualHeight = Device.getVirtualBarHeight(mActivity)
+        }
+        mRenderOpts[VIRTUAL_BAR_HEIGHT] = virtualHeight
         mWeexPage.h5Url?.let {
             val data = ManagerRegistry.Data.getData(it)
             if (data != null) {

@@ -100,7 +100,7 @@ object PageFilter {
                         add2ResultPage = page
                         break
                     } else {
-                        LgUtils.e("chendong", "prepare ${page.toSimpleString()}")
+                        // LgUtils.e("chendong", "prepare ${page.toSimpleString()}")
                         needPreparePages.add(page)
                         continue
                     }
@@ -112,12 +112,12 @@ object PageFilter {
             }
             if (add2ResultPage != null) {
                 resultPages.add(add2ResultPage)
-                LgUtils.e("chendong", "result success ${add2ResultPage.toSimpleString()}")
+                // LgUtils.e("chendong", "result success ${add2ResultPage.toSimpleString()}")
             } else if (sortCfgs.isNotEmpty()) {
                 resultPages.add(sortCfgs[0])
-                LgUtils.e("chendong", "result fail ${sortCfgs[0].toSimpleString()}")
+                // LgUtils.e("chendong", "result fail ${sortCfgs[0].toSimpleString()}")
             } else {
-                LgUtils.e("chendong", "result not found")
+                // LgUtils.e("chendong", "result not found")
             }
         }
         // prepare pages js resource from network

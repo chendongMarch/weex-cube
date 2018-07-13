@@ -4,9 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Build;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
+
+import com.march.common.utils.LgUtils;
 
 import java.lang.reflect.Method;
 
@@ -17,6 +22,33 @@ import java.lang.reflect.Method;
  * @author chendong
  */
 public class Device {
+
+    public static int getVirtualBarHeight(Context context) {
+        int vh = 0;
+        try {
+            if (vh > 0) {
+                LgUtils.e("chendong" ,"size = " + vh);
+                return vh;
+            }
+            WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+            Display display = windowManager.getDefaultDisplay();
+            DisplayMetrics dm = new DisplayMetrics();
+            try {
+                @SuppressWarnings("rawtypes")
+                Class c = Class.forName("android.view.Display");
+                @SuppressWarnings("unchecked")
+                Method method = c.getMethod("getRealMetrics", DisplayMetrics.class);
+                method.invoke(display, dm);
+                vh = dm.heightPixels - display.getHeight();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return vh;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
 
     public static void hideBottomUI(Activity activity) {
         try {

@@ -3,7 +3,6 @@ package com.march.wxcube.http.cookie
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.CookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
-
 /**
  * CreateAt : 2018/7/9
  * Describe :
@@ -14,5 +13,6 @@ class PersistentCookieJarImpl(cache: CookieCache, prefs: SharedPrefsCookiePersis
 
     var cache: CookieCache = cache
     var prefs: SharedPrefsCookiePersistor = prefs
+
 
 }

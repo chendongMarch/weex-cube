@@ -9,8 +9,6 @@ import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.getDef
 import com.march.wxcube.module.dispatcher.*
-import com.march.wxcube.ui.WxActivity
-import com.taobao.weex.WXSDKManager
 import com.taobao.weex.annotation.JSMethod
 import com.taobao.weex.bridge.JSCallback
 import com.taobao.weex.common.WXModule
@@ -31,7 +29,7 @@ class OneModule : WXModule() {
                 ModalDispatcher(),
                 EventDispatcher(this),
                 ToolsDispatcher(),
-                StatusBarDispatcher(),
+                AndroidDispatcher(),
                 PageDispatcher(this),
                 ImageDispatcher(),
                 *CubeWx.mWxInitAdapter.getModuleDispatchers()
