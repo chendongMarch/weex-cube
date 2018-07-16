@@ -45,7 +45,8 @@ class WxInitConfig {
     var jsCacheStrategy: Int = JsCacheStrategy.CACHE_MEMORY_DISK_BOTH
     var jsPrepareStrategy: Int = JsPrepareStrategy.PREPARE_ALL
 
-    var configUrl: String = ""
+    var wxCfgUrl: String = ""
+    var onlineCfgUrl: String = ""
     var reqAuthority: String = ""
     var bundleAuthority: String = ""
     var bundlePathPrefix: String = ""
@@ -70,7 +71,7 @@ class WxInitConfig {
         //
         CubeWx.mRootCacheDir = WxUtils.makeRootCacheDir()
         //
-        CubeWx.mWxJsLoader = WxJsLoader(ctx)
+        CubeWx.mWxJsLoader = WxJsLoader()
         CubeWx.mWxUpdater = WxUpdater()
         CubeWx.mWxRouter = WxRouter()
         return this

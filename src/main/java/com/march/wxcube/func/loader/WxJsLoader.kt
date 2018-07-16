@@ -23,7 +23,7 @@ import java.util.concurrent.Executors
  *
  * @author chendong
  */
-class WxJsLoader(context: Context) : OnWxUpdateListener {
+class WxJsLoader : OnWxUpdateListener {
 
     companion object {
         private const val TAG = "WxJsLoader"

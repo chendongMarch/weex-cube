@@ -3,7 +3,7 @@ package com.march.wxcube.module.dispatcher
 import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.module.JsCallbackWrap
-import com.march.wxcube.module.OneModule
+import com.march.wxcube.module.BridgeModule
 import com.march.wxcube.module.mInstId
 
 /**
@@ -12,7 +12,7 @@ import com.march.wxcube.module.mInstId
  *
  * @author chendong
  */
-class EventDispatcher(val module: OneModule) : BaseDispatcher() {
+class EventDispatcher(val module: BridgeModule) : BaseDispatcher() {
 
     companion object {
         const val registerEvent = "registerEvent"

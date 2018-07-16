@@ -70,7 +70,7 @@ class RequestManager : IManager {
             return wxResp.init(ERROR_CODE_FAILURE, STATUS_NO_NETWORK, "网络错误")
         }
 
-        val request = makeHttpRequest(wxRequest)
+        val request = makeHttpRequest(wxRequest) ?: return wxResp.init(ERROR_CODE_FAILURE, STATUS_CODE_FAILURE, "参数错误")
 
         if (!checkUrlValid(request.url())) {
             return wxResp.init(ERROR_CODE_FAILURE, STATUS_CODE_FAILURE, "参数错误")
@@ -110,7 +110,7 @@ class RequestManager : IManager {
             listener.onHttpFinish(wxResp.init(ERROR_CODE_FAILURE, STATUS_NO_NETWORK, "网络错误"))
             return
         }
-        val request = makeHttpRequest(wxRequest)
+        val request = makeHttpRequest(wxRequest) ?: return listener.onHttpFinish(wxResp.init(ERROR_CODE_FAILURE, STATUS_CODE_FAILURE, "参数错误"))
         listener.onHttpStart()
         if (!checkUrlValid(request.url())) {
             listener.onHttpFinish(wxResp.init(ERROR_CODE_FAILURE, STATUS_CODE_FAILURE, "参数错误"))
@@ -157,7 +157,10 @@ class RequestManager : IManager {
     }
 
     // 通过 weex 请求构建 http 请求
-    private fun makeHttpRequest(wxRequest: WXRequest): Request {
+    private fun makeHttpRequest(wxRequest: WXRequest): Request? {
+        if (wxRequest.url == null || wxRequest.url.isBlank()) {
+            return null
+        }
         val method = if (wxRequest.method == null) "get" else wxRequest.method
         val url = WxUtils.rewriteUrl(wxRequest.url, URIAdapter.REQUEST)
         val body = wxRequest.body

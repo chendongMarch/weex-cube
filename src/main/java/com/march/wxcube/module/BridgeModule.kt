@@ -19,7 +19,7 @@ import com.taobao.weex.common.WXModule
  *
  * @author chendong
  */
-class OneModule : WXModule() {
+class BridgeModule : WXModule() {
 
     private val mDispatcherRegistry by lazy {
         DispatcherRegistry(
@@ -32,6 +32,7 @@ class OneModule : WXModule() {
                 AndroidDispatcher(),
                 PageDispatcher(this),
                 ImageDispatcher(),
+                ConfigDispatcher(),
                 *CubeWx.mWxInitAdapter.getModuleDispatchers()
         )
     }
@@ -66,7 +67,7 @@ class OneModule : WXModule() {
 
     inner class OneModuleBridgeProvider : BaseDispatcher.Provider {
 
-        val module = this@OneModule
+        val module = this@BridgeModule
 
         override fun activity(): AppCompatActivity = module.mAct ?: throw RuntimeException("activity find error")
 

@@ -4,10 +4,10 @@ import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import com.march.common.utils.ToastUtils
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.Permission
 import com.march.wxcube.common.WxConstants
+import com.march.wxcube.manager.ManagerRegistry
 import java.lang.Exception
 
 
@@ -54,6 +54,7 @@ class IndexActivity : BaseActivity() {
         if (result) {
             // 1.5s 后启动
             CubeWx.mWxUpdater.update(this)
+            ManagerRegistry.OnlineCfg.update(this)
             Handler().postDelayed(mIndexRunnable, TIME_START)
         } else {
 //            ToastUtils.show("请授予存储权限～")

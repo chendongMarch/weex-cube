@@ -40,22 +40,22 @@ class CookieStoreImpl(context: Context) : CookieStore {
     fun backUpCookies() {
         mCookies.clear()
         val prefsMap = mCookiePrefs.all
-        prefsMap.forEach { key, value ->
-            if (value != null && !(value as String).startsWith(COOKIE_NAME_PREFIX)) {
-                val cookieNames = TextUtils.split(value, ",")
-                for (name in cookieNames) {
-                    val encodedCookie = mCookiePrefs.getString(COOKIE_NAME_PREFIX + name, null)
-                    if (encodedCookie != null) {
-                        val decodedCookie = decodeCookie(encodedCookie)
-                        if (decodedCookie != null) {
-                            if (!mCookies.containsKey(key))
-                                mCookies[key] = ConcurrentHashMap()
-                            mCookies[key]?.set(name, decodedCookie)
-                        }
-                    }
-                }
-            }
-        }
+//        prefsMap.forEach { key, value ->
+//            if (value != null && !(value as String).startsWith(COOKIE_NAME_PREFIX)) {
+//                val cookieNames = TextUtils.split(value, ",")
+//                for (name in cookieNames) {
+//                    val encodedCookie = mCookiePrefs.getString(COOKIE_NAME_PREFIX + name, null)
+//                    if (encodedCookie != null) {
+//                        val decodedCookie = decodeCookie(encodedCookie)
+//                        if (decodedCookie != null) {
+//                            if (!mCookies.containsKey(key))
+//                                mCookies[key] = ConcurrentHashMap()
+//                            mCookies[key]?.set(name, decodedCookie)
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     // 存储 cookie 到磁盘

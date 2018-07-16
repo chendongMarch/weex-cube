@@ -27,7 +27,7 @@ import com.taobao.weex.adapter.URIAdapter
  *
  * @author chendong
  */
-class PageDispatcher(val module: OneModule) : BaseDispatcher() {
+class PageDispatcher(val module: BridgeModule) : BaseDispatcher() {
     
     companion object {
         const val initPage = "initPage"

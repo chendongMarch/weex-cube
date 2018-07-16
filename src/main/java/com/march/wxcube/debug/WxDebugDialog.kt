@@ -67,7 +67,7 @@ class WxDebugDialog(context: Context, private val mWeexPageDebugger: WxPageDebug
         updateMsg()
         val debugConfig = mWeexPageDebugger.mWxPageDebugCfg
         pageRefreshJsSwitch?.isChecked = debugConfig.isRefreshing
-        pageRefreshJsSwitch?.setOnCheckedChangeListener { _, isChecked ->
+        pageRefreshJsSwitch?.setOnCheckedChangeListener { v, isChecked ->
             debugConfig.isRefreshing = isChecked
             if (debugConfig.isRefreshing) {
                 mWeexPageDebugger.stopRefresh()
