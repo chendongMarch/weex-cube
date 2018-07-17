@@ -56,6 +56,7 @@ class WxPage() : Parcelable {
         page.jsVersion = this.jsVersion
         page.h5Url = openUrl
         page.indexPage = this.indexPage
+        page.md5 = this.md5
         return page
     }
 
@@ -102,7 +103,7 @@ class WxPage() : Parcelable {
                 "jsVersion=$jsVersion, " +
                 "h5Url=$h5Url, " +
                 "remoteJs=$remoteJs, " +
-                "md5='$md5', " +
+                "md5=$md5, " +
                 "comment=$comment, " +
                 "indexPage=$indexPage)"
     }

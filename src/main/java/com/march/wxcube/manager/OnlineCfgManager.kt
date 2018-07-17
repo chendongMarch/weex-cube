@@ -44,7 +44,7 @@ class OnlineCfgManager : IManager {
         try {
             val jsonObj = JSONObject.parseObject(json)
             val map = jsonObj.getJSONObject("data").toMutableMap()
-            for ((key, value) in map) {
+            map.forEach { (key,value) ->
                 configs[key] = value.toString()
             }
         } catch (e: Exception) {
