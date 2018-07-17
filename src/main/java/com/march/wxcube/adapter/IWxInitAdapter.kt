@@ -43,6 +43,13 @@ interface IWxInitAdapter {
      */
     fun getAppKey() = "cubewx"
 
+    /**
+     * 初始化结束
+     */
+    fun onInitFinished() {
+
+    }
+
 }
 
 class DefaultWxInitAdapter : IWxInitAdapter

@@ -60,7 +60,6 @@ class BridgeModule : WXModule() {
         try {
             mDispatcherRegistry.dispatch(method, params,JsCallbackWrap(callback))
         } catch (e: Exception) {
-            e.printStackTrace()
             mDispatcherRegistry.postJsResult(JsCallbackWrap(callback), false to "$method($params) error ${e.message}")
         }
     }

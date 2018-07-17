@@ -6,7 +6,6 @@ import android.net.Uri
 import android.support.v4.app.Fragment
 import android.view.View
 import android.view.ViewGroup
-import com.march.common.utils.LgUtils
 import com.march.common.utils.immersion.StatusBarUtils
 import com.march.wxcube.CubeWx
 import com.march.wxcube.adapter.IWxReportAdapter
@@ -57,7 +56,7 @@ class WxDelegate : WxLifeCycle {
     // 当前加载的页面
     private var mCurPage: WxPage? = null
     // 当前承载的页面
-    internal lateinit var mWeexPage: WxPage
+    lateinit var mWxPage: WxPage
     private var mWeexDebugger: WxPageDebugger? = null
     // 附加数据和操作
     private val mPerformers by lazy { mutableMapOf<String, IPerformer>() }
@@ -68,7 +67,7 @@ class WxDelegate : WxLifeCycle {
      */
     constructor(fragment: Fragment) {
         mHost = fragment
-        mWeexPage = fragment.arguments?.getParcelable(WxPage.KEY_PAGE) ?: return
+        mWxPage = fragment.arguments?.getParcelable(WxPage.KEY_PAGE) ?: return
         val act = fragment.activity ?: return
         init(act)
     }
@@ -78,7 +77,7 @@ class WxDelegate : WxLifeCycle {
      */
     constructor(activity: Activity) {
         mHost = activity
-        mWeexPage = activity.intent.getParcelableExtra(WxPage.KEY_PAGE)
+        mWxPage = activity.intent.getParcelableExtra(WxPage.KEY_PAGE)
         init(activity)
         initContainerView(activity.findViewById(android.R.id.content))
     }
@@ -125,7 +124,7 @@ class WxDelegate : WxLifeCycle {
     private fun destroyWxInst() {
         mWeexInst.onActivityDestroy()
         mWeexRender.onDestroy()
-        ManagerRegistry.getInst().onWxInstRelease(mWeexPage, mWeexInst)
+        ManagerRegistry.getInst().onWxInstRelease(mWxPage, mWeexInst)
         mLifeCallbacks.forEach { it.onDestroy() }
         mLifeCallbacks.clear()
     }
@@ -136,7 +135,7 @@ class WxDelegate : WxLifeCycle {
     private fun createWxInst() {
         mWeexInst = WXSDKInstance(mActivity)
         mWeexRender = WxRender(mActivity, mWeexInst, RenderListener())
-        ManagerRegistry.getInst().onWxInstInit(mWeexPage, mWeexInst, this)
+        ManagerRegistry.getInst().onWxInstInit(mWxPage, mWeexInst, this)
     }
 
 
@@ -164,13 +163,13 @@ class WxDelegate : WxLifeCycle {
             CubeWx.mWxReportAdapter.report(IWxReportAdapter.CODE_RENDER_ERROR, """
                 code = $errCode
                 msg = $msg
-                page = $mWeexPage
+                page = $mWxPage
             """.trimIndent())
             // 如果已经成功过，则此时不会走失败页面，只会没有反应
             if (mRenderStatus == RenderStatus.RENDER_SUCCESS) {
                 return
             }
-            if (mCurPage == null || mCurPage?.equals(mWeexPage) == true) {
+            if (mCurPage == null || mCurPage?.equals(mWxPage) == true) {
                 renderNotFound()
             }
         }
@@ -196,18 +195,18 @@ class WxDelegate : WxLifeCycle {
         if(mRenderOpts.isNotEmpty()){
             return mRenderOpts
         }
-        val uri = Uri.parse(mWeexPage.h5Url)
+        val uri = Uri.parse(mWxPage.h5Url)
         uri.queryParameterNames.forEach { mRenderOpts[it] = uri.getQueryParameter(it) }
         mRenderOpts[INSTANCE_ID] = mWeexInst.instanceId
         mRenderOpts[TOP_SAFE_AREA_HEIGHT] = WxUtils.getWxPxByRealPx(StatusBarUtils.getStatusBarHeight(mActivity))
         mRenderOpts[BOTTOM_SAFE_AREA_HEIGHT] = 0
-        mRenderOpts[BUNDLE_URL] = WxUtils.rewriteUrl(mWeexPage.remoteJs, URIAdapter.BUNDLE)
-        mRenderOpts[H5_URL] = WxUtils.rewriteUrl(mWeexPage.h5Url, URIAdapter.WEB)
+        mRenderOpts[BUNDLE_URL] = WxUtils.rewriteUrl(mWxPage.remoteJs, URIAdapter.BUNDLE)
+        mRenderOpts[H5_URL] = WxUtils.rewriteUrl(mWxPage.h5Url, URIAdapter.WEB)
         if (virtualHeight < 0) {
             virtualHeight = Device.getVirtualBarHeight(mActivity)
         }
         mRenderOpts[VIRTUAL_BAR_HEIGHT] = virtualHeight
-        mWeexPage.h5Url?.let {
+        mWxPage.h5Url?.let {
             val data = ManagerRegistry.Data.getData(it)
             if (data != null) {
                 mRenderOpts[EXTRA] = data
@@ -242,7 +241,7 @@ class WxDelegate : WxLifeCycle {
      * 渲染当前页面
      */
     fun render() {
-        render(mWeexPage)
+        render(mWxPage)
     }
 
     /**
@@ -250,8 +249,8 @@ class WxDelegate : WxLifeCycle {
      */
     fun renderJs(js: String) {
         preRender()
-        mCurPage = mWeexPage
-        mWeexRender.renderJs(mWeexPage, parseRenderOptions(), js)
+        mCurPage = mWxPage
+        mWeexRender.renderJs(mWxPage, parseRenderOptions(), js)
     }
 
     /**

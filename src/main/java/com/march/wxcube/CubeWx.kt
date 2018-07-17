@@ -54,7 +54,7 @@ object CubeWx {
         ctx.registerActivityLifecycleCallbacks(WxDebugActivityLifeCycle())
         mWeakCtx = WeakContext(ctx)
         mWxCfg = config.prepare(ctx)
-        initLibrary(ctx)
+        WebKit.init(ctx, WebKit.CORE_SYS, null)
         WXEnvironment.setOpenDebugLog(config.debug)
         WXEnvironment.setApkDebugable(config.debug)
 
@@ -75,6 +75,7 @@ object CubeWx {
                 // .setWebSocketAdapterFactory(WebSocketAdapter.createFactory())
                 // 图片加载
                 .setImgAdapter(ImgAdapter())
+
         mWxInitAdapter.onWxSdkEngineInit(builder)
         WXSDKEngine.initialize(ctx, builder.build())
         WxInstaller.registerModule()
@@ -88,19 +89,7 @@ object CubeWx {
         ManagerRegistry.getInst().register(WxInstManager())
         ManagerRegistry.getInst().register(OnlineCfgManager())
 
-    }
-
-    private fun initLibrary(ctx: Application) {
-        Common.init(ctx, object : CommonInjector {
-            override fun getConfigClass(): Class<*> {
-                return mWxInitAdapter.getConfigClass()
-            }
-
-            override fun getJsonParser(): JsonParser {
-                return JsonParserImpl()
-            }
-        })
-        WebKit.init(ctx, WebKit.CORE_SYS, null)
+        mWxInitAdapter.onInitFinished()
     }
 
     fun onWeexConfigUpdate(context: Context, pages: List<WxPage>?) {

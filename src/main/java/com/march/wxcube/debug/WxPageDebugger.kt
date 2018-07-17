@@ -93,7 +93,7 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
         }
         return with(delegate) {
             mWxPageDebugCfg.isRefreshing = true
-            CubeWx.mWxJsLoader.getTemplateAsync(mActivity, JsLoadStrategy.NET_FIRST, JsCacheStrategy.NO_CACHE, mWeexPage) {
+            CubeWx.mWxJsLoader.getTemplateAsync(mActivity, JsLoadStrategy.NET_FIRST, JsCacheStrategy.NO_CACHE, mWxPage) {
                 it?.let {
                     if (mWxPageDebugCfg.renderTemplate != it) {
                         if (mWxPageDebugCfg.renderTemplate.isBlank()) {
@@ -139,7 +139,7 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
     fun onReady(delegate: WxDelegate) {
         mDelegate = delegate
         mActivity = delegate.mActivity
-        mWeexPage = delegate.mWeexPage
+        mWeexPage = delegate.mWxPage
     }
 
     override fun onDestroy() {
@@ -153,7 +153,7 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
         super.onPause()
         if (mWxPageDebugCfg.isRefreshing) {
             stopRefresh(false)
-            // ToastUtils.show("页面${mWeexPage?.pageName}进入后台，暂停轮询")
+            // ToastUtils.show("页面${mWxPage?.pageName}进入后台，暂停轮询")
         }
     }
 
@@ -161,7 +161,7 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
         super.onResume()
         if (mWxPageDebugCfg.isRefreshing) {
             startRefresh(false)
-            // ToastUtils.show("页面${mWeexPage?.pageName}进入后台，开始轮询")
+            // ToastUtils.show("页面${mWxPage?.pageName}进入后台，开始轮询")
         }
     }
 
