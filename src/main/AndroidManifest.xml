@@ -7,7 +7,8 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application>
-        <activity android:name="com.march.wxcube.ui.WxActivity">
+        <activity android:name="com.march.wxcube.ui.WxActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
 
