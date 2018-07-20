@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import com.march.common.utils.ToastUtils
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.Permission
 import com.march.wxcube.common.WxConstants
@@ -39,6 +40,7 @@ class IndexActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ToastUtils.show("我是修复后的内容～")
         try {
             CubeWx.mWxPageAdapter.onPageCreated(this, WxConstants.PAGE_INDEX)
             CubeWx.mWxPageAdapter.getLoading().setIndexContent(this)
@@ -57,7 +59,7 @@ class IndexActivity : BaseActivity() {
             ManagerRegistry.OnlineCfg.update(this)
             Handler().postDelayed(mIndexRunnable, TIME_START)
         } else {
-//            ToastUtils.show("请授予存储权限～")
+            ToastUtils.show("请授予存储权限～")
         }
     }
 
