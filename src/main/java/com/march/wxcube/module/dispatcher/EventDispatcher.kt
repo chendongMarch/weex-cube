@@ -1,9 +1,9 @@
 package com.march.wxcube.module.dispatcher
 
-import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.manager.ManagerRegistry
-import com.march.wxcube.module.JsCallbackWrap
 import com.march.wxcube.module.BridgeModule
+import com.march.wxcube.module.DispatcherJsMethod
+import com.march.wxcube.module.DispatcherParam
 import com.march.wxcube.module.mInstId
 
 /**
@@ -14,32 +14,15 @@ import com.march.wxcube.module.mInstId
  */
 class EventDispatcher(val module: BridgeModule) : BaseDispatcher() {
 
-    companion object {
-        const val registerEvent = "registerEvent"
-        const val postEvent = "postEvent"
-        const val unRegisterEvent = "unRegisterEvent"
-    }
-
-    override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
-        when (method) {
-            registerEvent   -> registerEvent(params)
-            postEvent       -> postEvent(params)
-            unRegisterEvent -> unRegisterEvent(params)
-        }
-    }
-
-    override fun getMethods(): Array<String> {
-        return arrayOf(registerEvent, postEvent, unRegisterEvent)
-    }
-
     /**
      * 注册接受某事件
      * const event = weex.requireModule('cube-event')
      * event.registerEvent('myEvent')
      */
-    private fun registerEvent(params: JSONObject) {
-        val instanceId = module.mInstId ?: throw RuntimeException("Event#registerEvent instanceId is null ${params.toJSONString()}")
-        val event = params.getString(KEY_EVENT) ?: throw RuntimeException("Event#registerEvent event is null ${params.toJSONString()}")
+    @DispatcherJsMethod
+    fun registerEvent(param: DispatcherParam) {
+        val instanceId = module.mInstId ?: throw RuntimeException("Event#registerEvent instanceId is null ${param.params.toJSONString()}")
+        val event = param.params.getString(KEY_EVENT) ?: throw RuntimeException("Event#registerEvent event is null ${param.params.toJSONString()}")
         ManagerRegistry.Event.registerEvent(event, instanceId)
     }
 
@@ -49,9 +32,10 @@ class EventDispatcher(val module: BridgeModule) : BaseDispatcher() {
      * const event = weex.requireModule('cube-event')
      * event.postEvent('myEvent',{isOk:true});
      */
-    private fun postEvent(params: JSONObject) {
-        val event = params.getString(KEY_EVENT) ?: throw RuntimeException("Event#postEvent event is null ${params.toJSONString()}")
-        val data = params.getJSONObject(KEY_DATA) ?: throw RuntimeException("Event#postEvent event is null ${params.toJSONString()}")
+    @DispatcherJsMethod
+    fun postEvent(param: DispatcherParam) {
+        val event = param.params.getString(KEY_EVENT) ?: throw RuntimeException("Event#postEvent event is null ${param.params.toJSONString()}")
+        val data = param.params.getJSONObject(KEY_DATA) ?: throw RuntimeException("Event#postEvent event is null ${param.params.toJSONString()}")
         ManagerRegistry.Event.postEvent(event, data.toMap())
     }
 
@@ -61,9 +45,10 @@ class EventDispatcher(val module: BridgeModule) : BaseDispatcher() {
      * const event = weex.requireModule('cube-event')
      * event.unRegisterEvent('myEvent');
      */
-    private fun unRegisterEvent(params: JSONObject) {
-        val instanceId = module.mInstId ?: throw RuntimeException("Event#unRegisterEvent instanceId is null ${params.toJSONString()}")
-        val event = params.getString(KEY_EVENT) ?: throw RuntimeException("Event#postEvent event is null ${params.toJSONString()}")
+    @DispatcherJsMethod
+    fun unRegisterEvent(param: DispatcherParam) {
+        val instanceId = module.mInstId ?: throw RuntimeException("Event#unRegisterEvent instanceId is null ${param.params.toJSONString()}")
+        val event = param.params.getString(KEY_EVENT) ?: throw RuntimeException("Event#postEvent event is null ${param.params.toJSONString()}")
         ManagerRegistry.Event.unRegisterEvent(event, instanceId)
     }
 }

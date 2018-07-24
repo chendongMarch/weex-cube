@@ -13,6 +13,8 @@ import com.march.wxcube.common.WxUtils
 import com.march.wxcube.common.log
 import com.march.wxcube.func.update.OnWxUpdateListener
 import com.march.wxcube.model.WxPage
+import kotlinx.coroutines.experimental.Deferred
+import org.jetbrains.anko.coroutines.experimental.bg
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -93,6 +95,26 @@ class WxJsLoader : OnWxUpdateListener {
             consumer(template)
             // 缓存存储模板数据
             storeTemplate(realLoadStrategy, cacheStrategy, page, template)
+        }
+    }
+
+    fun getTemplateCoroutine(context: Context, page: WxPage?): Deferred<String?>? {
+        val loadStrategy = CubeWx.mWxCfg.jsLoadStrategy
+        val cacheStrategy = CubeWx.mWxCfg.jsCacheStrategy
+        return getTemplateCoroutine(context, loadStrategy, cacheStrategy,page)
+    }
+
+
+    fun getTemplateCoroutine(context: Context, loadStrategy: Int, cacheStrategy: Int, page: WxPage?): Deferred<String?>? {
+        if (page == null) {
+            return null
+        }
+        return bg {
+            // 同步获取模板数据
+            val (realLoadStrategy, template) = getTemplateSync(WeakContext(context), loadStrategy, page)
+            // 缓存存储模板数据
+            storeTemplate(realLoadStrategy, cacheStrategy, page, template)
+            template
         }
     }
 

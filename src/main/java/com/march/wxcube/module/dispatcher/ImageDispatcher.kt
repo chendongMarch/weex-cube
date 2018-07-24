@@ -1,45 +1,22 @@
 package com.march.wxcube.module.dispatcher
 
-import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.common.WxUtils
-import com.march.wxcube.module.JsCallbackWrap
+import com.march.wxcube.module.DispatcherJsMethod
+import com.march.wxcube.module.DispatcherParam
 import com.march.wxcube.wxadapter.GlideApp
 import com.taobao.weex.adapter.URIAdapter
 
 /**
  * CreateAt : 2018/6/20
- * Describe :
+ * Describe : 图片处理
  *
  * @author chendong
  */
 class ImageDispatcher : BaseDispatcher() {
 
-    companion object {
-        const val preloadImage = "preloadImage"
-        const val previewImage = "previewImage"
-        const val selectImage = "selectImage"
-        const val uploadImage = "uploadImage"
-    }
-
-    override fun getMethods(): Array<String> {
-        return arrayOf(
-                preloadImage,
-                previewImage,
-                selectImage,
-                uploadImage)
-    }
-
-    override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
-        when (method) {
-            preloadImage -> preloadImage(params, jsCallbackWrap)
-            previewImage -> previewImage(params, jsCallbackWrap)
-            selectImage  -> selectImage(params, jsCallbackWrap)
-            uploadImage  -> uploadImage(params, jsCallbackWrap)
-        }
-    }
-
-    private fun preloadImage(params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
-        val jsonArray = params.getJSONArray(KEY_LIST) ?: throw RuntimeException("Image#preload list is null")
+    @DispatcherJsMethod
+    fun preloadImage(param: DispatcherParam) {
+        val jsonArray = param.params.getJSONArray(KEY_LIST) ?: throw RuntimeException("Image#preload list is null")
         for (obj in jsonArray) {
             if (obj is String) {
                 val url = WxUtils.rewriteUrl(obj, URIAdapter.IMAGE)
@@ -48,15 +25,18 @@ class ImageDispatcher : BaseDispatcher() {
         }
     }
 
-    private fun previewImage(params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
+    @DispatcherJsMethod
+    fun previewImage(param: DispatcherParam) {
         throw RuntimeException("Image#preview not implement")
     }
 
-    private fun selectImage(params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
+    @DispatcherJsMethod
+    fun selectImage(param: DispatcherParam) {
         throw RuntimeException("Image#select not implement")
     }
 
-    private fun uploadImage(params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
+    @DispatcherJsMethod
+    fun uploadImage(param: DispatcherParam) {
         throw RuntimeException("Image#upload not implement")
     }
 }

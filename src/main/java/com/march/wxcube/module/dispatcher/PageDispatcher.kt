@@ -17,53 +17,24 @@ import com.march.wxcube.common.toListEx
 import com.march.wxcube.model.FragmentConfig
 import com.march.wxcube.module.*
 import com.march.wxcube.performer.FragmentPerformer
-import com.march.wxcube.ui.WxActivity
 import com.march.wxcube.ui.WxFragment
 import com.taobao.weex.adapter.URIAdapter
 
 /**
  * CreateAt : 2018/6/7
- * Describe :
+ * Describe : 页面
  *
  * @author chendong
  */
 class PageDispatcher(val module: BridgeModule) : BaseDispatcher() {
-    
-    companion object {
-        const val initPage = "initPage"
-        const val loadTabs = "loadTabs"
-        const val showTab = "showTab"
-        const val reloadPage = "reloadPage"
-    }
-
-    override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
-        val weexAct = module.mWeexAct ?: throw RuntimeException("Page#loadTabs mWeexAct is null")
-        when (method) {
-            initPage   -> initPage(params)
-            loadTabs   -> loadTabs(weexAct, params)
-            showTab    -> showTab(weexAct, params)
-            reloadPage -> reloadPage()
-        }
-    }
-
-    override fun getAsyncMethods(): Array<String> {
-        return arrayOf(initPage)
-    }
-
-    override fun getMethods(): Array<String> {
-        return arrayOf(initPage, loadTabs, showTab, reloadPage)
-    }
-//
-//    private fun goHome(method: String, params: JSONObject) {
-//        mProvider.doBySelf(method, params)
-//    }
 
     /**
      * 初始化页面
      */
-    private fun initPage(params: JSONObject) {
+    @DispatcherJsMethod(async = true)
+    fun initPage(param: DispatcherParam) {
         val activity = mProvider.activity()
-        val background = params.getJSONObject("background")
+        val background = param.params.getJSONObject("background")
         val containerView = module.mWeexDelegate?.mContainerView ?: throw RuntimeException("Page#initPage containerView is null")
         if (background != null) {
             val color = background.getString("color")
@@ -85,15 +56,17 @@ class PageDispatcher(val module: BridgeModule) : BaseDispatcher() {
                 }
             }
         }
-        val interceptBack = params.getDef("interceptBack", false)
+        val interceptBack = param.params.getDef("interceptBack", false)
         module.mWeexDelegate?.mInterceptBackPressed = interceptBack
     }
 
     /**
      * 加载tab数据
      */
-    private fun loadTabs(act: WxActivity, params: JSONObject) {
-        val array = params.getJSONArray("tabs") ?: throw RuntimeException("Page#loadTabs tabs is null")
+    @DispatcherJsMethod
+    fun loadTabs(param: DispatcherParam) {
+        val act = module.mWeexAct ?: throw RuntimeException("Page#loadTabs mWeexAct is null")
+        val array = param.params.getJSONArray("tabs") ?: throw RuntimeException("Page#loadTabs tabs is null")
         val configs = array.toListEx(FragmentConfig::class.java) ?: throw RuntimeException("Page#loadTabs mWeexAct is null")
         act.mDelegate.addPerformer(FragmentPerformer(act.supportFragmentManager,
                 configs, object : FragmentPerformer.FragmentHandler {
@@ -121,10 +94,11 @@ class PageDispatcher(val module: BridgeModule) : BaseDispatcher() {
 
     /**
      * 显示 tab
-     * @param tag tab 对应的 tag
      */
-    private fun showTab(act: WxActivity, params: JSONObject) {
-        val tag = params.getString(KEY_TAG) ?: throw RuntimeException("Page#showTab tag is null")
+    @DispatcherJsMethod
+    fun showTab(param: DispatcherParam) {
+        val act = module.mWeexAct ?: throw RuntimeException("Page#loadTabs mWeexAct is null")
+        val tag = param.params.getString(KEY_TAG) ?: throw RuntimeException("Page#showTab tag is null")
         val performer = act.mDelegate.getPerformer(FragmentPerformer::class.java)
                 ?: throw RuntimeException("Page#showTab performer is null")
         performer.showFragment(tag)
@@ -133,7 +107,8 @@ class PageDispatcher(val module: BridgeModule) : BaseDispatcher() {
     /**
      * 刷新
      */
-    private fun reloadPage() {
+    @DispatcherJsMethod
+    fun reloadPage() {
         module.mWeexDelegate?.render()
     }
 }

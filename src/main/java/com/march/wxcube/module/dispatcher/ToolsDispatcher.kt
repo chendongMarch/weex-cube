@@ -1,8 +1,9 @@
 package com.march.wxcube.module.dispatcher
 
-import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.manager.ManagerRegistry
-import com.march.wxcube.module.JsCallbackWrap
+import com.march.wxcube.module.DispatcherJsMethod
+import com.march.wxcube.module.DispatcherParam
+import com.march.wxcube.module.ignore
 
 /**
  * CreateAt : 2018/6/6
@@ -12,21 +13,10 @@ import com.march.wxcube.module.JsCallbackWrap
  */
 class ToolsDispatcher : BaseDispatcher() {
 
-    companion object {
-        const val clearCookies = "clearCookies"
-    }
-    override fun getMethods(): Array<String> {
-        return arrayOf(clearCookies)
-    }
-
-    override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
-        when(method) {
-            clearCookies -> clearCookies()
-        }
-    }
-
-    private fun clearCookies() {
+    @DispatcherJsMethod
+    fun clearCookies(param: DispatcherParam) {
         ManagerRegistry.Request.getCookieJar().clear()
+        param.ignore()
     }
 
 }

@@ -2,7 +2,8 @@ package com.march.wxcube.module.dispatcher
 
 import android.support.v7.app.AppCompatActivity
 import com.alibaba.fastjson.JSONObject
-import com.march.wxcube.module.JsCallbackWrap
+import com.march.wxcube.module.DispatcherMethod
+import com.march.wxcube.module.Callback
 
 /**
  * CreateAt : 2018/6/6
@@ -14,7 +15,7 @@ abstract class BaseDispatcher {
 
     interface Provider {
         fun activity(): AppCompatActivity
-        fun doBySelf(method: String, params: JSONObject,jsCallbackWrap: JsCallbackWrap? = null)
+        fun doBySelf(method: String, params: JSONObject,jsCallbackWrap: Callback? = null)
     }
 
     lateinit var mProvider: Provider
@@ -38,17 +39,13 @@ abstract class BaseDispatcher {
 
     }
 
-    open fun getAsyncMethods() = arrayOf<String>()
-
-    abstract fun getMethods(): kotlin.Array<String>
-
-    abstract fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap)
+    val mMethods by lazy { mutableSetOf<DispatcherMethod>() }
 
     fun findAct(): AppCompatActivity {
         return mProvider.activity()
     }
 
-    fun postJsResult(jsCallback: JsCallbackWrap, result: Pair<Boolean, String>) {
+    fun postJsResult(jsCallback: Callback, result: Pair<Boolean, String>) {
         jsCallback.invoke(mapOf(
                 BaseDispatcher.KEY_SUCCESS to result.first,
                 BaseDispatcher.KEY_MSG to result.second))

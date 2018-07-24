@@ -47,4 +47,5 @@ class ManagerRegistry : IManager {
         return mManagerMap[clazz.simpleName] ?: throw IllegalStateException("manager not register")
     }
 
+
 }

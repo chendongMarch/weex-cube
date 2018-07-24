@@ -48,19 +48,13 @@ class BridgeModule : WXModule() {
      * 1. 写起来比较繁琐
      * 2. 调用起来不好识别，最好能有 vue 中间层的支持
      *
-     * OneModule$call()
-     * #method 调用方法的唯一标识
-     * #params 传递的参数
-     * #callback 结果回调，必须回调回去
-     *      success: boolean
-     *      msg: string
      */
     @JSMethod(uiThread = true)
     fun call(method: String, params: JSONObject, callback: JSCallback) {
         try {
-            mDispatcherRegistry.dispatch(method, params,JsCallbackWrap(callback))
+            mDispatcherRegistry.dispatch(method, params,Callback(callback))
         } catch (e: Exception) {
-            mDispatcherRegistry.postJsResult(JsCallbackWrap(callback), false to "$method($params) error ${e.message}")
+            mDispatcherRegistry.postJsResult(Callback(callback), false to "$method($params) error ${e.message}")
         }
     }
 
@@ -70,13 +64,13 @@ class BridgeModule : WXModule() {
 
         override fun activity(): AppCompatActivity = module.mAct ?: throw RuntimeException("activity find error")
 
-        override fun doBySelf(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap?) {
+        override fun doBySelf(method: String, params: JSONObject, jsCallbackWrap: Callback?) {
             when (method) {
-                RouterDispatcher.closePage -> {
+                "closePage" -> {
                     val delegate = module.mWeexDelegate ?: throw RuntimeException("Router#closePage delegate is null")
                     delegate.close()
                 }
-                ModalDispatcher.loading    -> {
+                "loading"   -> {
                     val msg = params.getDef(BaseDispatcher.KEY_MSG, "")
                     val show = params.getDef("show", false)
                     val weexAct = module.mWeexAct ?: throw RuntimeException("ModuleDispatcher#mWeexAct error")
@@ -94,16 +88,6 @@ class BridgeModule : WXModule() {
                         container.removeView(loadingView)
                     }
                 }
-//                PageDispatcher.goHome      -> {
-//                    val allInstances = WXSDKManager.getInstance().wxRenderManager.allInstances
-//                    for (inst in allInstances) {
-//                        val wxAct = inst?.context as? WxActivity
-//                        if (wxAct?.mDelegate?.mWeexPage?.indexPage == false) {
-//                            wxAct.finish()
-//                        }
-//                    }
-//                    // jsCallbackWrap?.invoke(mapOf(BaseDispatcher.KEY_SUCCESS to true, BaseDispatcher.KEY_MSG to "page#goHome finish"))
-//                }
             }
         }
     }

@@ -8,6 +8,8 @@ import com.taobao.weex.IWXRenderListener
 import com.taobao.weex.RenderContainer
 import com.taobao.weex.WXSDKInstance
 import com.taobao.weex.common.WXRenderStrategy
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 
 /**
  * CreateAt : 2018/5/3
@@ -37,10 +39,21 @@ class WxRender(activity: Activity,
         if(mWxInst.context == null) {
             return
         }
-        CubeWx.mWxJsLoader.getTemplateAsync(mWxInst.context, page) {
-            if (!it.isNullOrBlank()) {
-                renderJsCallback?.invoke(it)
-                mWxInst.render(page.pageName, it, opts, null, WXRenderStrategy.APPEND_ASYNC)
+//        CubeWx.mWxJsLoader.getTemplateAsync(mWxInst.context, page) {
+//            if (!it.isNullOrBlank()) {
+//                renderJsCallback?.invoke(it)
+//                mWxInst.render(page.pageName, it, opts, null, WXRenderStrategy.APPEND_ASYNC)
+//            } else {
+//                listener.onException(mWxInst, WxConstants.ERR_JS_NOT_READY, "JS NOT READY ${page.toShowString()}")
+//            }
+//        }
+
+        launch(UI) {
+            val deferred = CubeWx.mWxJsLoader.getTemplateCoroutine(mWxInst.context, page)
+            val template = deferred?.await()
+            if (!template.isNullOrBlank()) {
+                renderJsCallback?.invoke(template)
+                mWxInst.render(page.pageName, template, opts, null, WXRenderStrategy.APPEND_ASYNC)
             } else {
                 listener.onException(mWxInst, WxConstants.ERR_JS_NOT_READY, "JS NOT READY ${page.toShowString()}")
             }

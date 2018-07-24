@@ -1,9 +1,6 @@
 package com.march.wxcube.module.dispatcher
 
-import android.content.Context
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
-import com.alibaba.fastjson.JSONObject
 import com.march.wxcube.CubeWx
 import com.march.wxcube.R
 import com.march.wxcube.common.WxUtils
@@ -11,7 +8,8 @@ import com.march.wxcube.common.getDef
 import com.march.wxcube.common.toObjEx
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
-import com.march.wxcube.module.JsCallbackWrap
+import com.march.wxcube.module.DispatcherJsMethod
+import com.march.wxcube.module.DispatcherParam
 import com.march.wxcube.ui.WxActivity
 import com.taobao.weex.WXSDKManager
 
@@ -22,104 +20,97 @@ import com.taobao.weex.WXSDKManager
  * @author chendong
  */
 class RouterDispatcher : BaseDispatcher() {
+//
+//    companion object {
+//        const val KEY_NO_REPEAT = "notRepeat"
+//        // method
+//        const val openUrl = "openUrl"
+//        const val openNative = "openNative"
+//        const val openWeb = "openWeb"
+//        const val openDialog = "openDialog"
+//        const val openBrowser = "openBrowser"
+//        const val openApp = "openApp"
+//        const val closePage = "closePage"
+//        const val putExtraData = "putExtraData"
+//        const val openHomePage = "openHomePage"
+//    }
+//
+//    override fun getMethods(): Array<String> {
+//        return arrayOf(
+//                openUrl,
+//                openWeb,
+//                openDialog,
+//                openBrowser,
+//                openApp,
+//                openNative,
+//                openHomePage,
+//                closePage,
+//                putExtraData
+//        )
+//    }
+//
+//    override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
+//
+//    }
 
-    companion object {
-        const val KEY_NO_REPEAT = "notRepeat"
-        // method
-        const val openUrl = "openUrl"
-        const val openNative = "openNative"
-        const val openWeb = "openWeb"
-        const val openDialog = "openDialog"
-        const val openBrowser = "openBrowser"
-        const val openApp = "openApp"
-        const val closePage = "closePage"
-        const val putExtraData = "putExtraData"
-        const val openHomePage = "openHomePage"
-    }
-
-    override fun getMethods(): Array<String> {
-        return arrayOf(
-                openUrl,
-                openWeb,
-                openDialog,
-                openBrowser,
-                openApp,
-                openNative,
-                openHomePage,
-                closePage,
-                putExtraData
-        )
-    }
-
-    override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
-        val act = findAct()
-        when (method) {
-            openUrl      -> openUrl(act, params)
-            openWeb      -> openWeb(act, params)
-            openDialog   -> openDialog(act, params)
-            openBrowser  -> openBrowser(act, params)
-            openApp      -> openApp(act, params)
-            closePage    -> closePage(params)
-            putExtraData -> putExtraData(params)
-            openNative   -> openNative(params)
-            openHomePage -> openHomePage(act, params)
-        }
-    }
-
-    private fun openNative(params: JSONObject) {
-        val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openNative url is null")
+    @DispatcherJsMethod
+    fun openNative(param: DispatcherParam) {
+        val webUrl = param.params.getString(KEY_URL) ?: throw RuntimeException("Router#openNative url is null")
         val clazz = Class.forName(webUrl)
         val activity = mProvider.activity()
         activity.startActivity(Intent(activity, clazz))
     }
 
-    private fun closePage(params: JSONObject) {
-        mProvider.doBySelf(closePage, params)
+    @DispatcherJsMethod
+    fun closePage(param: DispatcherParam) {
+        mProvider.doBySelf(param.method,  param.params)
     }
 
-    private fun putExtraData(params: JSONObject) {
-        val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#putExtraData url is null")
-        val data = params[KEY_DATA] ?: throw RuntimeException("Router#putExtraData data is null")
+    @DispatcherJsMethod
+    fun putExtraData(param: DispatcherParam) {
+        val webUrl = param.params.getString(KEY_URL) ?: throw RuntimeException("Router#putExtraData url is null")
+        val data = param.params[KEY_DATA] ?: throw RuntimeException("Router#putExtraData data is null")
         ManagerRegistry.Data.putData(webUrl, data)
     }
 
-    private fun openApp(ctx: Context, params: JSONObject) {
-        openBrowser(ctx, params)
+    @DispatcherJsMethod
+    fun openApp(param: DispatcherParam) {
+        openBrowser(param)
     }
 
-    private fun openWeb(ctx: Context, params: JSONObject) {
-        val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openWeb url is null")
-        val result = CubeWx.mWxRouter.openWeb(ctx, webUrl)
+    @DispatcherJsMethod
+    fun openWeb(param: DispatcherParam) {
+        val webUrl = param.params.getString(KEY_URL) ?: throw RuntimeException("Router#openWeb url is null")
+        val result = CubeWx.mWxRouter.openWeb(findAct(), webUrl)
         if (!result.first) {
             throw RuntimeException("Router#openWeb Error ${result.second}")
         }
     }
 
-    private fun openDialog(act: AppCompatActivity, params: JSONObject) {
-        val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openDialog url is null")
-        val configJsonObj = params.getJSONObject(KEY_CONFIG)
-        val config = if (configJsonObj != null) {
-            configJsonObj.toObjEx(DialogConfig::class.java)
-        } else {
-            DialogConfig()
-        }
-        val result = CubeWx.mWxRouter.openDialog(act, webUrl, config)
+    @DispatcherJsMethod
+    fun openDialog(param: DispatcherParam) {
+        val webUrl = param.params.getString(KEY_URL) ?: throw RuntimeException("Router#openDialog url is null")
+        val configJsonObj = param.params.getJSONObject(KEY_CONFIG)
+        val config = configJsonObj.toObjEx(DialogConfig::class.java) ?: DialogConfig()
+        val result = CubeWx.mWxRouter.openDialog(findAct(), webUrl, config)
         if (!result.first) {
             throw RuntimeException("Router#openDialog Error ${result.second}")
         }
     }
 
-    private fun openBrowser(ctx: Context, params: JSONObject) {
-        val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openBrowser url is null")
-        val result = CubeWx.mWxRouter.openBrowser(ctx, webUrl)
+    @DispatcherJsMethod
+    fun openBrowser(param: DispatcherParam) {
+        val webUrl = param.params.getString(KEY_URL) ?: throw RuntimeException("Router#openBrowser url is null")
+        val result = CubeWx.mWxRouter.openBrowser(findAct(), webUrl)
         if (!result.first) {
             throw RuntimeException("Router#openBrowser Error ${result.second}")
         }
     }
 
-    private fun openHomePage(ctx: Context, params: JSONObject) {
+    @DispatcherJsMethod
+    fun openHomePage(param: DispatcherParam) {
         try {
-            val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openUrl url is null")
+            val webUrl = param.params.getString(KEY_URL) ?: throw RuntimeException("Router#openUrl url is null")
             val allInstances = WXSDKManager.getInstance().wxRenderManager.allInstances
             var hasHome = false
             for (inst in allInstances) {
@@ -131,24 +122,26 @@ class RouterDispatcher : BaseDispatcher() {
                 }
             }
             if (!hasHome) {
-                openUrl(ctx, params)
+                openUrl(param)
             }
         } catch (e: Exception) {
-            openUrl(ctx, params)
+            openUrl(param)
         }
     }
 
-    private fun openUrl(ctx: Context, params: JSONObject) {
-        val webUrl = params.getString(KEY_URL) ?: throw RuntimeException("Router#openUrl url is null")
-        val anim = params.getDef("animation", "normal")
-        val result = CubeWx.mWxRouter.openUrl(ctx, webUrl) {
+    @DispatcherJsMethod
+    fun openUrl(param: DispatcherParam) {
+        val webUrl = param.params.getString(KEY_URL) ?: throw RuntimeException("Router#openUrl url is null")
+        val anim = param.params.getDef("animation", "normal")
+        val result = CubeWx.mWxRouter.openUrl(findAct(), webUrl) {
             it.putExtra("animation", anim)
         }
         mProvider.activity().overridePendingTransition(R.anim.act_bottom_in, R.anim.act_no_anim)
         when (anim) {
             "btc"  -> mProvider.activity().overridePendingTransition(R.anim.act_bottom_in, R.anim.act_no_anim)
-            "fade" -> mProvider.activity().overridePendingTransition(android.R.anim.fade_in, R.anim.act_no_anim)
-            "rtl" -> mProvider.activity().overridePendingTransition(android.R.anim.fade_in, R.anim.act_no_anim)
+            "fade" -> mProvider.activity().overridePendingTransition(R.anim.fast_fade_in, R.anim.act_no_anim)
+            "rtl"  -> mProvider.activity().overridePendingTransition(R.anim.act_translate_in, R.anim.act_no_anim)
+            "no"   -> mProvider.activity().overridePendingTransition(R.anim.act_no_anim, R.anim.act_no_anim)
             else   -> mProvider.activity().overridePendingTransition(R.anim.act_translate_in, R.anim.act_no_anim)
         }
         if (!result.first) {

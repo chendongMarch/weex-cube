@@ -9,7 +9,6 @@ import com.march.common.utils.LgUtils
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.ui.WxActivity
 import com.march.wxcube.ui.WxDelegate
-import com.taobao.weex.WXSDKManager
 import com.taobao.weex.common.WXModule
 
 /**
@@ -18,6 +17,9 @@ import com.taobao.weex.common.WXModule
  *
  * @author chendong
  */
+
+fun Any?.ignore() {
+}
 
 // 获取 mCtx
 val WXModule.mCtx: Context?

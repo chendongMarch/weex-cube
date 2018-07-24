@@ -23,17 +23,12 @@ android {
 }
 
 dependencies {
-
     // kt 环境支持
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 
-    // appcompat
     implementation libs.appcompat_v7
     implementation libs.design
-    // 新版本需要 RecyclerView 支持
     implementation libs.recyclerView_v7
-    api 'com.github.franmontiel:PersistentCookieJar:v1.0.1'
-    // image
     api libs.glide4
     implementation libs.glideOkHttp
     kapt libs.glide4Compiler
@@ -47,10 +42,18 @@ dependencies {
     implementation libs.fastjson
 
     // http
+    api libs.cookie
     implementation 'com.squareup.okhttp:okhttp-ws:2.3.0'
     implementation libs.okhttp3
 
     // 模块支持
     implementation libs.common
     implementation project(':webkit')
+    api libs.ankoCommons
+    api libs.ankoCoroutines
+}
+kotlin {
+    experimental {
+        coroutines "enable"
+    }
 }
