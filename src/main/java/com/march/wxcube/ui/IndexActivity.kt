@@ -58,7 +58,7 @@ class IndexActivity : BaseActivity() {
             ManagerRegistry.OnlineCfg.update(this)
             Handler().postDelayed(mIndexRunnable, TIME_START)
         } else {
-            ToastUtils.show("请授予存储权限～")
+            // ToastUtils.show("请授予存储权限～")
         }
     }
 
