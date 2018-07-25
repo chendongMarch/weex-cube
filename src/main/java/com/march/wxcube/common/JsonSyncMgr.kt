@@ -1,6 +1,7 @@
 package com.march.wxcube.common
 
 import android.content.Context
+import com.march.common.model.WeakContext
 import com.march.common.pool.ExecutorsPool
 import com.march.common.utils.StreamUtils
 import com.march.wxcube.http.HttpListener
@@ -15,7 +16,7 @@ import com.taobao.weex.common.WXResponse
  * @author chendong
  */
 
-typealias DataParser = (Context, String) -> Boolean
+typealias DataParser = (WeakContext, String) -> Boolean
 
 
 class JsonSyncMgr(private val cfg: SyncCfg,
@@ -34,19 +35,22 @@ class JsonSyncMgr(private val cfg: SyncCfg,
      * 3. 启动配置文件下载，下载完毕后存储到 Local 供下次启动时读取
      */
     fun update(context: Context) {
+        val weakCtx = context.weak()
         ExecutorsPool.getInst().execute {
             var json = mDiskLruCache.read(cfg.key)
             if (json.isBlank()) {
-                json = readAssets(context, "${cfg.key}/${cfg.key}.json")
+                weakCtx.get()?.let {
+                    json = readAssets(it, "${cfg.key}/${cfg.key}.json")
+                }
             }
-            parser(context, json)
+            parser(weakCtx, json)
             // 发起网络请求最新配置
             val request = ManagerRegistry.Request.makeWxRequest(url = cfg.url, from = cfg.key)
             ManagerRegistry.Request.request(request, false, object : HttpListener {
                 override fun onHttpFinish(response: WXResponse) {
                     if (response.errorCode == RequestManager.ERROR_CODE_FAILURE) {
                         log("${cfg.key}  请求配置文件失败")
-                    } else if (parser(context, response.data)) {
+                    } else if (parser(weakCtx, response.data)) {
                         mDiskLruCache.write(cfg.key, response.data)
                     }
                     response.data = null

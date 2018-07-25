@@ -26,8 +26,8 @@ class OnlineCfgManager : IManager {
 
     private val jsonSyncMgr by lazy {
         val cfg = JsonSyncMgr.SyncCfg(KEY, CubeWx.mWxCfg.onlineCfgUrl)
-        JsonSyncMgr(cfg) { ctx, json ->
-            parseJsonAndUpdate(ctx, json)
+        JsonSyncMgr(cfg) { _, json ->
+            parseJsonAndUpdate(json)
         }
     }
 
@@ -37,7 +37,7 @@ class OnlineCfgManager : IManager {
         jsonSyncMgr.update(ctx)
     }
 
-    private fun parseJsonAndUpdate(ctx: Context, json: String?): Boolean {
+    private fun parseJsonAndUpdate(json: String?): Boolean {
         if (json == null || json.isBlank()) {
             return false
         }

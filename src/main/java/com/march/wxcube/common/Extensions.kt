@@ -1,11 +1,11 @@
 package com.march.wxcube.common
 
-import android.app.ActivityManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.view.View
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
+import com.march.common.model.WeakContext
 import com.march.wxcube.CubeWx
 import com.march.wxcube.wxadapter.GlideApp
 import java.lang.Exception
@@ -25,15 +25,9 @@ fun Any.log(msg: String, throwable: Throwable? = null) {
     CubeWx.mWxReportAdapter.log(this::class.java.simpleName, msg, throwable)
 }
 
-
-fun Context?.memory(float: Float): Int {
-    if (this == null) {
-        return 5 * 1024 * 1024
-    }
-    val activityManager = this.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-    return (activityManager.memoryClass * 1024 * 1024 * float).toInt()
+fun Context.weak(): WeakContext {
+    return WeakContext(this)
 }
-
 fun String.md5(): String {
     return try {
         val md = MessageDigest.getInstance("MD5")

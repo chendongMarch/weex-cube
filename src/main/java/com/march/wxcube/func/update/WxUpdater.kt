@@ -19,14 +19,17 @@ class WxUpdater {
 
     private val jsonSyncMgr by lazy {
         val cfg = JsonSyncMgr.SyncCfg(KEY, CubeWx.mWxCfg.wxCfgUrl)
-        JsonSyncMgr(cfg) { ctx, json ->
-            parseJsonAndUpdate(ctx, json)
+        JsonSyncMgr(cfg) { weakCtx, json ->
+            parseJsonAndUpdate(weakCtx.get(), json)
         }
     }
 
     // 解析配置文件，并通知出去
-    private fun parseJsonAndUpdate(context: Context, json: String?): Boolean {
+    private fun parseJsonAndUpdate(context: Context?, json: String?): Boolean {
         if (json == null || json.isBlank()) {
+            return false
+        }
+        if(context == null) {
             return false
         }
         try {
