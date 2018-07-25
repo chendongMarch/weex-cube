@@ -14,6 +14,8 @@ import com.march.wxcube.common.log
 import com.march.wxcube.func.update.OnWxUpdateListener
 import com.march.wxcube.model.WxPage
 import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.coroutines.experimental.bg
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -62,18 +64,10 @@ class WxJsLoader : OnWxUpdateListener {
 
     override fun onWeexCfgUpdate(context: Context, weexPages: List<WxPage>?) {
         if (CubeWx.mWxCfg.jsPrepareStrategy == JsPrepareStrategy.PREPARE_ALL) {
-            weexPages?.forEach { getTemplateAsync(context, it) {} }
+            weexPages?.forEach {
+                launch(UI) { getTemplate(context, it) }
+            }
         }
-    }
-
-    /**
-     * 异步获取模板
-     * 使用默认的加载和缓存策略
-     */
-    fun getTemplateAsync(context: Context, page: WxPage?, consumer: (String?) -> Unit) {
-        val loadStrategy = CubeWx.mWxCfg.jsLoadStrategy
-        val cacheStrategy = CubeWx.mWxCfg.jsCacheStrategy
-        getTemplateAsync(context, loadStrategy, cacheStrategy, page, consumer)
     }
 
     /**
@@ -98,14 +92,14 @@ class WxJsLoader : OnWxUpdateListener {
         }
     }
 
-    fun getTemplateCoroutine(context: Context, page: WxPage?): Deferred<String?>? {
+    fun getTemplate(context: Context, page: WxPage?): Deferred<String?>? {
         val loadStrategy = CubeWx.mWxCfg.jsLoadStrategy
         val cacheStrategy = CubeWx.mWxCfg.jsCacheStrategy
-        return getTemplateCoroutine(context, loadStrategy, cacheStrategy,page)
+        return getTemplate(context, loadStrategy, cacheStrategy,page)
     }
 
 
-    fun getTemplateCoroutine(context: Context, loadStrategy: Int, cacheStrategy: Int, page: WxPage?): Deferred<String?>? {
+    fun getTemplate(context: Context, loadStrategy: Int, cacheStrategy: Int, page: WxPage?): Deferred<String?>? {
         if (page == null) {
             return null
         }

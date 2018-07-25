@@ -49,7 +49,7 @@ class WxRender(activity: Activity,
 //        }
 
         launch(UI) {
-            val deferred = CubeWx.mWxJsLoader.getTemplateCoroutine(mWxInst.context, page)
+            val deferred = CubeWx.mWxJsLoader.getTemplate(mWxInst.context, page)
             val template = deferred?.await()
             if (!template.isNullOrBlank()) {
                 renderJsCallback?.invoke(template)

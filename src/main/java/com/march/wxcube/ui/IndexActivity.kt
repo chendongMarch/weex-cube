@@ -40,7 +40,6 @@ class IndexActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ToastUtils.show("我是修复后的内容～")
         try {
             CubeWx.mWxPageAdapter.onPageCreated(this, WxConstants.PAGE_INDEX)
             CubeWx.mWxPageAdapter.getLoading().setIndexContent(this)

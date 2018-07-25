@@ -44,7 +44,6 @@ class EventManager : IManager {
             val mutableSet = mEventInstanceIdMap[event]
             mutableSet?.remove(nonNullId)
         }
-
     }
 
     // 注册接受某事件

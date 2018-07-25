@@ -27,6 +27,8 @@ import com.march.wxcube.ui.WxDelegate
 import com.taobao.weex.IWXRenderListener
 import com.taobao.weex.WXSDKInstance
 import com.taobao.weex.adapter.URIAdapter
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 
 /**
  * CreateAt : 2018/5/3
@@ -93,17 +95,19 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
         }
         return with(delegate) {
             mWxPageDebugCfg.isRefreshing = true
-            CubeWx.mWxJsLoader.getTemplateAsync(mActivity, JsLoadStrategy.NET_FIRST, JsCacheStrategy.NO_CACHE, mWxPage) {
-                it?.let {
+            val loadStrategy = JsLoadStrategy.NET_FIRST
+            val cacheStrategy = JsCacheStrategy.NO_CACHE
+            launch(UI) {
+                val deferred = CubeWx.mWxJsLoader.getTemplate(mActivity, loadStrategy, cacheStrategy, mWxPage)
+                val template = deferred?.await()
+                template?.let {
                     if (mWxPageDebugCfg.renderTemplate != it) {
                         if (mWxPageDebugCfg.renderTemplate.isBlank()) {
                             mWxPageDebugCfg.renderTemplate = it
                         } else {
-                            mActivity.runOnUiThread {
-                                renderJs(it)
-                                mWxPageDebugCfg.renderTemplate = it
-                                ToastUtils.show("已为您刷新～")
-                            }
+                            renderJs(it)
+                            mWxPageDebugCfg.renderTemplate = it
+                            ToastUtils.show("已为您刷新～")
                         }
                         mRefreshCount = 0
                     } else {
@@ -111,21 +115,52 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
                         log("获取到但是没有改变，不作渲染")
                     }
                 }
-                mHandler.post {
-                    mView?.animate()
-                            ?.rotationYBy(360f)
-                            ?.setDuration(5_00)
-                            ?.setListener(object : AnimatorListener() {
-                                override fun onAnimationEnd(animation: Animator?) {
-                                    mView?.rotationY = 0f
-                                }
-                            })
-                            ?.start()
-                }
+                mView?.animate()
+                        ?.rotationYBy(360f)
+                        ?.setDuration(5_00)
+                        ?.setListener(object : AnimatorListener() {
+                            override fun onAnimationEnd(animation: Animator?) {
+                                mView?.rotationY = 0f
+                            }
+                        })
+                        ?.start()
                 if (!once && mWxPageDebugCfg.isRefreshing && mWxPageDebugCfg.isRefreshing) {
                     mHandler.sendEmptyMessageDelayed(0, 5000)
                 }
             }
+//            CubeWx.mWxJsLoader.getTemplateAsync(mActivity, loadStrategy, cacheStrategy, mWxPage) {
+//                it?.let {
+//                    if (mWxPageDebugCfg.renderTemplate != it) {
+//                        if (mWxPageDebugCfg.renderTemplate.isBlank()) {
+//                            mWxPageDebugCfg.renderTemplate = it
+//                        } else {
+//                            mActivity.runOnUiThread {
+//                                renderJs(it)
+//                                mWxPageDebugCfg.renderTemplate = it
+//                                ToastUtils.show("已为您刷新～")
+//                            }
+//                        }
+//                        mRefreshCount = 0
+//                    } else {
+//                        mRefreshCount++
+//                        log("获取到但是没有改变，不作渲染")
+//                    }
+//                }
+//                mHandler.post {
+//                    mView?.animate()
+//                            ?.rotationYBy(360f)
+//                            ?.setDuration(5_00)
+//                            ?.setListener(object : AnimatorListener() {
+//                                override fun onAnimationEnd(animation: Animator?) {
+//                                    mView?.rotationY = 0f
+//                                }
+//                            })
+//                            ?.start()
+//                }
+//                if (!once && mWxPageDebugCfg.isRefreshing && mWxPageDebugCfg.isRefreshing) {
+//                    mHandler.sendEmptyMessageDelayed(0, 5000)
+//                }
+//            }
             true
         }
     }
