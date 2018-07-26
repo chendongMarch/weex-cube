@@ -15,7 +15,7 @@ import com.march.wxcube.module.DispatcherParam
 class DebugDispatcher : BaseDispatcher() {
 
     @DispatcherJsMethod
-    fun toast(param: DispatcherParam) {
+    fun debugToast(param: DispatcherParam) {
         val duration = param.params.getDef(KEY_DURATION, 2)
         val msg = param.params.getDef(KEY_MSG, "no msg")
         if (duration <= 2) {
@@ -26,7 +26,7 @@ class DebugDispatcher : BaseDispatcher() {
     }
 
     @DispatcherJsMethod
-    fun log(param: DispatcherParam) {
+    fun debugLog(param: DispatcherParam) {
         val tag = param.params.getDef(KEY_TAG, "weex-debug")
         val msg = param.params.getDef(KEY_MSG, "no msg")
         LgUtils.e(tag, msg)
