@@ -70,7 +70,7 @@ class WxActivity : BaseActivity() {
         val anim = intent.getStringExtra("animation")
         when (anim) {
             "btc"  -> overridePendingTransition(R.anim.act_no_anim, R.anim.act_bottom_out)
-            "fade" -> overridePendingTransition(R.anim.act_no_anim, R.anim.fast_fade_out)
+            "fade" -> overridePendingTransition(R.anim.act_no_anim, R.anim.act_fast_fade_out)
             "rtl"  -> overridePendingTransition(R.anim.act_no_anim, R.anim.act_translate_out)
             "no"  -> overridePendingTransition(R.anim.act_no_anim, R.anim.act_no_anim)
             else   -> overridePendingTransition(R.anim.act_no_anim, R.anim.act_translate_out)

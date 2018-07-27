@@ -20,38 +20,6 @@ import com.taobao.weex.WXSDKManager
  * @author chendong
  */
 class RouterDispatcher : BaseDispatcher() {
-//
-//    companion object {
-//        const val KEY_NO_REPEAT = "notRepeat"
-//        // method
-//        const val openUrl = "openUrl"
-//        const val openNative = "openNative"
-//        const val openWeb = "openWeb"
-//        const val openDialog = "openDialog"
-//        const val openBrowser = "openBrowser"
-//        const val openApp = "openApp"
-//        const val closePage = "closePage"
-//        const val putExtraData = "putExtraData"
-//        const val openHomePage = "openHomePage"
-//    }
-//
-//    override fun getMethods(): Array<String> {
-//        return arrayOf(
-//                openUrl,
-//                openWeb,
-//                openDialog,
-//                openBrowser,
-//                openApp,
-//                openNative,
-//                openHomePage,
-//                closePage,
-//                putExtraData
-//        )
-//    }
-//
-//    override fun dispatch(method: String, params: JSONObject, jsCallbackWrap: JsCallbackWrap) {
-//
-//    }
 
     @DispatcherJsMethod
     fun openNative(param: DispatcherParam) {
@@ -139,7 +107,7 @@ class RouterDispatcher : BaseDispatcher() {
         mProvider.activity().overridePendingTransition(R.anim.act_bottom_in, R.anim.act_no_anim)
         when (anim) {
             "btc"  -> mProvider.activity().overridePendingTransition(R.anim.act_bottom_in, R.anim.act_no_anim)
-            "fade" -> mProvider.activity().overridePendingTransition(R.anim.fast_fade_in, R.anim.act_no_anim)
+            "fade" -> mProvider.activity().overridePendingTransition(R.anim.act_fast_fade_in, R.anim.act_no_anim)
             "rtl"  -> mProvider.activity().overridePendingTransition(R.anim.act_translate_in, R.anim.act_no_anim)
             "no"   -> mProvider.activity().overridePendingTransition(R.anim.act_no_anim, R.anim.act_no_anim)
             else   -> mProvider.activity().overridePendingTransition(R.anim.act_translate_in, R.anim.act_no_anim)
