@@ -1,9 +1,9 @@
 package com.march.wxcube.module.dispatcher
 
+import com.bumptech.glide.Glide
 import com.march.wxcube.common.WxUtils
 import com.march.wxcube.module.DispatcherJsMethod
 import com.march.wxcube.module.DispatcherParam
-import com.march.wxcube.wxadapter.GlideApp
 import com.taobao.weex.adapter.URIAdapter
 
 /**
@@ -20,7 +20,7 @@ class ImageDispatcher : BaseDispatcher() {
         for (obj in jsonArray) {
             if (obj is String) {
                 val url = WxUtils.rewriteUrl(obj, URIAdapter.IMAGE)
-                GlideApp.with(mProvider.activity()).load(url).preload()
+                Glide.with(mProvider.activity()).load(url).preload()
             }
         }
     }

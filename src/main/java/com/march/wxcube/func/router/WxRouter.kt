@@ -143,11 +143,13 @@ class WxRouter : OnWxUpdateListener {
         if (mWeexPageMap.isEmpty()) {
             return false
         }
-        val page = mWeexPageMap.values.firstOrNull { it.indexPage }
-        if (page?.isValid == true) {
-            return CubeWx.mWxRouter.openUrl(context, page.h5Url ?: "").first
+        synchronized(WxRouter::class.java) {
+            val page = mWeexPageMap.values.firstOrNull { it.indexPage }
+            if (page?.isValid == true) {
+                return CubeWx.mWxRouter.openUrl(context, page.h5Url ?: "").first
+            }
+            return false
         }
-        return false
     }
 
 }

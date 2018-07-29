@@ -3,6 +3,7 @@ package com.march.wxcube.model
 import android.os.Parcel
 import android.os.Parcelable
 import android.text.TextUtils
+import com.march.wxcube.CubeWx
 import com.march.wxcube.common.newLine
 
 
@@ -46,6 +47,8 @@ class WxPage() : Parcelable {
                 && !TextUtils.isEmpty(jsVersion)
                 && !TextUtils.isEmpty(h5Url)
                 && !TextUtils.isEmpty(remoteJs))
+
+
 
 
     fun make(openUrl: String): WxPage {
@@ -111,6 +114,10 @@ class WxPage() : Parcelable {
     companion object {
 
         const val KEY_PAGE = "KEY_PAGE"
+
+        fun errorPage(): WxPage? {
+            return CubeWx.mWxRouter.findPage(CubeWx.mWxPageAdapter.getNotFontPageUrl())
+        }
 
         @JvmField
         val CREATOR: Parcelable.Creator<WxPage> = object : Parcelable.Creator<WxPage> {

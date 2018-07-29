@@ -3,12 +3,12 @@ package com.march.wxcube.common
 import android.content.Context
 import android.graphics.Bitmap
 import android.view.View
+import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.march.common.model.WeakContext
 import com.march.wxcube.CubeWx
 import com.march.wxcube.manager.ManagerRegistry
-import com.march.wxcube.wxadapter.GlideApp
 import java.lang.Exception
 import java.math.BigInteger
 import java.nio.charset.Charset
@@ -48,7 +48,7 @@ fun StringBuilder.newLine(): StringBuilder {
 }
 
 fun Context.downloadImage(path: String, resolver: (Bitmap) -> Unit) {
-    val request = GlideApp.with(this).asBitmap()
+    val request = Glide.with(this).asBitmap()
     val res = ManagerRegistry.ResMapping.mapUrlRes(path)
     if (res > 0) {
         request.load(res)

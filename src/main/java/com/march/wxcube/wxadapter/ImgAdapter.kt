@@ -3,10 +3,8 @@ package com.march.wxcube.wxadapter
 import android.graphics.Bitmap
 import android.widget.ImageView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.annotation.GlideModule
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.module.AppGlideModule
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
@@ -15,10 +13,6 @@ import com.march.wxcube.manager.ManagerRegistry
 import com.taobao.weex.adapter.IWXImgLoaderAdapter
 import com.taobao.weex.common.WXImageStrategy
 import com.taobao.weex.dom.WXImageQuality
-
-
-@GlideModule
-class MyAppGlideModule : AppGlideModule()
 
 /**
  * CreateAt : 2018/3/26
@@ -63,13 +57,7 @@ class ImgAdapter : IWXImgLoaderAdapter {
     }
 
     private fun loadGif(url: String, view: ImageView, strategy: WXImageStrategy?) {
-<<<<<<< Updated upstream
-        GlideApp.with(view.context)
-                .load(url)
-                .into(view)
-=======
         Glide.with(view.context).load(url).into(view)
->>>>>>> Stashed changes
     }
 
 
@@ -82,9 +70,9 @@ class ImgAdapter : IWXImgLoaderAdapter {
             view ?: return false
             if (view.measuredWidth > 0 && view.measuredHeight > 0) {
                 if (view.measuredWidth > 300 && CubeWx.mWxCfg.largeImgHolder > 0) {
-                    view.setImageResource(CubeWx.mWxCfg.largeImgHolder)
+                    setImageResource(view, CubeWx.mWxCfg.largeImgHolder)
                 } else if (CubeWx.mWxCfg.smallImgHolder > 0) {
-                    view.setImageResource(CubeWx.mWxCfg.smallImgHolder)
+                    setImageResource(view, CubeWx.mWxCfg.smallImgHolder)
                 }
             }
             return false
@@ -95,6 +83,16 @@ class ImgAdapter : IWXImgLoaderAdapter {
             strategy?.imageListener?.onImageFinish(url, view, true, null)
             return false
         }
+
+        fun setImageResource(imageView: ImageView, res: Int) {
+            try {
+                System.gc()
+                imageView.setImageResource(res)
+            } catch (ignore: Exception) {
+            }
+        }
+
     }
+
 
 }

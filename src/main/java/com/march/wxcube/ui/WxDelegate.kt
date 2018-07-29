@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import com.march.common.utils.immersion.StatusBarUtils
 import com.march.wxcube.CubeWx
 import com.march.wxcube.adapter.IWxReportAdapter
-import com.march.wxcube.common.Device
 import com.march.wxcube.common.WxUtils
 import com.march.wxcube.debug.WxPageDebugger
 import com.march.wxcube.lifecycle.WxLifeCycle
@@ -67,7 +66,7 @@ class WxDelegate : WxLifeCycle {
      */
     constructor(fragment: Fragment) {
         mHost = fragment
-        mWxPage = fragment.arguments?.getParcelable(WxPage.KEY_PAGE) ?: return
+        mWxPage = fragment.arguments?.getParcelable(WxPage.KEY_PAGE) ?: WxPage.errorPage() ?: return
         val act = fragment.activity ?: return
         init(act)
     }
@@ -77,7 +76,7 @@ class WxDelegate : WxLifeCycle {
      */
     constructor(activity: Activity) {
         mHost = activity
-        mWxPage = activity.intent.getParcelableExtra(WxPage.KEY_PAGE)
+        mWxPage = activity.intent.getParcelableExtra(WxPage.KEY_PAGE) ?: WxPage.errorPage() ?: return
         init(activity)
         initContainerView(activity.findViewById(android.R.id.content))
     }
@@ -196,15 +195,15 @@ class WxDelegate : WxLifeCycle {
             return mRenderOpts
         }
         val uri = Uri.parse(mWxPage.h5Url)
-        uri.queryParameterNames.forEach { mRenderOpts[it] = uri.getQueryParameter(it) }
+        uri.queryParameterNames.forEach { mRenderOpts[it] = uri.getQueryParameter(it) ?: "" }
         mRenderOpts[INSTANCE_ID] = mWeexInst.instanceId
         mRenderOpts[TOP_SAFE_AREA_HEIGHT] = WxUtils.getWxPxByRealPx(StatusBarUtils.getStatusBarHeight(mActivity))
         mRenderOpts[BOTTOM_SAFE_AREA_HEIGHT] = 0
         mRenderOpts[BUNDLE_URL] = WxUtils.rewriteUrl(mWxPage.remoteJs, URIAdapter.BUNDLE)
         mRenderOpts[H5_URL] = WxUtils.rewriteUrl(mWxPage.h5Url, URIAdapter.WEB)
-        if (virtualHeight < 0) {
-            virtualHeight = Device.getVirtualBarHeight(mActivity)
-        }
+//        if (virtualHeight < 0) {
+//            virtualHeight = Device.getVirtualBarHeight(mActivity)
+//        }
         mRenderOpts[VIRTUAL_BAR_HEIGHT] = virtualHeight
         mWxPage.h5Url?.let {
             val data = ManagerRegistry.Data.getData(it)
