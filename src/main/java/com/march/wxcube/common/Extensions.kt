@@ -7,6 +7,7 @@ import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.march.common.model.WeakContext
 import com.march.wxcube.CubeWx
+import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.wxadapter.GlideApp
 import java.lang.Exception
 import java.math.BigInteger
@@ -47,10 +48,15 @@ fun StringBuilder.newLine(): StringBuilder {
 }
 
 fun Context.downloadImage(path: String, resolver: (Bitmap) -> Unit) {
-    GlideApp.with(this).asBitmap().load(path)
-            .into(object : SimpleTarget<Bitmap>() {
-                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                    resolver(resource)
-                }
-            })
+    val request = GlideApp.with(this).asBitmap()
+    val res = ManagerRegistry.ResMapping.mapUrlRes(path)
+    if (res > 0) {
+        request.load(res)
+    } else {
+        request.load(path)
+    }.into(object : SimpleTarget<Bitmap>() {
+        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+            resolver(resource)
+        }
+    })
 }

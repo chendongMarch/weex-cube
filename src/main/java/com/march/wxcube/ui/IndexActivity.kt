@@ -1,12 +1,9 @@
 package com.march.wxcube.ui
 
-import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import com.march.common.utils.ToastUtils
 import com.march.wxcube.CubeWx
-import com.march.wxcube.common.Permission
 import com.march.wxcube.common.WxConstants
 import com.march.wxcube.manager.ManagerRegistry
 import java.lang.Exception
@@ -43,24 +40,14 @@ class IndexActivity : BaseActivity() {
         try {
             CubeWx.mWxPageAdapter.onPageCreated(this, WxConstants.PAGE_INDEX)
             CubeWx.mWxPageAdapter.getLoading().setIndexContent(this)
-            checkPermissionAndLaunch()
+            CubeWx.mWxUpdater.update(this)
+            ManagerRegistry.OnlineCfg.update(this)
+            Handler().postDelayed(mIndexRunnable, TIME_START)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun checkPermissionAndLaunch() {
-        val result = Permission.checkPermission(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE))
-        if (result) {
-            // 1.5s 后启动
-            CubeWx.mWxUpdater.update(this)
-            ManagerRegistry.OnlineCfg.update(this)
-            Handler().postDelayed(mIndexRunnable, TIME_START)
-        } else {
-            // ToastUtils.show("请授予存储权限～")
-        }
-    }
 
     override fun finish() {
         super.finish()
@@ -72,8 +59,4 @@ class IndexActivity : BaseActivity() {
         CubeWx.mWxRouter.mRouterReadyCallback = null
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        checkPermissionAndLaunch()
-    }
 }

@@ -8,7 +8,7 @@ import com.march.wxcube.common.WxUtils
 import com.march.wxcube.common.log
 import com.march.wxcube.http.HttpListener
 import com.march.wxcube.manager.ManagerRegistry
-import com.march.wxcube.manager.RequestManager
+import com.march.wxcube.manager.RequestMgr
 import com.march.wxcube.model.WxPage
 import com.march.wxcube.func.router.UrlKey
 import com.taobao.weex.adapter.URIAdapter
@@ -75,7 +75,7 @@ internal object WxGlobalDebugger {
         val request = ManagerRegistry.Request.makeWxRequest(url = url, from = "request-wx-debug-config")
         ManagerRegistry.Request.request(request, false, object : HttpListener {
             override fun onHttpFinish(response: WXResponse) {
-                if (response.errorCode == RequestManager.ERROR_CODE_FAILURE) {
+                if (response.errorCode == RequestMgr.ERROR_CODE_FAILURE) {
                     log("请求调试配置文件失败")
                 } else {
                     val netJson = response.data ?: return

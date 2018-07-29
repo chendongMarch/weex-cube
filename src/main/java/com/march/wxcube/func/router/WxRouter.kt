@@ -9,11 +9,11 @@ import com.march.webkit.WebKit
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.WxUtils
 import com.march.wxcube.common.log
+import com.march.wxcube.func.update.OnWxUpdateListener
 import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.WxPage
 import com.march.wxcube.ui.WebActivity
 import com.march.wxcube.ui.WxDialogFragment
-import com.march.wxcube.func.update.OnWxUpdateListener
 import com.taobao.weex.adapter.URIAdapter
 
 

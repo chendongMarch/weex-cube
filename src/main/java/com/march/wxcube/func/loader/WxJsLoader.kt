@@ -99,8 +99,8 @@ class WxJsLoader : OnWxUpdateListener {
     }
 
 
-    fun getTemplate(context: Context, loadStrategy: Int, cacheStrategy: Int, page: WxPage?): Deferred<String?>? {
-        if (page == null) {
+    fun getTemplate(context: Context?, loadStrategy: Int, cacheStrategy: Int, page: WxPage?): Deferred<String?>? {
+        if (context == null || page == null) {
             return null
         }
         return bg {

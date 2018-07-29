@@ -1,6 +1,5 @@
 package com.march.wxcube
 
-import android.content.Context
 import com.march.wxcube.adapter.*
 import com.march.wxcube.common.WxUtils
 import com.march.wxcube.func.loader.JsCacheStrategy
@@ -59,7 +58,7 @@ class WxInitConfig {
     var wxReportAdapter: IWxReportAdapter = DefaultWxReportAdapter()
 
 
-    fun prepare(ctx: Context): WxInitConfig {
+    fun prepare(): WxInitConfig {
         CubeWx.mWxCfg = this
 
         // adapter

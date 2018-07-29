@@ -11,7 +11,7 @@ import java.lang.ref.WeakReference
  *
  * @author chendong
  */
-class WxInstManager : IManager {
+class WxInstMgr : IManager {
 
     private val mWeexDelegateMap by lazy { mutableMapOf<String, WeakReference<WxDelegate>>() }
     private val mWeexActivityMap by lazy { mutableMapOf<String, WeakReference<WxDelegate>>() }

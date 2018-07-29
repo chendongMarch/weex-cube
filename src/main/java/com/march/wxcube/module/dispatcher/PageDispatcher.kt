@@ -5,7 +5,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.support.v4.app.Fragment
 import android.text.TextUtils
 import android.view.ViewGroup
-import com.alibaba.fastjson.JSONObject
 import com.march.common.utils.ColorUtils
 import com.march.common.utils.DimensUtils
 import com.march.common.utils.DrawableUtils

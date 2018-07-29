@@ -50,6 +50,13 @@ interface IWxInitAdapter {
 
     }
 
+    /**
+     * 通过 url 映射到 res
+     */
+    fun getUrlResMap(): Map<String, Int> {
+        return mapOf()
+    }
+
 }
 
 class DefaultWxInitAdapter : IWxInitAdapter

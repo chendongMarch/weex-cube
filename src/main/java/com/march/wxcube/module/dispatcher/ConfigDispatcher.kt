@@ -37,7 +37,7 @@ class ConfigDispatcher : BaseDispatcher() {
             if (item == null) {
                 param.callback(mapOf(KEY_SUCCESS to false, KEY_MSG to "not get item"))
             } else {
-                param.callback(mapOf(KEY_SUCCESS to true, KEY_RESULT to item))
+                param.callback(mapOf(KEY_SUCCESS to true, KEY_RESULT to mapOf(KEY_DATA to item)))
             }
         }
     }
@@ -45,12 +45,12 @@ class ConfigDispatcher : BaseDispatcher() {
     @DispatcherJsMethod
     fun readAllOnlineConfig(param: DispatcherParam) {
         param.callback(mapOf(KEY_SUCCESS to true,
-                KEY_RESULT to ManagerRegistry.OnlineCfg.configs))
+                KEY_RESULT to mapOf(KEY_DATA to ManagerRegistry.OnlineCfg.configs)))
     }
 
     @DispatcherJsMethod
     fun readAllWeexConfig(param: DispatcherParam) {
         val map = CubeWx.mWxRouter.mWeexPageMap
-        param.callback(mapOf(KEY_SUCCESS to true, KEY_RESULT to map.values))
+        param.callback(mapOf(KEY_SUCCESS to true, KEY_RESULT to mapOf(KEY_DATA to map.values)))
     }
 }

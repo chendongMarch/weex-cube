@@ -49,13 +49,15 @@ class WxRender(activity: Activity,
 //        }
 
         launch(UI) {
-            val deferred = CubeWx.mWxJsLoader.getTemplate(mWxInst.context, page)
-            val template = deferred?.await()
-            if (!template.isNullOrBlank()) {
-                renderJsCallback?.invoke(template)
-                mWxInst.render(page.pageName, template, opts, null, WXRenderStrategy.APPEND_ASYNC)
-            } else {
-                listener.onException(mWxInst, WxConstants.ERR_JS_NOT_READY, "JS NOT READY ${page.toShowString()}")
+            mWxInst.context?.let {
+                val deferred = CubeWx.mWxJsLoader.getTemplate(it, page)
+                val template = deferred?.await()
+                if (!template.isNullOrBlank()) {
+                    renderJsCallback?.invoke(template)
+                    mWxInst.render(page.pageName, template, opts, null, WXRenderStrategy.APPEND_ASYNC)
+                } else {
+                    listener.onException(mWxInst, WxConstants.ERR_JS_NOT_READY, "JS NOT READY ${page.toShowString()}")
+                }
             }
         }
     }

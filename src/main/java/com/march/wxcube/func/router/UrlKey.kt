@@ -22,16 +22,20 @@ internal class UrlKey {
         }
     }
 
-    private var url: String = ""
-    private var host: String = ""
-    private var port: String = ""
-    private var path: String = ""
+    var url: String? = ""
+    var host: String? = ""
+    var port: String? = ""
+    var path: String? = ""
 
     override fun equals(other: Any?): Boolean {
         if (other == null || other !is UrlKey) {
             return false
         }
-        return host == other.host && port == other.port && path == other.path
+        return if (port == null || other.port == null) {
+            host == other.host && path == other.path
+        } else {
+            host == other.host && port == other.port && path == other.path
+        }
     }
 
     override fun hashCode(): Int {

@@ -6,7 +6,7 @@ import com.march.common.pool.ExecutorsPool
 import com.march.common.utils.StreamUtils
 import com.march.wxcube.http.HttpListener
 import com.march.wxcube.manager.ManagerRegistry
-import com.march.wxcube.manager.RequestManager
+import com.march.wxcube.manager.RequestMgr
 import com.taobao.weex.common.WXResponse
 
 /**
@@ -48,7 +48,7 @@ class JsonSyncMgr(private val cfg: SyncCfg,
             val request = ManagerRegistry.Request.makeWxRequest(url = cfg.url, from = cfg.key)
             ManagerRegistry.Request.request(request, false, object : HttpListener {
                 override fun onHttpFinish(response: WXResponse) {
-                    if (response.errorCode == RequestManager.ERROR_CODE_FAILURE) {
+                    if (response.errorCode == RequestMgr.ERROR_CODE_FAILURE) {
                         log("${cfg.key}  请求配置文件失败")
                     } else if (parser(weakCtx, response.data)) {
                         mDiskLruCache.write(cfg.key, response.data)

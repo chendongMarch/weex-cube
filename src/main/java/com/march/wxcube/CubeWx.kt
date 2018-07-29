@@ -2,13 +2,9 @@ package com.march.wxcube
 
 import android.app.Application
 import android.content.Context
-import com.march.common.Common
-import com.march.common.CommonInjector
-import com.march.common.adapter.JsonParser
 import com.march.common.model.WeakContext
 import com.march.webkit.WebKit
 import com.march.wxcube.adapter.*
-import com.march.wxcube.common.JsonParserImpl
 import com.march.wxcube.common.WxInstaller
 import com.march.wxcube.debug.WxDebugActivityLifeCycle
 import com.march.wxcube.debug.WxGlobalDebugger
@@ -53,7 +49,7 @@ object CubeWx {
     fun init(ctx: Application, config: WxInitConfig) {
         ctx.registerActivityLifecycleCallbacks(WxDebugActivityLifeCycle())
         mWeakCtx = WeakContext(ctx)
-        mWxCfg = config.prepare(ctx)
+        mWxCfg = config.prepare()
         WebKit.init(ctx, WebKit.CORE_SYS, null)
         WXEnvironment.setOpenDebugLog(config.debug)
         WXEnvironment.setApkDebugable(config.debug)
@@ -83,11 +79,12 @@ object CubeWx {
         WxInstaller.registerBindingX()
         mWxInitAdapter.onWxModuleCompRegister()
 
-        ManagerRegistry.getInst().register(DataManager())
-        ManagerRegistry.getInst().register(EventManager())
-        ManagerRegistry.getInst().register(RequestManager())
-        ManagerRegistry.getInst().register(WxInstManager())
-        ManagerRegistry.getInst().register(OnlineCfgManager())
+        ManagerRegistry.getInst().register(MemoryDataMgr())
+        ManagerRegistry.getInst().register(EventBusMgr())
+        ManagerRegistry.getInst().register(RequestMgr())
+        ManagerRegistry.getInst().register(WxInstMgr())
+        ManagerRegistry.getInst().register(OnlineCfgMgr())
+        ManagerRegistry.getInst().register(ResMappingMgr())
 
         mWxInitAdapter.onInitFinished()
     }

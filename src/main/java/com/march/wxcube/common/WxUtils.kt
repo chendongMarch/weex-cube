@@ -31,11 +31,7 @@ object WxUtils {
 
     // 创建根缓存文件夹
     fun makeRootCacheDir(): File {
-        val sdFile = Environment.getExternalStorageDirectory()
-        var rootFile = CubeWx.mWeakCtx.get()?.cacheDir ?: sdFile
-        if (CubeWx.mWxCfg.debug) {
-            rootFile = sdFile
-        }
+        val rootFile = CubeWx.mWeakCtx.get()?.cacheDir
         val cacheFile = File(rootFile, "${CubeWx.mWxInitAdapter.getAppKey()}-${WxConstants.CACHE_ROOT_DIR_NAME}")
         cacheFile.mkdirs()
         return cacheFile
@@ -72,7 +68,6 @@ object WxUtils {
         return DiskLruCache(WxUtils.makeCacheDir(dirName), size)
     }
 
-
     // 结束界面
     fun finishActivity(act: Activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
@@ -88,7 +83,7 @@ object WxUtils {
         }
     }
 
-
+    // 计算 md5
     fun md5(template: String): String {
         return try {
             val md = MessageDigest.getInstance("MD5")

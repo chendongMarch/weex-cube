@@ -1,7 +1,5 @@
 package com.march.wxcube.http
 
-import com.franmontiel.persistentcookiejar.PersistentCookieJar
-import com.franmontiel.persistentcookiejar.cache.CookieCache
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import com.march.wxcube.CubeWx
@@ -36,7 +34,9 @@ internal object OkHttpMaker {
             builder.cookieJar(PersistentCookieJarImpl(SetCookieCache(), SharedPrefsCookiePersistor(it)))
         }
         // 进行日志打印，扩展自 HttpLoggingInterceptor
-        builder.addInterceptor(LogInterceptor())
+         if (CubeWx.mWxCfg.debug) {
+             builder.addInterceptor(LogInterceptor())
+         }
         // token校验，返回 403 时
         // builder.authenticator(new TokenAuthenticator());
         CubeWx.mWxInitAdapter.onInitOkHttpClient(builder)
