@@ -57,9 +57,6 @@ class ImgAdapter : IWXImgLoaderAdapter {
 
     private fun loadGif(url: String, view: ImageView, strategy: WXImageStrategy?) {
         GlideApp.with(view.context)
-                .asGif()
-                .useAnimationPool(true)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .load(url)
                 .into(view)
     }

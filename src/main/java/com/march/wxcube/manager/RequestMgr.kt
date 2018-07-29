@@ -46,7 +46,6 @@ class RequestMgr : IManager {
         return (ManagerRegistry.Request.mOkHttpClient.cookieJar() as PersistentCookieJarImpl)
     }
 
-
     // 结束该页面的请求
     override fun onWxInstRelease(weexPage: WxPage?, instance: WXSDKInstance?) {
         val tag = instance?.instanceId ?: return

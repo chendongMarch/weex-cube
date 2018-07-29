@@ -40,7 +40,7 @@ class RequestManager : IManager {
 
     }
 
-    private val mOkHttpClient by lazy { OkHttpMaker.buildOkHttpClient() }
+    val mOkHttpClient by lazy { OkHttpMaker.buildOkHttpClient() }
 
     fun getCookieJar(): PersistentCookieJarImpl {
         return (ManagerRegistry.Request.mOkHttpClient.cookieJar() as PersistentCookieJarImpl)
