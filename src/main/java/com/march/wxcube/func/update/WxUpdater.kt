@@ -35,7 +35,15 @@ class WxUpdater {
         try {
             val wxPageResp = CubeWx.mWxModelAdapter.convert(json)
             val wxPages = wxPageResp?.datas ?: return false
-            val filterPages = PageFilter.filter(context, wxPages)
+            // 过滤数据
+            val filterPages = if (needPrepare) PageFilter.filter(context, wxPages) {
+                CubeWx.mWxJsLoader.prepareRemoteJsSync(context, it)
+            } else PageFilter.filter(context, wxPages) {
+                if (CubeWx.mWxCfg.fortest) {
+                    val pageStr = it.joinToString { it.pageName ?: "no page" }
+                    CubeWx.mWxReportAdapter.toast(context, "第二次准备发现未下载成功页面，请检查\n $pageStr", true)
+                }
+            }
             filterPages.forEach {
                 it.h5Url = WxUtils.rewriteUrl(it.h5Url, URIAdapter.WEB)
                 // it.remoteJs = WxUtils.rewriteUrl(it.remoteJs, URIAdapter.BUNDLE)
@@ -51,8 +59,11 @@ class WxUpdater {
         return true
     }
 
-    fun update(context: Context) {
-        jsonSyncMgr.update(context)
+    private var needPrepare = false
+
+    fun update(context: Context, needPrepare: Boolean = true) {
+        this.needPrepare = needPrepare
+        this.jsonSyncMgr.update(context)
     }
 
 }

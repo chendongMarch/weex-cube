@@ -20,6 +20,7 @@ import okhttp3.*
 import okhttp3.internal.Util
 import java.io.File
 import java.io.IOException
+import java.net.URLEncoder
 
 /**
  * CreateAt : 2018/4/20
@@ -155,6 +156,17 @@ class RequestMgr : IManager {
         return true
     }
 
+    private fun encodeUrl(url: String?): String {
+        if (url == null || url.isNullOrBlank()) {
+            return ""
+        }
+        return try {
+            URLEncoder.encode(url, "utf-8")
+        } catch (e: Exception) {
+            url
+        }
+    }
+
     // 通过 weex 请求构建 http 请求
     private fun makeHttpRequest(wxRequest: WXRequest): Request? {
         if (wxRequest.url == null || wxRequest.url.isBlank()) {
@@ -164,7 +176,11 @@ class RequestMgr : IManager {
         val url = WxUtils.rewriteUrl(wxRequest.url, URIAdapter.REQUEST)
         val body = wxRequest.body
         val paramMap = wxRequest.paramMap
-        var reqBuilder = Request.Builder().url(url)
+        var reqBuilder = try {
+            Request.Builder().url(url)
+        } catch (e: Exception) {
+            return null
+        }
         // header
         paramMap?.forEach { entry ->
             if (entry.key == KEY_TAG) {

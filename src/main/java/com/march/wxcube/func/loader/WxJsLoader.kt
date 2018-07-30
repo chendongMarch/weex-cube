@@ -199,10 +199,16 @@ class WxJsLoader : OnWxUpdateListener {
         if (pages.isEmpty()) {
             return
         }
+        if (CubeWx.mWxCfg.fortest) {
+            val pageStr = pages.joinToString { it.pageName ?: "no page" }
+            CubeWx.mWxReportAdapter.toast(context, "发现更新，开始下载\n $pageStr", true)
+        }
         pages.forEach {
             val template = mLoaderRegistry[JsLoadStrategy.NET_FIRST]?.load(context, it)
             storeTemplate(JsLoadStrategy.NET_FIRST, JsCacheStrategy.CACHE_MEMORY_DISK_BOTH, it, template)
         }
+        // 准备完毕
+        CubeWx.mWxUpdater.update(context, false)
     }
 }
 

@@ -2,7 +2,6 @@ package com.march.wxcube.func.update
 
 import android.content.Context
 import com.march.common.Common
-import com.march.common.pool.ExecutorsPool
 import com.march.wxcube.CubeWx
 import com.march.wxcube.common.log
 import com.march.wxcube.model.WxPage
@@ -15,9 +14,9 @@ import com.march.wxcube.model.WxPage
  */
 object PageFilter {
 
-    fun filter(context: Context, pages: List<WxPage>): List<WxPage> {
+    fun filter(context: Context, pages: List<WxPage>, prepare: (List<WxPage>) -> Unit = {}): List<WxPage> {
         // return filterBestPages(pages)
-        return filterBestPagesV2(context, pages)
+        return filterBestPagesV2(context, pages, prepare)
     }
 
     // 过滤，页面数据OK，版本支持OK，VersionCode 合法
@@ -73,7 +72,7 @@ object PageFilter {
     // 从高版本开始查找，搜索资源已经存在的配置项，称为有效配置项
     // 找到有效配置，中断检索，加入正式配置列表
     // 找到无效配置（版本高，但资源没有下载），加入准备配置列表，后续下载，继续检索
-    private fun filterBestPagesV2(context: Context, pages: List<WxPage>): List<WxPage> {
+    private fun filterBestPagesV2(context: Context, pages: List<WxPage>, prepare: (List<WxPage>) -> Unit = {}): List<WxPage> {
         val pageCfgsMap = mutableMapOf<String, MutableSet<WxPage>>()
         val validPages = filterAllValidPages(pages)
         val needPreparePages = mutableListOf<WxPage>()
@@ -112,26 +111,15 @@ object PageFilter {
             }
             when {
                 add2ResultPage != null -> resultPages.add(add2ResultPage)
-                // log( "result success ${add2ResultPage.toSimpleString()}")
+                    // log( "result success ${add2ResultPage.toSimpleString()}")
                 sortCfgs.isNotEmpty()  -> resultPages.add(sortCfgs[0])
-                // log("result fail ${sortCfgs[0].toSimpleString()}")
+                    // log("result fail ${sortCfgs[0].toSimpleString()}")
                 else                   -> {
                     // log( "result not found")
                 }
             }
         }
-        // prepare pages js resource from network
-        ExecutorsPool.getInst().execute {
-            try {
-                CubeWx.mWxJsLoader.prepareRemoteJsSync(context, needPreparePages)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-        needPreparePages.forEach { page ->
-        }
-        // 出去之后，会加载 result pages
-        // CubeWx.onWeexConfigUpdate(context, filterPages)
+        prepare(needPreparePages)
         return resultPages
     }
 

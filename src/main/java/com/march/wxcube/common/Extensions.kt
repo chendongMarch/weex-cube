@@ -60,3 +60,7 @@ fun Context.downloadImage(path: String, resolver: (Bitmap) -> Unit) {
         }
     })
 }
+
+fun Any.tag(): String {
+    return this::class.java.simpleName
+}

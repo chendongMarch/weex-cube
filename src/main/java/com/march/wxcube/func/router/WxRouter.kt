@@ -127,13 +127,16 @@ class WxRouter : OnWxUpdateListener {
         return result.make(url)
     }
 
-
     override fun onWeexCfgUpdate(context: Context, weexPages: List<WxPage>?) {
-        mWeexPageMap.isNotEmpty().let { mWeexPageMap.clear() }
+        val tempMap = mutableMapOf<UrlKey, WxPage>()
         weexPages?.forEach {
             it.h5Url?.let { url ->
-                mWeexPageMap[UrlKey.fromUrl(url)] = it
+                tempMap[UrlKey.fromUrl(url)] = it
             }
+        }
+        synchronized(WxRouter::class.java) {
+            mWeexPageMap.isNotEmpty().let { mWeexPageMap.clear() }
+            mWeexPageMap.putAll(tempMap)
         }
         mRouterReadyCallback?.invoke()
     }

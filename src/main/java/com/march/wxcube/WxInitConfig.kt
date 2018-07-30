@@ -19,6 +19,7 @@ import com.march.wxcube.func.update.WxUpdater
 class WxInitConfig {
 
     companion object {
+
         fun buildDebug(complete: WxInitConfig.() -> Unit): WxInitConfig {
             return WxInitConfig().apply(complete)
         }
@@ -28,6 +29,7 @@ class WxInitConfig {
                 debug = false
                 showDebugBtn = false
                 logEnable = false
+                fortest = false
             }.apply(complete)
         }
     }
@@ -39,6 +41,7 @@ class WxInitConfig {
     var debug: Boolean = true
     var showDebugBtn = true
     var logEnable = true
+    var fortest: Boolean = true
 
     var jsLoadStrategy: Int = JsLoadStrategy.DEFAULT
     var jsCacheStrategy: Int = JsCacheStrategy.CACHE_MEMORY_DISK_BOTH
