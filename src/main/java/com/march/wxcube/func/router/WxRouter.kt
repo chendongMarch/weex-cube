@@ -14,6 +14,7 @@ import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.model.WxPage
 import com.march.wxcube.ui.WebActivity
 import com.march.wxcube.ui.WxDialogFragment
+import com.march.wxcube.wxadapter.UriWriter
 import com.taobao.weex.adapter.URIAdapter
 
 
@@ -117,7 +118,7 @@ class WxRouter : OnWxUpdateListener {
             mInterceptor?.invoke(url) ?: mWeexPageMap.values.firstOrNull { it.pageName == url }
         } else {
             // 通过 url 查找
-            val validUrl = WxUtils.rewriteUrl(url, URIAdapter.WEB)
+            val validUrl = UriWriter.rewrite(url, URIAdapter.WEB)
             mInterceptor?.invoke(validUrl) ?: mWeexPageMap[UrlKey.fromUrl(validUrl)]
         }
         if (result == null) {

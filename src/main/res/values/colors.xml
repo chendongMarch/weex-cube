@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#02B6C0</color>
-    <color name="colorPrimaryDark">#02B6C0</color>
-    <color name="colorAccent">#02B6C0</color>
     <color name="containerBg">#fff</color>
     <color name="black">#1a1210</color>
     <color name="global_debug_bg">#e6f2f2</color>

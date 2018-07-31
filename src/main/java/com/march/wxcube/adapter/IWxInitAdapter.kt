@@ -19,6 +19,11 @@ interface IWxInitAdapter {
     fun onInitOkHttpClient(builder: OkHttpClient.Builder) {}
 
     /**
+     * 初始化 glide
+     */
+    fun onInitGlideOkHttpClient(builder: OkHttpClient.Builder) {}
+
+    /**
      * 初始化 WxSdkEngine
      */
     fun onWxSdkEngineInit(builder: InitConfig.Builder) {}

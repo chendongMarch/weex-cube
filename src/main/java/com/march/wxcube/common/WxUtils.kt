@@ -3,7 +3,6 @@ package com.march.wxcube.common
 import android.app.Activity
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
 import com.march.common.utils.DimensUtils
 import com.march.common.utils.FileUtils
 import com.march.wxcube.CubeWx
@@ -48,6 +47,8 @@ object WxUtils {
     fun clearDiskCache() {
         FileUtils.delete(CubeWx.mRootCacheDir)
     }
+
+
 
     // 重写 url
     fun rewriteUrl(url: String?, type: String): String {

@@ -1,6 +1,8 @@
 package com.march.wxcube.manager
 
 import android.content.Context
+import com.bumptech.glide.Glide
+import com.bumptech.glide.GlideBuilder
 import com.march.common.disklru.DiskLruCache
 import com.march.common.pool.ExecutorsPool
 import com.march.common.utils.NetUtils
@@ -11,6 +13,7 @@ import com.march.wxcube.http.HttpListener
 import com.march.wxcube.http.OkHttpMaker
 import com.march.wxcube.http.cookie.PersistentCookieJarImpl
 import com.march.wxcube.model.WxPage
+import com.march.wxcube.wxadapter.UriWriter
 import com.taobao.weex.WXSDKInstance
 import com.taobao.weex.adapter.IWXHttpAdapter
 import com.taobao.weex.adapter.URIAdapter
@@ -59,6 +62,7 @@ class RequestMgr : IManager {
         mOkHttpClient.dispatcher().runningCalls()
                 .filter(filter)
                 .forEach { it.cancel() }
+
     }
 
     /**
@@ -173,7 +177,7 @@ class RequestMgr : IManager {
             return null
         }
         val method = if (wxRequest.method == null) "get" else wxRequest.method
-        val url = WxUtils.rewriteUrl(wxRequest.url, URIAdapter.REQUEST)
+        val url = UriWriter.rewrite(wxRequest.url, URIAdapter.REQUEST)
         val body = wxRequest.body
         val paramMap = wxRequest.paramMap
         var reqBuilder = try {

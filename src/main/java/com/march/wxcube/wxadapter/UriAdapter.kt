@@ -27,11 +27,13 @@ class UriAdapter : DefaultUriAdapter() {
      *
      */
     override fun rewrite(instance: WXSDKInstance?, type: String, uri: Uri): Uri {
+        if (type == URIAdapter.IMAGE) {
+            return uri
+        }
         val builder = uri.buildUpon()
         if (uri.isRelative && !uri.isOpaque) {
             addHttpSchema(builder, uri)
             when (type) {
-                URIAdapter.IMAGE   -> replaceHttpSchema(builder, uri)
                 URIAdapter.REQUEST -> addAuthority(CubeWx.mWxCfg.reqAuthority, builder, uri)
                 URIAdapter.WEB     -> addAuthority(CubeWx.mWxCfg.webAuthority, builder, uri)
                 URIAdapter.BUNDLE  -> {

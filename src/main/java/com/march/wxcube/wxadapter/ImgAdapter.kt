@@ -11,6 +11,7 @@ import com.bumptech.glide.request.target.Target
 import com.march.wxcube.CubeWx
 import com.march.wxcube.manager.ManagerRegistry
 import com.taobao.weex.adapter.IWXImgLoaderAdapter
+import com.taobao.weex.adapter.URIAdapter
 import com.taobao.weex.common.WXImageStrategy
 import com.taobao.weex.dom.WXImageQuality
 
@@ -24,10 +25,11 @@ class ImgAdapter : IWXImgLoaderAdapter {
 
     override fun setImage(url: String?, view: ImageView?, quality: WXImageQuality?, strategy: WXImageStrategy?) {
         if (view != null && url != null) {
+            val parseUrl = UriWriter.rewrite(url, URIAdapter.IMAGE)
             if (url.endsWith("gif")) {
-                loadGif(url, view, strategy)
+                loadGif(parseUrl, view, strategy)
             } else {
-                loadImg(url, view, strategy)
+                loadImg(parseUrl, view, strategy)
             }
         } else {
             strategy?.imageListener?.onImageFinish(url, view, false, null)

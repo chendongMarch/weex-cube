@@ -43,4 +43,13 @@ internal object OkHttpMaker {
         return builder.build()
      }
 
+
+    fun buildGlideOkHttpClient(): OkHttpClient {
+        val builder = OkHttpClient.Builder()
+        // 失败后重试
+        builder.retryOnConnectionFailure(true)
+        CubeWx.mWxInitAdapter.onInitGlideOkHttpClient(builder)
+        return builder.build()
+    }
+
 }

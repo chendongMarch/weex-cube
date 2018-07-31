@@ -48,7 +48,7 @@ dependencies {
 
     // 模块支持
     implementation libs.common
-    implementation project(':webkit')
+    implementation libs.webkit
     api libs.ankoCommons
     api libs.ankoCoroutines
 }
@@ -56,4 +56,23 @@ kotlin {
     experimental {
         coroutines "enable"
     }
+}
+android {
+    lintOptions {
+        abortOnError false
+    }
+}
+
+
+apply plugin: 'bintray-release'
+tasks.withType(Javadoc).all {
+    enabled = false
+}
+publish {
+    userOrg = 'showjoyandroid'
+    groupId = 'com.showjoy'
+    artifactId = 'weex-cube'
+    publishVersion = '0.0.1'
+    desc = 'weex-cube'
+    website = 'https://github.com/chendongMarch/weex-cube'
 }
