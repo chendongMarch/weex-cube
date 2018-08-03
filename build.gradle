@@ -1,36 +1,23 @@
-apply plugin: 'com.android.library'
-
 apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
 apply plugin: 'kotlin-kapt'
 
-// project/buildDebug.gradle
-// apply from: 'https://coding.net/u/devlab/p/Resource/git/raw/master/android/project.gradle'
 def libs = rootProject.ext.libs
-def version = rootProject.ext.version
-
-android {
-
-    compileSdkVersion version.compileSdkVersion
-
-    defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion version.targetSdkVersion
-    }
-
-}
-
+def business = rootProject.ext.business
 dependencies {
-    // kt 环境支持
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    compileOnly libs.common
-    compileOnly libs.webkit
-
+    compileOnly business.common
+    compileOnly business.webkit
+    compileOnly libs.fastjson
+    compileOnly libs.okhttp3
     compileOnly libs.appcompat_v7
     compileOnly libs.design
     compileOnly libs.recyclerView_v7
+    // kt 环境支持
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    api libs.ankoCommons
+    api libs.ankoCoroutines
     api libs.glide4
     implementation libs.glideOkHttp
     kapt libs.glide4Compiler
@@ -40,13 +27,10 @@ dependencies {
     implementation 'com.alibaba.android:bindingx_weex_plugin:1.0.1'
     implementation 'com.taobao.android:weex_inspector:0.13.4'
     debugImplementation 'com.taobao.android:weex_analyzer:0.1.0.5'
-    compileOnly libs.fastjson
     // http
     api libs.cookie
     implementation 'com.squareup.okhttp:okhttp-ws:2.3.0'
-    compileOnly libs.okhttp3
-    api libs.ankoCommons
-    api libs.ankoCoroutines
+
 }
 kotlin {
     experimental {
