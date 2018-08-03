@@ -31,9 +31,9 @@ class PageDispatcher(val module: BridgeModule) : BaseDispatcher() {
      * 初始化页面
      */
     @DispatcherJsMethod(async = true)
-    fun initPage(param: DispatcherParam) {
+    fun initPage(args: WxArgs) {
         val activity = mProvider.activity()
-        val background = param.params.getJSONObject("background")
+        val background = args.params.getJSONObject("background")
         val containerView = module.mWeexDelegate?.mContainerView ?: throw RuntimeException("Page#initPage containerView is null")
         if (background != null) {
             val color = background.getString("color")
@@ -55,7 +55,7 @@ class PageDispatcher(val module: BridgeModule) : BaseDispatcher() {
                 }
             }
         }
-        val interceptBack = param.params.getDef("interceptBack", false)
+        val interceptBack = args.params.getDef("interceptBack", false)
         module.mWeexDelegate?.mInterceptBackPressed = interceptBack
     }
 
@@ -63,9 +63,9 @@ class PageDispatcher(val module: BridgeModule) : BaseDispatcher() {
      * 加载tab数据
      */
     @DispatcherJsMethod
-    fun loadTabs(param: DispatcherParam) {
+    fun loadTabs(args: WxArgs) {
         val act = module.mWeexAct ?: throw RuntimeException("Page#loadTabs mWeexAct is null")
-        val array = param.params.getJSONArray("tabs") ?: throw RuntimeException("Page#loadTabs tabs is null")
+        val array = args.params.getJSONArray("tabs") ?: throw RuntimeException("Page#loadTabs tabs is null")
         val configs = array.toListEx(FragmentConfig::class.java) ?: throw RuntimeException("Page#loadTabs mWeexAct is null")
         act.mDelegate.addPerformer(FragmentPerformer(act.supportFragmentManager,
                 configs, object : FragmentPerformer.FragmentHandler {
@@ -95,9 +95,9 @@ class PageDispatcher(val module: BridgeModule) : BaseDispatcher() {
      * 显示 tab
      */
     @DispatcherJsMethod
-    fun showTab(param: DispatcherParam) {
+    fun showTab(args: WxArgs) {
         val act = module.mWeexAct ?: throw RuntimeException("Page#loadTabs mWeexAct is null")
-        val tag = param.params.getString(KEY_TAG) ?: throw RuntimeException("Page#showTab tag is null")
+        val tag = args.params.getString(KEY_TAG) ?: throw RuntimeException("Page#showTab tag is null")
         val performer = act.mDelegate.getPerformer(FragmentPerformer::class.java)
                 ?: throw RuntimeException("Page#showTab performer is null")
         performer.showFragment(tag)

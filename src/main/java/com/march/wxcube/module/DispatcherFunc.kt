@@ -22,7 +22,7 @@ annotation class DispatcherJsMethod(
 
 
 // 方法调用参数
-data class DispatcherParam(
+data class WxArgs(
         val method: String,
         val params: JSONObject,
         val callback: Callback

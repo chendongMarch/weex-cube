@@ -8,6 +8,7 @@ def libs = rootProject.ext.libs
 def business = rootProject.ext.business
 dependencies {
     implementation business.common
+    compileOnly business.gallery
     compileOnly business.webkit
     compileOnly libs.fastjson
     compileOnly libs.okhttp3

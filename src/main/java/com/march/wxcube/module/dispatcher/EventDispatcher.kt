@@ -3,7 +3,7 @@ package com.march.wxcube.module.dispatcher
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.module.BridgeModule
 import com.march.wxcube.module.DispatcherJsMethod
-import com.march.wxcube.module.DispatcherParam
+import com.march.wxcube.module.WxArgs
 import com.march.wxcube.module.mInstId
 
 /**
@@ -20,9 +20,9 @@ class EventDispatcher(val module: BridgeModule) : BaseDispatcher() {
      * event.registerEvent('myEvent')
      */
     @DispatcherJsMethod
-    fun registerEvent(param: DispatcherParam) {
-        val instanceId = module.mInstId ?: throw RuntimeException("Event#registerEvent instanceId is null ${param.params.toJSONString()}")
-        val event = param.params.getString(KEY_EVENT) ?: throw RuntimeException("Event#registerEvent event is null ${param.params.toJSONString()}")
+    fun registerEvent(args: WxArgs) {
+        val instanceId = module.mInstId ?: throw RuntimeException("Event#registerEvent instanceId is null ${args.params.toJSONString()}")
+        val event = args.params.getString(KEY_EVENT) ?: throw RuntimeException("Event#registerEvent event is null ${args.params.toJSONString()}")
         ManagerRegistry.Event.registerEvent(event, instanceId)
     }
 
@@ -33,9 +33,9 @@ class EventDispatcher(val module: BridgeModule) : BaseDispatcher() {
      * event.postEvent('myEvent',{isOk:true});
      */
     @DispatcherJsMethod
-    fun postEvent(param: DispatcherParam) {
-        val event = param.params.getString(KEY_EVENT) ?: throw RuntimeException("Event#postEvent event is null ${param.params.toJSONString()}")
-        val data = param.params.getJSONObject(KEY_DATA) ?: throw RuntimeException("Event#postEvent event is null ${param.params.toJSONString()}")
+    fun postEvent(args: WxArgs) {
+        val event = args.params.getString(KEY_EVENT) ?: throw RuntimeException("Event#postEvent event is null ${args.params.toJSONString()}")
+        val data = args.params.getJSONObject(KEY_DATA) ?: throw RuntimeException("Event#postEvent event is null ${args.params.toJSONString()}")
         ManagerRegistry.Event.postEvent(event, data.toMap())
     }
 
@@ -46,9 +46,9 @@ class EventDispatcher(val module: BridgeModule) : BaseDispatcher() {
      * event.unRegisterEvent('myEvent');
      */
     @DispatcherJsMethod
-    fun unRegisterEvent(param: DispatcherParam) {
-        val instanceId = module.mInstId ?: throw RuntimeException("Event#unRegisterEvent instanceId is null ${param.params.toJSONString()}")
-        val event = param.params.getString(KEY_EVENT) ?: throw RuntimeException("Event#postEvent event is null ${param.params.toJSONString()}")
+    fun unRegisterEvent(args: WxArgs) {
+        val instanceId = module.mInstId ?: throw RuntimeException("Event#unRegisterEvent instanceId is null ${args.params.toJSONString()}")
+        val event = args.params.getString(KEY_EVENT) ?: throw RuntimeException("Event#postEvent event is null ${args.params.toJSONString()}")
         ManagerRegistry.Event.unRegisterEvent(event, instanceId)
     }
 }

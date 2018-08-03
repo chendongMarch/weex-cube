@@ -25,8 +25,8 @@ interface WxLifeCycle {
 
     fun onDestroy() {}
 
-    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {}
+    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {}
 
-    fun onPermissionResult(requestCode: Int, resultCode: Int, data: Intent) {}
+    fun onPermissionResult(requestCode: Int, resultCode: Int, data: Intent?) {}
 
 }

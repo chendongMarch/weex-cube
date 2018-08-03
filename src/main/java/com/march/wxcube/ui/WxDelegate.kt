@@ -307,12 +307,12 @@ class WxDelegate : WxLifeCycle {
         mLifeCallbacks.forEach { it.onStop() }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         mWeexInst.onActivityResult(requestCode, resultCode, data)
         mLifeCallbacks.forEach { it.onActivityResult(requestCode, resultCode, data) }
     }
 
-    override fun onPermissionResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onPermissionResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onPermissionResult(requestCode, resultCode, data)
         mLifeCallbacks.forEach { it.onPermissionResult(requestCode, resultCode, data) }
         // mWeexInst.onRequestPermissionsResult(requestCode,resultCode,data)

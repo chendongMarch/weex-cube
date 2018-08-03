@@ -2,7 +2,7 @@ package com.march.wxcube.module.dispatcher
 
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.module.DispatcherJsMethod
-import com.march.wxcube.module.DispatcherParam
+import com.march.wxcube.module.WxArgs
 import com.march.wxcube.module.ignore
 
 /**
@@ -14,9 +14,9 @@ import com.march.wxcube.module.ignore
 class ToolsDispatcher : BaseDispatcher() {
 
     @DispatcherJsMethod
-    fun clearCookies(param: DispatcherParam) {
+    fun clearCookies(args: WxArgs) {
         ManagerRegistry.Request.getCookieJar().clear()
-        param.ignore()
+        args.ignore()
     }
 
 }

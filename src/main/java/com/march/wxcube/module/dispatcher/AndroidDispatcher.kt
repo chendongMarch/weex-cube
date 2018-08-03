@@ -3,7 +3,7 @@ package com.march.wxcube.module.dispatcher
 import com.march.common.utils.immersion.ImmersionStatusBarUtils
 import com.march.wxcube.common.Device
 import com.march.wxcube.module.DispatcherJsMethod
-import com.march.wxcube.module.DispatcherParam
+import com.march.wxcube.module.WxArgs
 import com.march.wxcube.module.ignore
 
 /**
@@ -18,19 +18,19 @@ class AndroidDispatcher : BaseDispatcher() {
      * 状态栏透明，必须在 create 中调用，否则不生效
      */
     @DispatcherJsMethod
-    fun translucentStatusBar(param: DispatcherParam) {
+    fun translucentStatusBar(args: WxArgs) {
         ImmersionStatusBarUtils.translucent(findAct())
-        param.ignore()
+        args.ignore()
     }
 
     /**
      * 隐藏底部状态栏达到全屏的目的
      */
     @DispatcherJsMethod
-    fun hideBottomUI(param: DispatcherParam) {
+    fun hideBottomUI(args: WxArgs) {
         try {
             Device.hideBottomUI(findAct())
-           param.ignore()
+           args.ignore()
         } catch (e: Exception) {
 
         }
@@ -40,17 +40,17 @@ class AndroidDispatcher : BaseDispatcher() {
      * 状态栏颜色黑字
      */
     @DispatcherJsMethod
-    fun setStatusBarLight(param: DispatcherParam) {
+    fun setStatusBarLight(args: WxArgs) {
         ImmersionStatusBarUtils.setStatusBarLightMode(findAct())
-       param.ignore()
+       args.ignore()
     }
 
     /**
      * 状态栏颜色白字
      */
     @DispatcherJsMethod
-    fun setStatusBarDark(param: DispatcherParam) {
+    fun setStatusBarDark(args: WxArgs) {
         ImmersionStatusBarUtils.setStatusBarDarkMode(findAct())
-       param.ignore()
+       args.ignore()
     }
 }

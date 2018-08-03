@@ -9,7 +9,7 @@ import com.march.wxcube.common.toObjEx
 import com.march.wxcube.manager.ManagerRegistry
 import com.march.wxcube.model.DialogConfig
 import com.march.wxcube.module.DispatcherJsMethod
-import com.march.wxcube.module.DispatcherParam
+import com.march.wxcube.module.WxArgs
 import com.march.wxcube.ui.WxActivity
 import com.taobao.weex.WXSDKManager
 
@@ -22,33 +22,33 @@ import com.taobao.weex.WXSDKManager
 class RouterDispatcher : BaseDispatcher() {
 
     @DispatcherJsMethod
-    fun openNative(param: DispatcherParam) {
-        val webUrl = param.params.getString(KEY_URL) ?: throw RuntimeException("Router#openNative url is null")
+    fun openNative(args: WxArgs) {
+        val webUrl = args.params.getString(KEY_URL) ?: throw RuntimeException("Router#openNative url is null")
         val clazz = Class.forName(webUrl)
         val activity = mProvider.activity()
         activity.startActivity(Intent(activity, clazz))
     }
 
     @DispatcherJsMethod
-    fun closePage(param: DispatcherParam) {
-        mProvider.doBySelf(param.method,  param.params)
+    fun closePage(args: WxArgs) {
+        mProvider.doBySelf(args.method,  args.params)
     }
 
     @DispatcherJsMethod
-    fun putExtraData(param: DispatcherParam) {
-        val webUrl = param.params.getString(KEY_URL) ?: throw RuntimeException("Router#putExtraData url is null")
-        val data = param.params[KEY_DATA] ?: throw RuntimeException("Router#putExtraData data is null")
+    fun putExtraData(args: WxArgs) {
+        val webUrl = args.params.getString(KEY_URL) ?: throw RuntimeException("Router#putExtraData url is null")
+        val data = args.params[KEY_DATA] ?: throw RuntimeException("Router#putExtraData data is null")
         ManagerRegistry.Data.putData(webUrl, data)
     }
 
     @DispatcherJsMethod
-    fun openApp(param: DispatcherParam) {
-        openBrowser(param)
+    fun openApp(args: WxArgs) {
+        openBrowser(args)
     }
 
     @DispatcherJsMethod
-    fun openWeb(param: DispatcherParam) {
-        val webUrl = param.params.getString(KEY_URL) ?: throw RuntimeException("Router#openWeb url is null")
+    fun openWeb(args: WxArgs) {
+        val webUrl = args.params.getString(KEY_URL) ?: throw RuntimeException("Router#openWeb url is null")
         val result = CubeWx.mWxRouter.openWeb(findAct(), webUrl)
         if (!result.first) {
             throw RuntimeException("Router#openWeb Error ${result.second}")
@@ -56,9 +56,9 @@ class RouterDispatcher : BaseDispatcher() {
     }
 
     @DispatcherJsMethod
-    fun openDialog(param: DispatcherParam) {
-        val webUrl = param.params.getString(KEY_URL) ?: throw RuntimeException("Router#openDialog url is null")
-        val configJsonObj = param.params.getJSONObject(KEY_CONFIG)
+    fun openDialog(args: WxArgs) {
+        val webUrl = args.params.getString(KEY_URL) ?: throw RuntimeException("Router#openDialog url is null")
+        val configJsonObj = args.params.getJSONObject(KEY_CONFIG)
         val config = configJsonObj.toObjEx(DialogConfig::class.java) ?: DialogConfig()
         val result = CubeWx.mWxRouter.openDialog(findAct(), webUrl, config)
         if (!result.first) {
@@ -67,8 +67,8 @@ class RouterDispatcher : BaseDispatcher() {
     }
 
     @DispatcherJsMethod
-    fun openBrowser(param: DispatcherParam) {
-        val webUrl = param.params.getString(KEY_URL) ?: throw RuntimeException("Router#openBrowser url is null")
+    fun openBrowser(args: WxArgs) {
+        val webUrl = args.params.getString(KEY_URL) ?: throw RuntimeException("Router#openBrowser url is null")
         val result = CubeWx.mWxRouter.openBrowser(findAct(), webUrl)
         if (!result.first) {
             throw RuntimeException("Router#openBrowser Error ${result.second}")
@@ -76,9 +76,9 @@ class RouterDispatcher : BaseDispatcher() {
     }
 
     @DispatcherJsMethod
-    fun openHomePage(param: DispatcherParam) {
+    fun openHomePage(args: WxArgs) {
         try {
-            val webUrl = param.params.getString(KEY_URL) ?: throw RuntimeException("Router#openUrl url is null")
+            val webUrl = args.params.getString(KEY_URL) ?: throw RuntimeException("Router#openUrl url is null")
             val allInstances = WXSDKManager.getInstance().wxRenderManager.allInstances
             var hasHome = false
             for (inst in allInstances) {
@@ -90,17 +90,17 @@ class RouterDispatcher : BaseDispatcher() {
                 }
             }
             if (!hasHome) {
-                openUrl(param)
+                openUrl(args)
             }
         } catch (e: Exception) {
-            openUrl(param)
+            openUrl(args)
         }
     }
 
     @DispatcherJsMethod
-    fun openUrl(param: DispatcherParam) {
-        val webUrl = param.params.getString(KEY_URL) ?: throw RuntimeException("Router#openUrl url is null")
-        val anim = param.params.getDef("animation", "normal")
+    fun openUrl(args: WxArgs) {
+        val webUrl = args.params.getString(KEY_URL) ?: throw RuntimeException("Router#openUrl url is null")
+        val anim = args.params.getDef("animation", "normal")
         val result = CubeWx.mWxRouter.openUrl(findAct(), webUrl) {
             it.putExtra("animation", anim)
         }

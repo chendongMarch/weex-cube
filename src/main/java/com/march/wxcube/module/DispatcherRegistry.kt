@@ -21,7 +21,6 @@ class DispatcherRegistry(provider: Provider, vararg dispatchers: BaseDispatcher)
         for (dispatcher in dispatchers) {
             registerDispatcher(dispatcher, provider)
         }
-        LgUtils.e("chendong", "cost time = ${System.currentTimeMillis() - time}")
     }
 
     private fun registerDispatcher(dispatcher: BaseDispatcher, provider: Provider) {
@@ -37,7 +36,7 @@ class DispatcherRegistry(provider: Provider, vararg dispatchers: BaseDispatcher)
 
     fun dispatch(method: String, params: JSONObject, jsCallbackWrap: Callback) {
         val dispatcherMethod = mMethodMap[method]?: throw RuntimeException("method $method not match")
-        dispatcherMethod.method.invoke(dispatcherMethod.dispatcher, DispatcherParam(method, params, jsCallbackWrap))
+        dispatcherMethod.method.invoke(dispatcherMethod.dispatcher, WxArgs(method, params, jsCallbackWrap))
         // 不是异步方法直接返回结束
         if (!mAsyncMethods.contains(method)) {
             postJsResult(jsCallbackWrap, true to "$method($params) finish ")
