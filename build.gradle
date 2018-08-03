@@ -7,7 +7,7 @@ apply plugin: 'kotlin-kapt'
 def libs = rootProject.ext.libs
 def business = rootProject.ext.business
 dependencies {
-    compileOnly business.common
+    implementation business.common
     compileOnly business.webkit
     compileOnly libs.fastjson
     compileOnly libs.okhttp3

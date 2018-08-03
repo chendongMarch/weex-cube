@@ -84,7 +84,7 @@ object PageFilter {
                 pageCfgsMap[pageName] = set
             }
         }
-        for ((key, cfgs) in pageCfgsMap) {
+        for ((_, cfgs) in pageCfgsMap) {
             // 先对 cfgs 按照 js 版本排序
             val sortCfgs = cfgs.sortedWith(Comparator { last, cur ->
                 val lastJsVersionCodes = getVersionCodes(last.jsVersion)
