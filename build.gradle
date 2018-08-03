@@ -48,7 +48,10 @@ dependencies {
 
     // 模块支持
     implementation libs.common
-    implementation libs.webkit
+
+    implementation (libs.webkit) {
+        exclude group: 'com.zfy', module: 'common'
+    }
     api libs.ankoCommons
     api libs.ankoCoroutines
 }

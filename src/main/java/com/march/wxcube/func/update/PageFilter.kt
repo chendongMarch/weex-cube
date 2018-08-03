@@ -22,7 +22,7 @@ object PageFilter {
     // 过滤，页面数据OK，版本支持OK，VersionCode 合法
     private fun filterAllValidPages(pages: List<WxPage>): MutableList<WxPage> {
         val resultPages = mutableListOf<WxPage>()
-        val curVersionCodes = getVersionCodes(Common.BuildConfig.VERSION_NAME)
+        val curVersionCodes = getVersionCodes(Common.getInst().buildConfig.VERSION_NAME)
         if (curVersionCodes.size != 3) {
             return pages.toMutableList()
         }

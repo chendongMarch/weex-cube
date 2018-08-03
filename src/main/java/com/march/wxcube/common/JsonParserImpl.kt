@@ -3,6 +3,7 @@ package com.march.wxcube.common
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
+import com.march.common.adapter.JsonAdapter
 import com.march.common.adapter.JsonParser
 import java.lang.reflect.Type
 
@@ -12,7 +13,7 @@ import java.lang.reflect.Type
  *
  * @author chendong
  */
-class JsonParserImpl : JsonParser {
+class JsonParserImpl : JsonAdapter {
 
     private class MyTypeRef<T>(vararg actualTypeArguments: Type?) : com.alibaba.fastjson.TypeReference<T>(*actualTypeArguments)
 

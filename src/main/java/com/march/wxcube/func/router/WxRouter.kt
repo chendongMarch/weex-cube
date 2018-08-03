@@ -57,7 +57,7 @@ class WxRouter : OnWxUpdateListener {
         val page = findPage(url) ?: return openWeb(ctx, url)
         val intent = Intent().apply {
             putExtra(WxPage.KEY_PAGE, page)
-            data = Uri.parse("cube://${Common.BuildConfig.APPLICATION_ID}.weex/weex")
+            data = Uri.parse("cube://${Common.getInst().buildConfig.APPLICATION_ID}.weex/weex")
             rewrite(this)
         }
         return start(ctx, intent)
@@ -69,7 +69,7 @@ class WxRouter : OnWxUpdateListener {
     fun openWeexPage(ctx: Context, page: WxPage): Pair<Boolean, String> {
         val intent = Intent()
         intent.putExtra(WxPage.KEY_PAGE, page)
-        intent.data = Uri.parse("cube://${Common.BuildConfig.APPLICATION_ID}.weex/weex")
+        intent.data = Uri.parse("cube://${Common.getInst().buildConfig.APPLICATION_ID}.weex/weex")
         return start(ctx, intent)
     }
 
