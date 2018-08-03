@@ -25,33 +25,26 @@ android {
 dependencies {
     // kt 环境支持
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    compileOnly libs.common
+    compileOnly libs.webkit
 
-    implementation libs.appcompat_v7
-    implementation libs.design
-    implementation libs.recyclerView_v7
+    compileOnly libs.appcompat_v7
+    compileOnly libs.design
+    compileOnly libs.recyclerView_v7
     api libs.glide4
     implementation libs.glideOkHttp
     kapt libs.glide4Compiler
-
     // weex
     api 'com.taobao.android:weex_sdk:0.18.0'
     implementation 'com.alibaba.android:bindingx-core:1.0.1'
     implementation 'com.alibaba.android:bindingx_weex_plugin:1.0.1'
     implementation 'com.taobao.android:weex_inspector:0.13.4'
     debugImplementation 'com.taobao.android:weex_analyzer:0.1.0.5'
-    implementation libs.fastjson
-
+    compileOnly libs.fastjson
     // http
     api libs.cookie
     implementation 'com.squareup.okhttp:okhttp-ws:2.3.0'
-    implementation libs.okhttp3
-
-    // 模块支持
-    implementation libs.common
-
-    implementation (libs.webkit) {
-        exclude group: 'com.zfy', module: 'common'
-    }
+    compileOnly libs.okhttp3
     api libs.ankoCommons
     api libs.ankoCoroutines
 }
