@@ -9,6 +9,8 @@ import com.bumptech.glide.request.transition.Transition
 import com.march.common.model.WeakContext
 import com.march.wxcube.CubeWx
 import com.march.wxcube.manager.ManagerRegistry
+import com.march.wxcube.wxadapter.UriWriter
+import com.taobao.weex.adapter.URIAdapter
 import java.lang.Exception
 import java.math.BigInteger
 import java.nio.charset.Charset
@@ -53,7 +55,7 @@ fun Context.downloadImage(path: String, resolver: (Bitmap) -> Unit) {
     if (res > 0) {
         request.load(res)
     } else {
-        request.load(path)
+        request.load(UriWriter.rewrite(path, URIAdapter.IMAGE))
     }.into(object : SimpleTarget<Bitmap>() {
         override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
             resolver(resource)

@@ -3,8 +3,8 @@ package com.march.wxcube.adapter
 import android.content.Context
 import com.march.common.utils.LgUtils
 import com.march.wxcube.CubeWx
-import com.march.wxcube.common.tag
 import org.jetbrains.anko.longToast
+import org.jetbrains.anko.runOnUiThread
 import org.jetbrains.anko.toast
 
 /**
@@ -45,7 +45,9 @@ interface IWxReportAdapter {
 
 open class DefaultWxReportAdapter : IWxReportAdapter {
     override fun toast(ctx: Context, msg: String, short: Boolean) {
-        if (short) ctx.toast(msg) else ctx.longToast(msg)
+        ctx.runOnUiThread {
+            if (short) ctx.toast(msg) else ctx.longToast(msg)
+        }
         CubeWx.mWxReportAdapter.log("toastLog", msg)
     }
 
