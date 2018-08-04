@@ -17,7 +17,6 @@ class DispatcherRegistry(provider: Provider, vararg dispatchers: BaseDispatcher)
     private val mMethodMap by lazy { mutableMapOf<String, DispatcherMethod>() }
 
     init {
-        val time = System.currentTimeMillis()
         for (dispatcher in dispatchers) {
             registerDispatcher(dispatcher, provider)
         }
