@@ -94,7 +94,7 @@ object PageFilter {
             var add2ResultPage: WxPage? = null
             // 从高版本开始，找到每个页面最优的版本，正式版本时需要资源存在
             for (page in sortCfgs) {
-                if (!CubeWx.mWxCfg.debug) {
+                if (CubeWx.mWxCfg.loadJsSafeMode) {
                     if (isResourceExist(context, page)) {
                         add2ResultPage = page
                         break

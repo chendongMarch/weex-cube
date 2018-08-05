@@ -42,6 +42,8 @@ class WxInitConfig {
     var showDebugBtn = true
     var logEnable = true
     var fortest: Boolean = true
+    var loadJsSafeMode = true
+    var allImmersion = true
 
     var jsLoadStrategy: Int = JsLoadStrategy.DEFAULT
     var jsCacheStrategy: Int = JsCacheStrategy.CACHE_MEMORY_DISK_BOTH

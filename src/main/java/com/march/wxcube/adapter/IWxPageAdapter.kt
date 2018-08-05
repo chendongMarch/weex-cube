@@ -29,19 +29,24 @@ interface IWxPageAdapter {
      */
     fun getLoading(): Loading
 
-    fun getNotFontPageUrl(): String
+    /**
+     * 获取无效页面
+     */
+    fun getNotFoundPageUrl(): String
 
+    /**
+     * 获取需要沉浸式状态栏的页面
+     */
+    fun getImmersionPages(): List<String> = listOf()
 }
 
 
 open class DefaultWxPageAdapter : IWxPageAdapter {
 
-    override fun getNotFontPageUrl(): String = ""
+    override fun getNotFoundPageUrl(): String = ""
 
     override fun onPageCreated(activity: Activity, type: Int) {
-        if (type == WxConstants.PAGE_WEEX || type == WxConstants.PAGE_INDEX) {
-            BarUI.translucent(activity)
-        } else if (type == WxConstants.PAGE_WEB) {
+        if (type == WxConstants.PAGE_WEB || type == WxConstants.PAGE_INDEX) {
             activity.window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
         }
         BarUI.setStatusBarLightMode(activity)

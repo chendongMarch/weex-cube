@@ -60,6 +60,10 @@ class WxDelegate : WxLifeCycle {
     // 附加数据和操作
     private val mPerformers by lazy { mutableMapOf<String, IPerformer>() }
     private val mLifeCallbacks by lazy { mutableListOf<WxLifeCycle>() }
+    private val needImmersion by lazy {
+        CubeWx.mWxCfg.allImmersion || CubeWx.mWxPageAdapter.getImmersionPages().contains(mWxPage.pageName)
+    }
+
 
     /**
      * 为 Fragment 提供构造方法
@@ -86,6 +90,9 @@ class WxDelegate : WxLifeCycle {
      */
     private fun init(activity: Activity) {
         mActivity = activity
+        if (needImmersion) {
+            BarUI.translucent(mActivity)
+        }
         createWxInst()
     }
 
@@ -197,7 +204,8 @@ class WxDelegate : WxLifeCycle {
         val uri = Uri.parse(mWxPage.h5Url)
         uri.queryParameterNames.forEach { mRenderOpts[it] = uri.getQueryParameter(it) ?: "" }
         mRenderOpts[INSTANCE_ID] = mWeexInst.instanceId
-        mRenderOpts[TOP_SAFE_AREA_HEIGHT] = WxUtils.getWxPxByRealPx(BarUI.getStatusbarHeight(mActivity))
+        val topSafeHeight = if (needImmersion) 44 else 1
+        mRenderOpts[TOP_SAFE_AREA_HEIGHT] = WxUtils.getWxPxByRealPx(topSafeHeight)
         mRenderOpts[BOTTOM_SAFE_AREA_HEIGHT] = 0
         mRenderOpts[BUNDLE_URL] = WxUtils.rewriteUrl(mWxPage.remoteJs, URIAdapter.BUNDLE)
         mRenderOpts[H5_URL] = WxUtils.rewriteUrl(mWxPage.h5Url, URIAdapter.WEB)
@@ -256,7 +264,7 @@ class WxDelegate : WxLifeCycle {
      * 渲染 not found 页面
      */
     fun renderNotFound() {
-        val errPage = CubeWx.mWxRouter.findPage(CubeWx.mWxPageAdapter.getNotFontPageUrl()) ?: return
+        val errPage = CubeWx.mWxRouter.findPage(CubeWx.mWxPageAdapter.getNotFoundPageUrl()) ?: return
         render(errPage)
     }
 

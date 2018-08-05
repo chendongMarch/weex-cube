@@ -116,7 +116,7 @@ class WxPage() : Parcelable {
         const val KEY_PAGE = "KEY_PAGE"
 
         fun errorPage(): WxPage? {
-            return CubeWx.mWxRouter.findPage(CubeWx.mWxPageAdapter.getNotFontPageUrl())
+            return CubeWx.mWxRouter.findPage(CubeWx.mWxPageAdapter.getNotFoundPageUrl())
         }
 
         @JvmField
