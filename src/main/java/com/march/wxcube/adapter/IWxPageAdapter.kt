@@ -2,8 +2,7 @@ package com.march.wxcube.adapter
 
 import android.app.Activity
 import android.view.WindowManager
-import com.march.common.utils.immersion.ImmersionStatusBarUtils
-import com.march.wxcube.CubeWx
+import com.march.common.extensions.BarUI
 import com.march.wxcube.common.WxConstants
 import com.march.wxcube.loading.Loading
 import com.march.wxcube.loading.SimpleLoading
@@ -41,11 +40,11 @@ open class DefaultWxPageAdapter : IWxPageAdapter {
 
     override fun onPageCreated(activity: Activity, type: Int) {
         if (type == WxConstants.PAGE_WEEX || type == WxConstants.PAGE_INDEX) {
-            ImmersionStatusBarUtils.translucent(activity)
+            BarUI.translucent(activity)
         } else if (type == WxConstants.PAGE_WEB) {
             activity.window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
         }
-        ImmersionStatusBarUtils.setStatusBarLightMode(activity)
+        BarUI.setStatusBarLightMode(activity)
     }
 
     override fun getLoading(): Loading = SimpleLoading()

@@ -1,7 +1,6 @@
 package com.march.wxcube.module.dispatcher
 
-import com.march.common.utils.immersion.ImmersionStatusBarUtils
-import com.march.wxcube.common.Device
+import com.march.common.extensions.BarUI
 import com.march.wxcube.module.DispatcherJsMethod
 import com.march.wxcube.module.WxArgs
 import com.march.wxcube.module.ignore
@@ -19,7 +18,7 @@ class AndroidDispatcher : BaseDispatcher() {
      */
     @DispatcherJsMethod
     fun translucentStatusBar(args: WxArgs) {
-        ImmersionStatusBarUtils.translucent(findAct())
+        BarUI.translucent(findAct())
         args.ignore()
     }
 
@@ -29,7 +28,7 @@ class AndroidDispatcher : BaseDispatcher() {
     @DispatcherJsMethod
     fun hideBottomUI(args: WxArgs) {
         try {
-            Device.hideBottomUI(findAct())
+            BarUI.hideBottomBar(findAct())
            args.ignore()
         } catch (e: Exception) {
 
@@ -41,7 +40,7 @@ class AndroidDispatcher : BaseDispatcher() {
      */
     @DispatcherJsMethod
     fun setStatusBarLight(args: WxArgs) {
-        ImmersionStatusBarUtils.setStatusBarLightMode(findAct())
+        BarUI.setStatusBarLightMode(findAct())
        args.ignore()
     }
 
@@ -50,7 +49,7 @@ class AndroidDispatcher : BaseDispatcher() {
      */
     @DispatcherJsMethod
     fun setStatusBarDark(args: WxArgs) {
-        ImmersionStatusBarUtils.setStatusBarDarkMode(findAct())
-       args.ignore()
+        BarUI.setStatusBarDarkMode(findAct())
+        args.ignore()
     }
 }

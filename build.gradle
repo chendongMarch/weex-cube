@@ -8,13 +8,13 @@ def libs = rootProject.ext.libs
 def business = rootProject.ext.business
 dependencies {
     implementation business.common
-    compileOnly business.gallery
-    compileOnly business.webkit
-    compileOnly libs.fastjson
-    compileOnly libs.okhttp3
-    compileOnly libs.appcompat_v7
-    compileOnly libs.design
-    compileOnly libs.recyclerView_v7
+    implementation business.gallery
+    implementation business.webkit
+    implementation libs.fastjson
+    implementation libs.okhttp3
+    implementation libs.appcompat_v7
+    implementation libs.design
+    implementation libs.recyclerView_v7
     // kt 环境支持
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     api libs.ankoCommons

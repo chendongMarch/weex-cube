@@ -6,7 +6,7 @@ import android.net.Uri
 import android.support.v4.app.Fragment
 import android.view.View
 import android.view.ViewGroup
-import com.march.common.utils.immersion.StatusBarUtils
+import com.march.common.extensions.BarUI
 import com.march.wxcube.CubeWx
 import com.march.wxcube.adapter.IWxReportAdapter
 import com.march.wxcube.common.WxUtils
@@ -197,7 +197,7 @@ class WxDelegate : WxLifeCycle {
         val uri = Uri.parse(mWxPage.h5Url)
         uri.queryParameterNames.forEach { mRenderOpts[it] = uri.getQueryParameter(it) ?: "" }
         mRenderOpts[INSTANCE_ID] = mWeexInst.instanceId
-        mRenderOpts[TOP_SAFE_AREA_HEIGHT] = WxUtils.getWxPxByRealPx(StatusBarUtils.getStatusBarHeight(mActivity))
+        mRenderOpts[TOP_SAFE_AREA_HEIGHT] = WxUtils.getWxPxByRealPx(BarUI.getStatusbarHeight(mActivity))
         mRenderOpts[BOTTOM_SAFE_AREA_HEIGHT] = 0
         mRenderOpts[BUNDLE_URL] = WxUtils.rewriteUrl(mWxPage.remoteJs, URIAdapter.BUNDLE)
         mRenderOpts[H5_URL] = WxUtils.rewriteUrl(mWxPage.h5Url, URIAdapter.WEB)
