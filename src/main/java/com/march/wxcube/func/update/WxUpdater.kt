@@ -42,6 +42,8 @@ class WxUpdater {
                 if (it.isNotEmpty() && CubeWx.mWxCfg.fortest) {
                     val pageStr = it.joinToString { it.pageName ?: "no page" }
                     CubeWx.mWxReportAdapter.toast(context, "第二次准备发现未下载成功页面，请检查\n $pageStr", true)
+                } else {
+                    CubeWx.mWxReportAdapter.toast(context, "资源数据加载结束&成功", true)
                 }
             }
             filterPages.forEach {

@@ -93,7 +93,6 @@ object CubeWx {
 
         mWxInitAdapter.onInitFinished()
 
-
         // 初始化 glide
         Glide.get(ctx).registry.replace(GlideUrl::class.java,
                 InputStream::class.java,

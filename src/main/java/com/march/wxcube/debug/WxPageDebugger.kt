@@ -128,39 +128,6 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
                     mHandler.sendEmptyMessageDelayed(0, 5000)
                 }
             }
-//            CubeWx.mWxJsLoader.getTemplateAsync(mActivity, loadStrategy, cacheStrategy, mWxPage) {
-//                it?.let {
-//                    if (mWxPageDebugCfg.renderTemplate != it) {
-//                        if (mWxPageDebugCfg.renderTemplate.isBlank()) {
-//                            mWxPageDebugCfg.renderTemplate = it
-//                        } else {
-//                            mActivity.runOnUiThread {
-//                                renderJs(it)
-//                                mWxPageDebugCfg.renderTemplate = it
-//                                ToastUtils.show("已为您刷新～")
-//                            }
-//                        }
-//                        mRefreshCount = 0
-//                    } else {
-//                        mRefreshCount++
-//                        log("获取到但是没有改变，不作渲染")
-//                    }
-//                }
-//                mHandler.post {
-//                    mView?.animate()
-//                            ?.rotationYBy(360f)
-//                            ?.setDuration(5_00)
-//                            ?.setListener(object : AnimatorListener() {
-//                                override fun onAnimationEnd(animation: Animator?) {
-//                                    mView?.rotationY = 0f
-//                                }
-//                            })
-//                            ?.start()
-//                }
-//                if (!once && mWxPageDebugCfg.isRefreshing && mWxPageDebugCfg.isRefreshing) {
-//                    mHandler.sendEmptyMessageDelayed(0, 5000)
-//                }
-//            }
             true
         }
     }
@@ -230,7 +197,5 @@ class WxPageDebugger : IWXRenderListener, WxLifeCycle {
         ToastUtils.show("code = $errCode, msg = $msg")
     }
 
-
-    data class DebugConfig(var isRefreshRemoteJs: Boolean, var debugJsInCache: Boolean, var debugJsInDisk: Boolean)
 
 }
