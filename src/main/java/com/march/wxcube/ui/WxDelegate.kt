@@ -91,7 +91,7 @@ class WxDelegate : WxLifeCycle {
     private fun init(activity: Activity) {
         mActivity = activity
         if (needImmersion) {
-            BarUI.translucent(mActivity)
+            // BarUI.translucent(mActivity)
         }
         createWxInst()
     }

@@ -49,7 +49,10 @@ open class DefaultWxPageAdapter : IWxPageAdapter {
         if (type == WxConstants.PAGE_WEB || type == WxConstants.PAGE_INDEX) {
             activity.window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
         }
-        BarUI.setStatusBarLightMode(activity)
+        if (type == WxConstants.PAGE_WEEX) {
+            BarUI.translucent(activity)
+            BarUI.setStatusBarLightMode(activity)
+        }
     }
 
     override fun getLoading(): Loading = SimpleLoading()
