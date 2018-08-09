@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ProgressBar
-import android.widget.TextView
 import com.march.common.utils.DrawableUtils
 import com.march.wxcube.R
 import com.march.wxcube.ui.IndexActivity
@@ -63,7 +62,24 @@ open class SimpleLoading : Loading {
                         .from(container.context)
                         .inflate(R.layout.widget_loading, container, false)
             }
-            container.addView(weexLoadingView)
+            addView(container, weexLoadingView)
+        }
+    }
+
+    private fun addView(container: ViewGroup?, child: View?, lp: ViewGroup.LayoutParams? = null) {
+        if (container == null || child == null) {
+            return
+        }
+        try {
+            val indexOfChild = container.indexOfChild(child)
+            if (indexOfChild == -1) {
+                if (lp == null) {
+                    container.addView(child)
+                } else {
+                    container.addView(child, lp)
+                }
+            }
+        } catch (e: Exception) {
         }
     }
 
@@ -85,7 +101,7 @@ open class SimpleLoading : Loading {
                 val progressBar = ProgressBar(activity)
                 progressBar.layoutParams = FrameLayout.LayoutParams(100, 100)
                 val layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
-                frameLayout.addView(progressBar, layoutParams)
+                addView(frameLayout, progressBar, layoutParams)
                 frameLayout
             }
 
