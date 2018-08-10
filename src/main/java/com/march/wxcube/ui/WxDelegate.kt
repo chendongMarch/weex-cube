@@ -204,7 +204,7 @@ class WxDelegate : WxLifeCycle {
         val uri = Uri.parse(mWxPage.h5Url)
         uri.queryParameterNames.forEach { mRenderOpts[it] = uri.getQueryParameter(it) ?: "" }
         mRenderOpts[INSTANCE_ID] = mWeexInst.instanceId
-        val topSafeHeight = if (needImmersion) BarUI.getStatusbarHeight(mActivity) else 1
+        val topSafeHeight = if (needImmersion && BarUI.canTranslucent(mActivity)) BarUI.getStatusbarHeight(mActivity) else 1
         mRenderOpts[TOP_SAFE_AREA_HEIGHT] = WxUtils.getWxPxByRealPx(topSafeHeight)
         mRenderOpts[BOTTOM_SAFE_AREA_HEIGHT] = 0
         mRenderOpts[BUNDLE_URL] = WxUtils.rewriteUrl(mWxPage.remoteJs, URIAdapter.BUNDLE)
