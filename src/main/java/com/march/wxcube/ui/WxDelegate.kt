@@ -36,7 +36,6 @@ class WxDelegate : WxLifeCycle {
         const val VIRTUAL_BAR_HEIGHT = "virtualBarHeight"
         const val H5_URL = "h5Url"
 
-        var virtualHeight = -1
     }
 
     // 渲染状态
@@ -209,10 +208,6 @@ class WxDelegate : WxLifeCycle {
         mRenderOpts[BOTTOM_SAFE_AREA_HEIGHT] = 0
         mRenderOpts[BUNDLE_URL] = WxUtils.rewriteUrl(mWxPage.remoteJs, URIAdapter.BUNDLE)
         mRenderOpts[H5_URL] = WxUtils.rewriteUrl(mWxPage.h5Url, URIAdapter.WEB)
-//        if (virtualHeight < 0) {
-//            virtualHeight = Device.getVirtualBarHeight(mActivity)
-//        }
-        mRenderOpts[VIRTUAL_BAR_HEIGHT] = virtualHeight
         mWxPage.h5Url?.let {
             val data = ManagerRegistry.Data.getData(it)
             if (data != null) {
