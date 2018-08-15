@@ -1,5 +1,7 @@
 package com.march.wxcube.module.dispatcher
 
+import android.content.Context
+import android.view.inputmethod.InputMethodManager
 import com.march.common.extensions.BarUI
 import com.march.wxcube.module.DispatcherJsMethod
 import com.march.wxcube.module.WxArgs
@@ -44,12 +46,13 @@ class AndroidDispatcher : BaseDispatcher() {
        args.ignore()
     }
 
+
     /**
      * 状态栏颜色白字
      */
     @DispatcherJsMethod
-    fun setStatusBarDark(args: WxArgs) {
-        BarUI.setStatusBarDarkMode(findAct())
-        args.ignore()
+    fun hideKeyboard(args: WxArgs) {
+        val imm = mProvider.activity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(mProvider.activity().currentFocus.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
     }
 }

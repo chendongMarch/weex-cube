@@ -43,11 +43,11 @@ object CubeWx {
     lateinit var mWxUpdater: WxUpdater
     lateinit var mWxRouter: WxRouter
     // adapter
-    lateinit var mWxModelAdapter: IWxModelAdapter
-    lateinit var mWxDebugAdapter: IWxDebugAdapter
-    lateinit var mWxInitAdapter: IWxInitAdapter
-    lateinit var mWxPageAdapter: IWxPageAdapter
-    lateinit var mWxReportAdapter: IWxReportAdapter
+    lateinit var mWxModelAdapter: IWxModelAdapter // 数据转换
+    lateinit var mWxDebugAdapter: IWxDebugAdapter // 调试
+    lateinit var mWxInitAdapter: IWxInitAdapter // 初始化
+    lateinit var mWxPageAdapter: IWxPageAdapter // 页面
+    lateinit var mWxReportAdapter: IWxReportAdapter // 日志提交
 
     lateinit var mRootCacheDir:File
 

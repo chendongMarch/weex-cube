@@ -37,14 +37,15 @@ class WxInitConfig {
     var smallImgHolder: Int = 0
     var largeImgHolder: Int = 0
 
-    var https: Boolean = false
-    var debug: Boolean = true
-    var showDebugBtn = true
-    var logEnable = true
-    var fortest: Boolean = true
-    var loadJsSafeMode = true
-    var allImmersion = true
+    var https: Boolean = false // means force https
+    var debug: Boolean = true // means debug mode
+    var showDebugBtn = true // means show test btn
+    var logEnable = true // means can log msg
+    var fortest: Boolean = true // means show test msg
+    var loadJsSafeMode = true // means only load local js resource
+    var allImmersion = true // means all pages immersion
 
+    // see WxJsLoader JsLoadStrategy/JsCacheStrategy/JsPrepareStrategy
     var jsLoadStrategy: Int = JsLoadStrategy.DEFAULT
     var jsCacheStrategy: Int = JsCacheStrategy.CACHE_MEMORY_DISK_BOTH
     var jsPrepareStrategy: Int = JsPrepareStrategy.PREPARE_ALL
