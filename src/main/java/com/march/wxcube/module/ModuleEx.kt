@@ -77,23 +77,18 @@ val WXModule.mWeexDelegate: WxDelegate?
 // 获取 查找 view
 fun WXModule.findView(f: (View) -> Boolean): View? {
     val containerView: ViewGroup = mWXSDKInstance.containerView as ViewGroup
-    return findView(containerView, f)
+    val views = mutableListOf<View>()
+    findView(containerView, views)
+    return views.first(f)
 }
 
-private fun WXModule.findView(viewGroup: ViewGroup, f: (View) -> Boolean): View? {
-    var view: View? = null
-//        LgUtils.e("开始遍历一个 ViewGroup 共有 ${viewGroup.childCount} 个孩子")
+private fun WXModule.findView(viewGroup: ViewGroup, list: MutableList<View>) {
     for (i in (0 until viewGroup.childCount)) {
-        view = viewGroup.getChildAt(i)
-//            LgUtils.e("第${i}个孩子$view  ${view.tag}")
-        val result = f.invoke(view)
-        if (result) {
-            LgUtils.e("监测到，返回数据")
-            return view
-        } else if (view is ViewGroup) {
-            view = findView(view, f)
+        val child = viewGroup.getChildAt(i)
+        list.add(child)
+        if (child is ViewGroup) {
+            findView(child, list)
         }
     }
-    return view
 }
 

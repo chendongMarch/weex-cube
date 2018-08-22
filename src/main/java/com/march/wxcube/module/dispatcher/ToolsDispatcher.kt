@@ -1,9 +1,7 @@
 package com.march.wxcube.module.dispatcher
 
 import com.march.wxcube.manager.ManagerRegistry
-import com.march.wxcube.module.DispatcherJsMethod
-import com.march.wxcube.module.WxArgs
-import com.march.wxcube.module.ignore
+import com.march.wxcube.module.*
 
 /**
  * CreateAt : 2018/6/6
@@ -18,5 +16,4 @@ class ToolsDispatcher : BaseDispatcher() {
         ManagerRegistry.Request.getCookieJar().clear()
         args.ignore()
     }
-
 }

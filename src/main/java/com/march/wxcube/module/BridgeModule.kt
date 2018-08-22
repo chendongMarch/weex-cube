@@ -29,7 +29,7 @@ class BridgeModule : WXModule() {
                 ModalDispatcher(),
                 EventDispatcher(this),
                 ToolsDispatcher(),
-                AndroidDispatcher(),
+                AndroidDispatcher(this),
                 PageDispatcher(this),
                 ImageDispatcher(),
                 ConfigDispatcher(),

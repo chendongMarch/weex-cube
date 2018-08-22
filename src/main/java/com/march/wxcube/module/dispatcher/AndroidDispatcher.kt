@@ -2,10 +2,10 @@ package com.march.wxcube.module.dispatcher
 
 import android.content.Context
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import com.march.common.extensions.BarUI
-import com.march.wxcube.module.DispatcherJsMethod
-import com.march.wxcube.module.WxArgs
-import com.march.wxcube.module.ignore
+import com.march.wxcube.module.*
+import com.taobao.weex.ui.view.WXEditText
 
 /**
  * CreateAt : 2018/6/7
@@ -13,7 +13,19 @@ import com.march.wxcube.module.ignore
  *
  * @author chendong
  */
-class AndroidDispatcher : BaseDispatcher() {
+class AndroidDispatcher(val module: BridgeModule) : BaseDispatcher() {
+
+    @DispatcherJsMethod
+    fun getEditTextContent(args: WxArgs) {
+        val view = module.findView {
+            it is WXEditText
+        }
+        var result = ""
+        if (view != null && view is EditText) {
+            result = view.text.toString().trim()
+        }
+        args.callback(mapOf(KEY_SUCCESS to true, KEY_RESULT to mapOf(KEY_DATA to result)))
+    }
 
     /**
      * 状态栏透明，必须在 create 中调用，否则不生效
