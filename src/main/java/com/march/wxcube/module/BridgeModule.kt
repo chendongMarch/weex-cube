@@ -75,8 +75,8 @@ class BridgeModule : WXModule() {
                     val show = params.getDef("show", false)
                     val weexAct = module.mWeexAct ?: throw RuntimeException("ModuleDispatcher#mWeexAct error")
                     val container = weexAct.mDelegate.mContainerView
-                    weexAct.mLoadingIndicator.setMsg(msg)
-                    val loadingView = weexAct.mLoadingIndicator.getLoadingView()
+                    weexAct.mLoadingIndicator?.setMsg(msg)
+                    val loadingView = weexAct.mLoadingIndicator?.getLoadingView() ?: throw RuntimeException("ModuleDispatcher#loading null error")
                     val notLoading = container.indexOfChild(loadingView) == -1
                     if (show && notLoading) {
                         val layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)

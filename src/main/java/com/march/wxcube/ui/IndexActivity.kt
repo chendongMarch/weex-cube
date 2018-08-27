@@ -39,7 +39,7 @@ class IndexActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         try {
             CubeWx.mWxPageAdapter.onPageCreated(this, WxConstants.PAGE_INDEX)
-            CubeWx.mWxPageAdapter.getLoading().setIndexContent(this)
+            CubeWx.mWxPageAdapter.getLoading()?.setIndexContent(this)
             CubeWx.mWxUpdater.update(this)
             ManagerRegistry.OnlineCfg.update(this)
             Handler().postDelayed(mIndexRunnable, TIME_START)

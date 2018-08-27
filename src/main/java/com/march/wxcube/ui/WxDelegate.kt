@@ -97,7 +97,7 @@ class WxDelegate : WxLifeCycle {
 
     fun initContainerView(view: ViewGroup) {
         mContainerView = view
-        mLoadingHandler.startWeexLoading(mContainerView)
+        mLoadingHandler?.startWeexLoading(mContainerView)
     }
 
     fun addPerformer(performer: IPerformer) {
@@ -155,7 +155,7 @@ class WxDelegate : WxLifeCycle {
     inner class RenderListener : IWXRenderListener {
         override fun onRenderSuccess(instance: WXSDKInstance?, width: Int, height: Int) {
             mRenderStatus = RenderStatus.RENDER_SUCCESS
-            mLoadingHandler.finishWeexLoading(mContainerView)
+            mLoadingHandler?.finishWeexLoading(mContainerView)
             mWeexDebugger?.onRenderSuccess(instance, width, height)
         }
 

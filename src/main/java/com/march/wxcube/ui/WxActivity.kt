@@ -16,7 +16,7 @@ import com.march.wxcube.common.WxConstants
  */
 class WxActivity : BaseActivity() {
 
-    val mLoadingIndicator by lazy { CubeWx.mWxPageAdapter.getLoading().makeLoadingIndicator(this) }
+    val mLoadingIndicator by lazy { CubeWx.mWxPageAdapter.getLoading()?.makeLoadingIndicator(this) }
     val mDelegate: WxDelegate by lazy { WxDelegate(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {

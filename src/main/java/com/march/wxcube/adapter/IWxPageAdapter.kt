@@ -27,7 +27,7 @@ interface IWxPageAdapter {
      * 容器渲染时支持蒙版
      * 使用内置首页的自定义界面
      */
-    fun getLoading(): Loading
+    fun getLoading(): Loading?
 
     /**
      * 获取无效页面
@@ -55,5 +55,5 @@ open class DefaultWxPageAdapter : IWxPageAdapter {
         }
     }
 
-    override fun getLoading(): Loading = SimpleLoading()
+    override fun getLoading(): Loading? = SimpleLoading()
 }
