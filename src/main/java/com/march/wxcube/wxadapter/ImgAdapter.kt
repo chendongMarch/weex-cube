@@ -42,7 +42,7 @@ class ImgAdapter : IWXImgLoaderAdapter {
         val width = view.measuredWidth
         val height = view.measuredHeight
         if (width > 0 && height > 0) {
-            options.override(width, height)
+            options.override((width *1.5).toInt(), (height*1.5).toInt())
             if (width > 300 && CubeWx.mWxCfg.largeImgHolder > 0) {
                 options.placeholder(CubeWx.mWxCfg.largeImgHolder).error(CubeWx.mWxCfg.largeImgHolder)
             } else if (CubeWx.mWxCfg.smallImgHolder > 0) {
